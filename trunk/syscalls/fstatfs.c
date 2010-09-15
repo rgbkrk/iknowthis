@@ -14,12 +14,12 @@
 // Get file system statistics.
 SYSFUZZ(fstatfs, __NR_fstatfs, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gpointer     buf;
-	gint         retcode;
+    gpointer     buf;
+    gint         retcode;
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_fstatfs,                                   // int
-	                            typelib_fd_get(this),                                       // int fd
-	                            typelib_get_buffer(&buf, g_random_int_range(0, 0x1000)));   // struct statfs *buf
+    retcode = spawn_syscall_lwp(this, NULL, __NR_fstatfs,                                   // int
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // int fd
+                                typelib_get_buffer(&buf, PAGE_SIZE));                       // struct statfs *buf
 
     typelib_clear_buffer(buf);
 

@@ -16,7 +16,7 @@
 SYSFUZZ(fadvise64, __NR_fadvise64, SYS_NONE, CLONE_DEFAULT, 0)
 {
     return spawn_syscall_lwp(this, NULL, __NR_fadvise64,                                // long
-                             typelib_fd_get(this),                                      // int fd
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE),       // int fd
                              typelib_get_integer(),                                     // long offset
                              typelib_get_integer(),                                     // size_t len
                              typelib_get_integer());                                    // int advice

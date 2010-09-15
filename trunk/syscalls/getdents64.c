@@ -20,9 +20,9 @@ SYSFUZZ(getdents64, __NR_getdents64, SYS_NONE, CLONE_DEFAULT, 0)
     gint        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_getdents64,                                // int
-                                typelib_fd_get(this),                                       // int fd
-                                typelib_get_buffer(&dirp, g_random_int_range(0, 0x10000)),  // struct linux_dirent *dirp
-                                typelib_get_integer());                                     // unsigned int count
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // int fd
+                                typelib_get_buffer(&dirp, PAGE_SIZE),                       // struct linux_dirent *dirp
+                                typelib_get_integer_range(0, PAGE_SIZE));                   // unsigned int count
 
     typelib_clear_buffer(dirp);
 

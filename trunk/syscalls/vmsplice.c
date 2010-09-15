@@ -23,7 +23,7 @@ SYSFUZZ(vmsplice, __NR_vmsplice, SYS_NONE, CLONE_DEFAULT, 1000)
     typelib_get_iovec(&iov, &size, IOV_NONE);
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_vmsplice,                              // long
-                                typelib_fd_get(this),                                   // int fd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int fd
                                 iov,                                                    // const struct iovec *iov
                                 size,                                                   // unsigned long nrsegs
                                 typelib_get_integer());                                 // unsigned int flags

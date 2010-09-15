@@ -12,6 +12,12 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
+// Callback for typelib_add_resource().
+static gboolean destroy_open_file(guintptr fd)
+{
+    return syscall(__NR_close, fd) != -1;
+}
+
 // Initialize an inotify instance
 // int inotify_init(void)
 SYSFUZZ(inotify_init1, __NR_inotify_init1, SYS_NONE, CLONE_DEFAULT, 0)
@@ -28,7 +34,7 @@ SYSFUZZ(inotify_init1, __NR_inotify_init1, SYS_NONE, CLONE_DEFAULT, 0)
         if (g_random_int_range(0, 128)) {
             close(fd);
         } else {
-            typelib_fd_new(this, fd, FD_NONE);
+            typelib_add_resource(this, fd, RES_FILE, RF_NONE, destroy_open_file);
         }
     }
 

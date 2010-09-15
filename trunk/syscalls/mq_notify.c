@@ -21,7 +21,7 @@ SYSFUZZ(mq_notify, __NR_mq_notify, SYS_NONE, CLONE_DEFAULT, 0)
     gint        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_notify,                                // mqd_t
-                                typelib_fd_get(this),                                      // mqd_t mqdes
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),       // mqd_t mqdes
                                 typelib_get_buffer(&notification, PAGE_SIZE));             // const struct sigevent *notification
 
     typelib_clear_buffer(notification);

@@ -22,7 +22,7 @@ SYSFUZZ(fgetxattr, __NR_fgetxattr, SYS_NONE, CLONE_DEFAULT, 0)
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, NULL, __NR_fgetxattr,                             // int
-                                typelib_fd_get(this),                                   // int fd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int fd
                                 typelib_get_buffer(&name, PAGE_SIZE),                   // const char *name
                                 typelib_get_buffer(&value, PAGE_SIZE),                  // const void *value
                                 typelib_get_integer_range(0, PAGE_SIZE));               // size_t size

@@ -20,7 +20,7 @@ SYSFUZZ(inotify_add_watch, __NR_inotify_add_watch, SYS_NONE, CLONE_DEFAULT, 0)
     gint     retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_inotify_add_watch,                             // int
-                                typelib_fd_get(this),                                           // int fd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),            // int fd
                                 typelib_get_pathname(&pathname),                                // const char *pathname
                                 typelib_get_integer());                                         // uint32_t mask
     g_free(pathname);

@@ -29,16 +29,23 @@
 # define F_SETOWN_EX 0
 #endif
 
+// Callback for typelib_add_resource().
+static gboolean destroy_open_file(guintptr fd)
+{
+    return syscall(__NR_close, fd) != -1;
+}
+
 // Manipulate file descriptor.
+// int fcntl(int fd, int cmd, ... /* arg */ );
 SYSFUZZ(fcntl, __NR_fcntl, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	guint       cmd;
-	guintptr    arg;
-	gint        result;
-	gint        retcode;
+    guint       cmd;
+    guintptr    arg;
+    gint        result;
+    gint        retcode;
 
     // Choose a random cmd and arg.
-	cmd     = typelib_get_integer_selection(23, F_DUPFD,
+    cmd     = typelib_get_integer_selection(23, F_DUPFD,
                                                 F_DUPFD_CLOEXEC,
                                                 F_GETFD,
                                                 F_SETFD,
@@ -61,15 +68,15 @@ SYSFUZZ(fcntl, __NR_fcntl, SYS_NONE, CLONE_DEFAULT, 0)
                                                 F_GETLK64,
                                                 F_SETLK64,
                                                 F_SETLKW64);
-	arg     = typelib_get_integer();
+    arg     = typelib_get_integer();
 
     // Decide what to do based on cmd.
     switch (cmd) {
         case F_DUPFD:
         case F_DUPFD_CLOEXEC:
-            arg     = typelib_fd_get(this);    
+            arg     = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);
             retcode = spawn_syscall_lwp(this, &result, __NR_fcntl,                          // int
-                                        typelib_fd_get(this),                               // int fd
+                                        typelib_get_resource(this, NULL, RES_FILE, RF_NONE),// int fd
                                         cmd,                                                // int cmd
                                         arg);
 
@@ -78,7 +85,7 @@ SYSFUZZ(fcntl, __NR_fcntl, SYS_NONE, CLONE_DEFAULT, 0)
                 if (g_random_int_range(0, 128)) {
                     close(result);
                 } else {
-                	typelib_fd_new(this, result, FD_NONE);
+                    typelib_add_resource(this, result, RES_FILE, RF_NONE, destroy_open_file);
                 }
             }
 
@@ -90,7 +97,7 @@ SYSFUZZ(fcntl, __NR_fcntl, SYS_NONE, CLONE_DEFAULT, 0)
         case F_SETLK64:
         case F_SETLKW64:
             retcode = spawn_syscall_lwp(this, &result, __NR_fcntl,                          // int
-                                        typelib_fd_get(this),                               // int fd
+                                        typelib_get_resource(this, NULL, RES_FILE, RF_NONE),// int fd
                                         cmd,                                                // int cmd
                                         typelib_get_buffer((void **)(&arg), PAGE_SIZE));
 
@@ -101,31 +108,30 @@ SYSFUZZ(fcntl, __NR_fcntl, SYS_NONE, CLONE_DEFAULT, 0)
         case F_SETSIG:
             // I don't want no crazy signal.
             retcode = spawn_syscall_lwp(this, &result, __NR_fcntl,                          // int
-                                        typelib_fd_get(this),                               // int fd
+                                        typelib_get_resource(this, NULL, RES_FILE, RF_NONE),// int fd
                                         cmd,                                                // int cmd
                                         SIGIO);                                             // long pid
             return retcode;
         case F_SETOWN:
             retcode = spawn_syscall_lwp(this, &result, __NR_fcntl,                            // int
-                                        typelib_fd_get(this),                                 // int fd
+                                        typelib_get_resource(this, NULL, RES_FILE, RF_NONE),  // int fd
                                         cmd,                                                  // int cmd
                                         typelib_get_resource(this, NULL, RES_FORK, RF_NONE)); // long pid
-            
+
             return retcode;
         case F_SETFL:
             // Maybe set O_NONBLOCK
         default:
             retcode = spawn_syscall_lwp(this, &result, __NR_fcntl,                          // int
-                                        typelib_fd_get(this),                               // int fd
+                                        typelib_get_resource(this, NULL, RES_FILE, RF_NONE),// int fd
                                         cmd,                                                // int cmd
                                         arg);
     }
 
     // Try to work out what happened.
     if (retcode == EFAULT) {
-    	g_critical("fcntl cmd %#x returned EFAULT, fixme", cmd);
+        g_critical("fcntl cmd %#x returned EFAULT, fixme", cmd);
     }
-
 
     return retcode;
 }

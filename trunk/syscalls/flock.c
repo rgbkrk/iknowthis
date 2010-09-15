@@ -15,8 +15,8 @@
 // int flock(int fd, int operation);
 SYSFUZZ(flock, __NR_flock, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_flock,                                    // int
-	                         typelib_fd_get(this),                                      // int fd
-	                         typelib_get_integer());                                    // int operation
+    return spawn_syscall_lwp(this, NULL, __NR_flock,                                    // int
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE),       // int fd
+                             typelib_get_integer());                                    // int operation
 }
 

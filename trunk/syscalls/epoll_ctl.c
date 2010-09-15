@@ -19,10 +19,10 @@ SYSFUZZ(epoll_ctl, __NR_epoll_ctl, SYS_NONE, CLONE_DEFAULT, 0)
     gint        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_epoll_ctl,                             // int
-                                typelib_fd_get(this),                                   // int fd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int fd
                                 typelib_get_integer(),                                  // int op
-                                typelib_fd_get(this),                                   // int fd
-                                typelib_get_buffer(&event, g_random_int_range(0, 8192))); // struct epoll_event *event
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int fd
+                                typelib_get_buffer(&event, PAGE_SIZE));                 // struct epoll_event *event
 
     typelib_clear_buffer(event);
     return retcode;

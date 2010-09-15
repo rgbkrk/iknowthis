@@ -15,6 +15,6 @@
 // ssize_t writev(int fd, const struct iovec *iov, int iovcnt);
 SYSFUZZ(writev, __NR_writev, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-	return 0;
+    return 0;
 }
 

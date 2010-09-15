@@ -13,9 +13,9 @@
 
 // Synchronize a file’s in-core state with storage device.
 // int fsync(int fd);
+// XXX: Slow.
 SYSFUZZ(fsync, __NR_fsync, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-	return syscall_fast(__NR_fsync,                                                         // int
-	                    typelib_fd_get(this));                                         // int fd
+    return syscall_fast(__NR_fsync, typelib_get_resource(this, NULL, RES_FILE, RF_NONE));
 }
 

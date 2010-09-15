@@ -11,15 +11,21 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
+// Callback for typelib_add_resource().
+static gboolean destroy_open_file(guintptr fd)
+{
+    return syscall(__NR_close, fd) != -1;
+}
+
 // Duplicate a file descriptor.
 // int dup(int oldfd);
 SYSFUZZ(dup, __NR_dup, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint    fd;
-	gint    retcode;
+    gint    fd;
+    gint    retcode;
 
-	retcode = spawn_syscall_lwp(this, &fd, __NR_dup,                                                // int
-	                            typelib_fd_get(this));                                              // int oldfd
+    retcode = spawn_syscall_lwp(this, &fd, __NR_dup,                                                // int
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE));               // int oldfd
 
     if (retcode == ESUCCESS) {
         // Note that because basically nothing can go wrong with dup,
@@ -27,12 +33,12 @@ SYSFUZZ(dup, __NR_dup, SYS_NONE, CLONE_DEFAULT, 0)
         // quickly.
 
         // Therefore, only allow it occassionally.
-    	if (g_random_int_range(0, 1024)) {
-    		// Throw it away.
-    		close(fd);
+        if (g_random_int_range(0, 1024)) {
+            // Throw it away.
+            close(fd);
         } else {
-        	// Allow it.
-        	typelib_fd_new(this, fd, FD_NONE);
+            // Allow it.
+            typelib_add_resource(this, fd, RES_FILE, RF_NONE, destroy_open_file);
         }
     }
 

@@ -18,6 +18,8 @@
 # define O_CLOEXEC 04
 #endif
 
+#include "resource.h"
+
 gpointer        typelib_random_buffer(gpointer buffer, gsize size);
 gpointer        typelib_get_buffer(gpointer *buffer, gsize size);
 gchar *         typelib_get_pathname(gchar **pathname);
@@ -34,25 +36,11 @@ enum {
 gpointer        typelib_get_iovec(gpointer *iov, gint *count, guint flags);
 void            typelib_clear_iovec(gpointer iovec, gint count, guint flags);
 
-// File descriptors.
-enum {
-	FD_NONE             = 0,
-	FD_DEBUG            = 1 << 0,
-};
-
-    // Main.
-    void            typelib_fd_new(syscall_fuzzer_t *this, gint fd, gint flags);
-    void            typelib_fd_stale(syscall_fuzzer_t *this, gint fd, gint flags);
-    gint            typelib_fd_get(syscall_fuzzer_t *this);
-    
-    // Debugging.
-    guint           typelib_fd_count_unmanaged(void);
-
 // Vmas.
 enum {
-	VMA_NONE            = 0,
-	VMA_DEBUG           = 1 << 0,
-	VMA_HUGE            = 1 << 1,
+    VMA_NONE            = 0,
+    VMA_DEBUG           = 1 << 0,
+    VMA_HUGE            = 1 << 1,
 };
 
     // Main.

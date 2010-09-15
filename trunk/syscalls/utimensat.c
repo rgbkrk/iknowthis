@@ -15,14 +15,14 @@
 // int utimensat(int dirfd, const char *pathname, const struct timespec times[2], int flags);
 SYSFUZZ(utimensat, __NR_utimensat, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gchar       *filename;
-	gpointer     times;
+    gchar       *filename;
+    gpointer     times;
     gint         retcode;
 
     retcode     = spawn_syscall_lwp(this, NULL, __NR_utimensat,                                    // int
-                                    typelib_fd_get(this),                                          // int dirfd
+                                    typelib_get_resource(this, NULL, RES_FILE, RF_NONE),           // int dirfd
                                     typelib_get_pathname(&filename),                               // const char *filename
-                                    typelib_get_buffer(&times, g_random_int_range(0, 0x1000)),     // const struct timespec times[2]
+                                    typelib_get_buffer(&times, PAGE_SIZE),                         // const struct timespec times[2]
                                     typelib_get_integer());                                        // int flags
 
     typelib_clear_buffer(times);
