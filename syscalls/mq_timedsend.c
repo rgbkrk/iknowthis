@@ -22,7 +22,7 @@ SYSFUZZ(mq_timedsend, __NR_mq_timedsend, SYS_NONE, CLONE_DEFAULT, 0)
     gint        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_timedsend,                              // mqd_t
-                                typelib_fd_get(this),                                       // mqd_t mqdes
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // mqd_t mqdes
                                 typelib_get_buffer(&msg_ptr, PAGE_SIZE),                    // const char *msg_ptr
                                 typelib_get_integer_range(0, PAGE_SIZE),                    // size_t msg_len
                                 typelib_get_integer_range(0, 32768),                        // unsigned msg_prio

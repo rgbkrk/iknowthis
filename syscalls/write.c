@@ -14,18 +14,14 @@
 // Write to a file descriptor.
 SYSFUZZ(write, __NR_write, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-	gsize       size;
-	gint        retcode;
-	gpointer    buffer;
-
-    // Choose how big the buffer should be for input.
-    size = g_random_int_range(0, PAGE_SIZE);
+    gint        retcode;
+    gpointer    buffer;
 
     // Execute systemcall.
-    retcode = spawn_syscall_lwp(this, NULL, __NR_write,                // ssize_t
-                                typelib_fd_get(this),                  // int fd
-	                            typelib_get_buffer(&buffer, size),     // const void *buf
-	                            size);                                 // size_t count
+    retcode = spawn_syscall_lwp(this, NULL, __NR_write,                                 // ssize_t
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int fd
+                                typelib_get_buffer(&buffer, PAGE_SIZE),                 // const void *buf
+                                typelib_get_integer_range(0, PAGE_SIZE));               // size_t count
 
     // Clean up.
     typelib_clear_buffer(buffer);

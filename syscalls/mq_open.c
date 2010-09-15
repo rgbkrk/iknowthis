@@ -13,6 +13,12 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
+// Callback for typelib_add_resource().
+static gboolean destroy_open_file(guintptr fd)
+{
+    return syscall(__NR_close, fd) != -1;
+}
+
 // Open a message queue
 // mqd_t mq_open(const char *name, int oflag, mode_t mode,
 //               struct mq_attr *attr);
@@ -34,7 +40,7 @@ SYSFUZZ(mq_open, __NR_mq_open, SYS_NONE, CLONE_DEFAULT, 1000)
     g_free(name);
 
     if (retcode == ESUCCESS) {
-    	typelib_fd_new(this, mqd, FD_NONE);
+        typelib_add_resource(this, mqd, RES_FILE, RF_NONE, destroy_open_file);
     }
 
     return retcode;

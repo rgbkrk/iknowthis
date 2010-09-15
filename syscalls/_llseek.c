@@ -17,14 +17,14 @@
 //             unsigned int whence);
 SYSFUZZ(_llseek, __NR__llseek, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gpointer    result;
+    gpointer    result;
     gint        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR__llseek,                               // int
-                                typelib_fd_get(this),                                   // int fd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int fd
                                 typelib_get_integer(),                                  // unsigned long offset_high
                                 typelib_get_integer(),                                  // unsigned long offset_low
-                                typelib_get_buffer(&result, g_random_int_range(0, 32)), // loff_t *result
+                                typelib_get_buffer(&result, PAGE_SIZE),                 // loff_t *result
                                 typelib_get_integer_range(0, 2));                       // int whence
 
     typelib_clear_buffer(result);

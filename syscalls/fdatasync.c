@@ -15,7 +15,7 @@
 // int fdatasync(int fd);
 SYSFUZZ(fdatasync, __NR_fdatasync, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_fdatasync,                                // int
-	                         typelib_fd_get(this));                                     // int fd
+    return spawn_syscall_lwp(this, NULL, __NR_fdatasync,                                // int
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE));      // int fd
 }
 

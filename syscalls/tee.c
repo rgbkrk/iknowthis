@@ -16,9 +16,9 @@
 SYSFUZZ(tee, __NR_tee, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     return spawn_syscall_lwp(this, NULL, __NR_tee,                                      // int
-                             typelib_fd_get(this),                                      // int fd_in
-                             typelib_fd_get(this),                                      // int fd_out
-                             typelib_get_integer(),                                     // size_t len
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE),       // int fd_in
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE),       // int fd_out
+                             typelib_get_integer_range(0, PAGE_SIZE),                   // size_t len
                              typelib_get_integer());                                    // unsigned int flags
 }
 

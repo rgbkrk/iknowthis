@@ -15,20 +15,20 @@
 // int symlinkat(const char *oldpath, int newdirfd, const char *newpath);
 SYSFUZZ(symlinkat, __NR_symlinkat, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gchar   *oldpath;
-	gchar   *newpath;
-	gint     retcode;
-	gint     fd;
+    gchar   *oldpath;
+    gchar   *newpath;
+    gint     retcode;
+    gint     fd;
 
     // Relative to the current working directory.
-	fd = g_random_boolean()
-	    ? typelib_fd_get(this)
+    fd = g_random_boolean()
+        ? typelib_get_resource(this, NULL, RES_FILE, RF_NONE)
         : AT_FDCWD;
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_symlinkat,                                     // int
-	                            typelib_get_pathname(&oldpath),                                 // const char *oldpath
+    retcode = spawn_syscall_lwp(this, NULL, __NR_symlinkat,                                     // int
+                                typelib_get_pathname(&oldpath),                                 // const char *oldpath
                                 fd,                                                             // int newdirfd
-	                            typelib_get_pathname(&newpath));                                // const char *newpath
+                                typelib_get_pathname(&newpath));                                // const char *newpath
 
     g_free(oldpath);
     g_free(newpath);

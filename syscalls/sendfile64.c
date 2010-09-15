@@ -19,10 +19,10 @@ SYSFUZZ(sendfile64, __NR_sendfile64, SYS_NONE, CLONE_DEFAULT, 1000)
     gpointer    offset;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_sendfile64,                            // ssize_t
-                                typelib_fd_get(this),                                   // int outfd
-                                typelib_fd_get(this),                                   // int infd
-                                typelib_get_buffer(&offset, g_random_int_range(0, 32)), // loff_t *offset
-                                typelib_get_integer());                                 // size_t count
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int outfd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int infd
+                                typelib_get_buffer(&offset, PAGE_SIZE),                 // loff_t *offset
+                                typelib_get_integer_range(0, PAGE_SIZE));               // size_t count
 
     typelib_clear_buffer(offset);
 

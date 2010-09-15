@@ -15,16 +15,16 @@
 // int fsetxattr(int fd, const char  *name, const void *value, size_t size, int flags);
 SYSFUZZ(fsetxattr, __NR_fsetxattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+    gint        retcode;
     gpointer    name;
     gpointer    value;
-	
+
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, NULL, __NR_fsetxattr,                             // int
-                                typelib_fd_get(this),                                   // int fd
-                                typelib_get_buffer(&name, g_random_int_range(0, 8192)), // const char *name
-                                typelib_get_buffer(&value, g_random_int_range(0, 8192)),// const void *value
-                                typelib_get_integer(),                                  // size_t size
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int fd
+                                typelib_get_buffer(&name, PAGE_SIZE),                   // const char *name
+                                typelib_get_buffer(&value, PAGE_SIZE),                  // const void *value
+                                typelib_get_integer_range(0, PAGE_SIZE),                // size_t size
                                 typelib_get_integer());                                 // int flags
 
     // Clean up.

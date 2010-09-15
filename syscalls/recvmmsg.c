@@ -15,14 +15,14 @@
 // ssize_t recvmmsg(int socket, struct mmsghdr *mmsg, int vlen, int flags);
 SYSFUZZ(recvmmsg, __NR_recvmmsg, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-	gint        retcode;
-	gpointer    mmsg;
-	
+    gint        retcode;
+    gpointer    mmsg;
+
     // Execute systemcall.
-    retcode = spawn_syscall_lwp(this, NULL, __NR_recvmmsg,              // ssize_t
-                                typelib_fd_get(this),                   // int fd
-                                typelib_get_buffer(&mmsg, PAGE_SIZE),   // void *buf
-                                typelib_get_integer());                 // size_t count
+    retcode = spawn_syscall_lwp(this, NULL, __NR_recvmmsg,                                             // ssize_t
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),                   // int fd
+                                typelib_get_buffer(&mmsg, PAGE_SIZE),                                  // void *buf
+                                typelib_get_integer_range(0, PAGE_SIZE));                              // size_t count
 
     // Clean up.
     typelib_clear_buffer(mmsg);

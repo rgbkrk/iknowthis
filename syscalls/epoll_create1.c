@@ -11,13 +11,19 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
+// Callback for typelib_add_resource().
+static gboolean destroy_open_file(guintptr fd)
+{
+    return syscall(__NR_close, fd) != -1;
+}
+
 // Open an epoll file descriptor.
 // int epoll_create(int size);
 SYSFUZZ(epoll_create1, __NR_epoll_create1, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gint        fd;
     gint        retcode;
-	
+
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &fd, __NR_epoll_create1,                          // int
                                 typelib_get_integer());                                 // int size
@@ -30,7 +36,7 @@ SYSFUZZ(epoll_create1, __NR_epoll_create1, SYS_NONE, CLONE_DEFAULT, 0)
             close(fd);
         } else {
             // Keep this one.
-            typelib_fd_new(this, fd, FD_NONE);
+            typelib_add_resource(this, fd, RES_FILE, RF_NONE, destroy_open_file);
         }
     }
 

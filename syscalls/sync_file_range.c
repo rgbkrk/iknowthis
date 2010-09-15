@@ -19,7 +19,7 @@
 SYSFUZZ(sync_file_range, __NR_sync_file_range, SYS_NONE, CLONE_DEFAULT, 0)
 {
     return spawn_syscall_lwp(this, NULL, __NR_sync_file_range,                        // int
-                             typelib_fd_get(this),                                    // int fd
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE),     // int fd
                              typelib_get_integer(),                                   // unsigned off_low
                              typelib_get_integer(),                                   // unsigned off_high
                              typelib_get_integer(),                                   // unsigned n_low

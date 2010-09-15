@@ -25,7 +25,7 @@
 // count against this limit, which would interfere with fuzzing.
 //
 // We need a kernel supported listener count, that we can check. I considered
-// sockets, files, semaphoers, but I think the most reliable is shmid attach
+// sockets, files, semaphores, but I think the most reliable is shmid attach
 // counts.
 // 
 // Note that zombies do _not_ count against this limit. Zombies are cleaned up
@@ -34,28 +34,23 @@
 // The shmid for this process.
 static gint shmid;
 
-void __constructor create_process_shmid(void)
+static void __constructor create_process_shmid(void)
 {
     struct shmid_ds shmds;
 
     // Create a shmid, used to track process creations.
     // ftok() does a stat(), and uses the inode number combined with the
     // proj_id, so I'll use the process id.
-    shmid = shmget(ftok("/proc/self/exe", getpid()), PAGE_SIZE, IPC_CREAT | S_IRUSR);
-
-    // Verify that worked correctly.
-    if (shmid == -1) {
-        g_critical("unable to create a shared segment id to track processes, %s", g_strerror(errno));
-
+    if ((shmid = shmget(ftok("/proc/self/exe", getpid()), PAGE_SIZE, IPC_CREAT | S_IRUSR)) == -1) {
         // I cannot safely continue, or I might take the system down.
+        g_critical("unable to create a shared segment id to track processes, %s", g_strerror(errno));
         abort();
     }
 
     // Attach to this segment.
     if (shmat(shmid, NULL, SHM_RDONLY) == MAP_FAILED) {
-        g_critical("there was an error attaching to shmid %#x, %s.", shmid, g_strerror(errno));
-
         // This is probably not good.
+        g_critical("there was an error attaching to shmid %#x, %s.", shmid, g_strerror(errno));
         abort();
     }
 
@@ -64,10 +59,8 @@ void __constructor create_process_shmid(void)
     shmctl(shmid, IPC_RMID, NULL);
 
     // Quick sanity check to ensure the nattach count is working.
-    shmctl(shmid, IPC_STAT, &shmds);
-
+    g_assert_cmpint(shmctl(shmid, IPC_STAT, &shmds), !=, -1);
     g_assert_cmpint(shmds.shm_nattch, ==, 1);
-
     return;
 }
 

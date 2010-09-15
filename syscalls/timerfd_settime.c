@@ -29,7 +29,7 @@ SYSFUZZ(timerfd_settime, __NR_timerfd_settime, SYS_NONE, CLONE_DEFAULT, 1000)
     gpointer    old_value;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_timerfd_settime,                                           // int
-                                typelib_fd_get(this),                                                       // int fd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),                        // int fd
                                 typelib_get_integer_selection(4, TFD_NONBLOCK,
                                                                  TFD_CLOEXEC,
                                                                  TFD_NONBLOCK | TFD_CLOEXEC,

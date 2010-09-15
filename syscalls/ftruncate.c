@@ -14,8 +14,8 @@
 // Truncate a file to a specified length.
 SYSFUZZ(ftruncate, __NR_ftruncate, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_ftruncate,                                // int
-	                         typelib_fd_get(this),                                      // int fd
-	                         typelib_get_integer());                                    // off_t length
+    return spawn_syscall_lwp(this, NULL, __NR_ftruncate,                                // int
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE),       // int fd
+                             typelib_get_integer());                                    // off_t length
 }
 

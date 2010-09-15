@@ -14,9 +14,8 @@
 // Reposition read/write file offset.
 SYSFUZZ(lseek, __NR_lseek, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_lseek,           // off_t
-	                         typelib_fd_get(this),             // int fd
-	                         typelib_get_integer(),            // off_t offset
-    	                     typelib_get_integer_range(0, 2)); // int whence
+    return spawn_syscall_lwp(this, NULL, __NR_lseek,                                            // off_t
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE),               // int fd
+                             typelib_get_integer(),                                             // off_t offset
+                             typelib_get_integer_range(0, 2));                                  // int whence
 }
-

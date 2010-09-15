@@ -65,14 +65,14 @@ SYSFUZZ(io_submit, __NR_io_submit, SYS_DISABLED, CLONE_DEFAULT, 1000)
     iocb->__pad1            = typelib_get_integer_selection(1, 0);
     iocb->__pad2            = typelib_get_integer_selection(1, 0);
     iocb->aio_lio_opcode    = typelib_get_integer_range(0, 8);
-    iocb->aio_fildes        = typelib_fd_get(this);
+    iocb->aio_fildes        = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);
     iocb->u.c.buf           = typelib_get_buffer(NULL, PAGE_SIZE);
     iocb->u.c.nbytes        = typelib_get_integer_range(0, PAGE_SIZE);
     iocb->u.c.__pad1        = typelib_get_integer_selection(1, 0);
     iocb->u.c.__pad2        = typelib_get_integer_selection(1, 0);
     iocb->u.c.__pad3        = typelib_get_integer_selection(1, 0);
     iocb->u.c.flags         = typelib_get_integer();
-    iocb->u.c.resfd         = typelib_fd_get(this);
+    iocb->u.c.resfd         = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);
 
     retcode = spawn_syscall_lwp(this, &num, __NR_io_submit,                             // long
                                 typelib_get_resource(this, NULL, RES_AIOCTX, RF_NONE),  // aio_context_t ctx_id
@@ -81,7 +81,7 @@ SYSFUZZ(io_submit, __NR_io_submit, SYS_DISABLED, CLONE_DEFAULT, 1000)
 
     if (retcode == ESUCCESS && num != 0) {
         g_assert_cmpint(num, ==, 1);
-        
+
         typelib_add_resource(this, GPOINTER_TO_UINT(iocb), RES_AIOCB, RF_NONE, destroy_iocb_callback);
     } else {
         destroy_iocb_callback(GPOINTER_TO_UINT(iocb));

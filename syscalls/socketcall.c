@@ -34,6 +34,12 @@
 # define SOCK_NONBLOCK 000000004
 #endif
 
+// Callback for typelib_add_resource().
+static gboolean destroy_open_file(guintptr fd)
+{
+    return syscall(__NR_close, fd) != -1;
+}
+
 // Socket system calls.
 // XXX: Think of a way to give these separate fuzzers.
 SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
@@ -79,16 +85,16 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
 
             // Check for new socket.
             if (retcode == ESUCCESS) {
-                typelib_fd_new(this, fd, FD_NONE);
+                typelib_add_resource(this, fd, RES_FILE, RF_NONE, destroy_open_file);
             }
 
             return retcode;
 
         case SYS_BIND:      // Bind a name to a socket.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);                                  // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);   // int sockfd
             socketcall_args[2]  = typelib_get_integer_range(0, 64);                      // socklen_t addrlen
-            
+
             typelib_get_buffer((void **) &socketcall_args[1], PAGE_SIZE);                // const struct sockaddr *addr
 
             // Make call.
@@ -103,7 +109,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
         case SYS_CONNECT:       // Initiate a connection on a socket.
 
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);                                  // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);   // int sockfd
             socketcall_args[2]  = g_random_int_range(0, 64);                             // socklen_t addrlen
             typelib_get_buffer((void **) &socketcall_args[1], PAGE_SIZE);                // const struct sockaddr *addr
 
@@ -111,16 +117,16 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             retcode = syscall_fast_ret(&fd, __NR_socketcall,                             // int
                                        SYS_CONNECT,                                      // int call
                                        socketcall_args);                                 // unsigned long *args
-            
+
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
 
             return retcode;
 
         case SYS_LISTEN:        // Listen for connections on a socket.
-            
+
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);                                  // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);   // int sockfd
             socketcall_args[1]  = g_random_int_range(0, 64);                             // socklen_t addrlen
             socketcall_args[2]  = g_random_int_range(0, 1024);                           // socklen_t addrlen
 
@@ -128,13 +134,13 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             retcode = syscall_fast_ret(&fd, __NR_socketcall,                             // int
                                        SYS_LISTEN,                                       // int call
                                        socketcall_args);                                 // unsigned long *args
-            
+
             return retcode;
 
         case SYS_ACCEPT:        // Accept a connection on a socket.
-            
+
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);                                  // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);   // int sockfd
             typelib_get_buffer((void **) &socketcall_args[1], PAGE_SIZE);                // struct sockaddr *addr
             typelib_get_buffer((void **) &socketcall_args[2], PAGE_SIZE);                // socklen_t *addrlen
 
@@ -146,12 +152,12 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[2]));
-            
+
             return retcode;
         case SYS_GETSOCKNAME:   // Get socket name.
-            
+
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);                                  // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);                                  // int sockfd
             typelib_get_buffer((void **) &socketcall_args[1], PAGE_SIZE);                // struct sockaddr *addr
             typelib_get_buffer((void **) &socketcall_args[2], PAGE_SIZE);                // socklen_t *addrlen
 
@@ -163,13 +169,13 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[2]));
-            
+
             return retcode;
 
         case SYS_GETPEERNAME:   // Get name of connected peer socket.
 
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);                                  // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);   // int sockfd
 
             typelib_get_buffer((void **) &socketcall_args[1], PAGE_SIZE);                // struct sockaddr *addr
             typelib_get_buffer((void **) &socketcall_args[2], PAGE_SIZE);                // socklen_t *addrlen
@@ -182,7 +188,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[2]));
-            
+
             return retcode;
 
         case SYS_SOCKETPAIR:    // Create a pair of connected sockets.
@@ -190,7 +196,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             socketcall_args[0]  = typelib_get_integer_range(0, 32);     // int domain
             socketcall_args[1]  = typelib_get_integer_range(0, 16);     // int type
             socketcall_args[2]  = typelib_get_integer_selection(1, 0);  // int protocol
-            
+
             typelib_get_buffer((void **) &socketcall_args[3], PAGE_SIZE);// int sv[2]
 
             // Possibly add some options.
@@ -206,10 +212,10 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                 gint    *sv = GUINT_TO_POINTER(socketcall_args[3]);
 
                 // Record the socketpair.
-                typelib_fd_new(this, sv[0], FD_NONE);
-                typelib_fd_new(this, sv[1], FD_NONE);
+                typelib_add_resource(this, sv[0], RES_FILE, RF_NONE, destroy_open_file);
+                typelib_add_resource(this, sv[1], RES_FILE, RF_NONE, destroy_open_file);
             }
-            
+
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[3]));
 
             return retcode;
@@ -217,8 +223,8 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
         case SYS_SEND:          // Send a message on a socket.
 
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);                     // int sockfd
-            socketcall_args[2]  = typelib_get_integer_range(0, PAGE_SIZE);  // size_t len
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);  // int sockfd
+            socketcall_args[2]  = typelib_get_integer_range(0, PAGE_SIZE);              // size_t len
             socketcall_args[3]  = typelib_get_integer_mask(MSG_CONFIRM
                                                          | MSG_DONTROUTE
                                                          | MSG_DONTWAIT
@@ -236,11 +242,11 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
 
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
-            
+
             return retcode;
         case SYS_RECV:          // Receive a message from a socket.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);                     // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);  // int sockfd
             socketcall_args[2]  = typelib_get_integer_range(0, PAGE_SIZE);  // size_t len
             socketcall_args[3]  = typelib_get_integer_mask(MSG_CONFIRM
                                                          | MSG_DONTROUTE
@@ -259,12 +265,12 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
 
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
-            
+
             return retcode;
 
         case SYS_SENDTO:        // Send a message on a socket.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);  // int sockfd
             socketcall_args[2]  = typelib_get_integer();            // size_t len
             socketcall_args[3]  = typelib_get_integer();            // int flags
             socketcall_args[5]  = g_random_int_range(0, 8192);      // socklen_t addrlen
@@ -287,7 +293,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
 
         case SYS_RECVFROM:      // Receive a message from a socket.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);  // int sockfd
             socketcall_args[2]  = typelib_get_integer();            // size_t len
             socketcall_args[3]  = typelib_get_integer();            // int flags
             socketcall_args[5]  = g_random_int_range(0, 8192);      // socklen_t addrlen
@@ -310,9 +316,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
 
         case SYS_SHUTDOWN:      // Shut down part of a full-duplex connection.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);             // int sockfd
             socketcall_args[2]  = g_random_int_range(0, 32);        // int how
-            
+
             // Make call.
             retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
                                        SYS_SHUTDOWN,                // int call
@@ -322,7 +328,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
 
         case SYS_SETSOCKOPT:    // Get and set options on sockets.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);             // int sockfd
             socketcall_args[1]  = typelib_get_integer_range(0, 256);// int level
             socketcall_args[2]  = typelib_get_integer_range(0, 128);// int optname
             socketcall_args[4]  = typelib_get_integer_range(0, 64);// socklen_t optlen
@@ -340,13 +346,13 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             return retcode;
         case SYS_GETSOCKOPT:    // Get and set options on sockets.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);             // int sockfd
             socketcall_args[1]  = typelib_get_integer_range(0, 256);// int level
             socketcall_args[2]  = typelib_get_integer_range(0, 128);// int optname
-            
+
             typelib_get_buffer((void **) &socketcall_args[3],       // const void *optval
                                g_random_int_range(0, 8192));
-            
+
             typelib_get_buffer((void **) &socketcall_args[4],       // socklen_t *optlen
                                g_random_int_range(0, 32));
 
@@ -354,7 +360,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
                                        SYS_GETSOCKOPT,              // int call
                                        socketcall_args);            // unsigned long
-            
+
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[3]));
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[4]));
@@ -362,12 +368,12 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             return retcode;
         case SYS_SENDMSG:       // Send a message on a socket.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int s
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);             // int s
             socketcall_args[2]  = typelib_get_integer();            // int flags
-            
+
             typelib_get_buffer((void **) &socketcall_args[1],       // struct msghdr *msg,
                                g_random_int_range(0, 8192));
-            
+
             // Make call.
             retcode = syscall_fast_ret(&fd, __NR_socketcall,
                                        SYS_SENDMSG,
@@ -376,12 +382,12 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             return retcode;
         case SYS_RECVMSG:       // Receive a message from a socket.
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int s
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);             // int s
             socketcall_args[2]  = typelib_get_integer();            // int flags
-            
+
             typelib_get_buffer((void **) &socketcall_args[1],       // struct msghdr *msg,
                                g_random_int_range(0, 8192));
-            
+
             // Make call.
             retcode = syscall_fast_ret(&fd, __NR_socketcall,
                                        SYS_RECVMSG,
@@ -391,12 +397,12 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
         case SYS_ACCEPT4:       // Accept a connection on a socket.
 
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int sockfd
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);             // int sockfd
             socketcall_args[3]  = typelib_get_integer();            // int flags
 
             typelib_get_buffer((void **) &socketcall_args[1],       // struct sockaddr *addr
                                g_random_int_range(0, 8192));
-            
+
             typelib_get_buffer((void **) &socketcall_args[2],       // socklen_t *addrlen
                                g_random_int_range(0, 32));
 
@@ -414,13 +420,13 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             // ssize_t recvmmsg(int socket, struct mmsghdr *mmsg, int vlen, int flags);
             // XXX: FIXME
             // Install arguments.
-            socketcall_args[0]  = typelib_fd_get(this);             // int s
+            socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);             // int s
             socketcall_args[2]  = 1;                                // int vlen;
             socketcall_args[3]  = typelib_get_integer();            // int flags
-            
+
             typelib_get_buffer((void **) &socketcall_args[1],       // struct msghdr *msg,
                                g_random_int_range(0, 8192));
-            
+
             // Make call.
             retcode = syscall_fast_ret(&fd, __NR_socketcall,
                                        SYS_RECVMMSG,

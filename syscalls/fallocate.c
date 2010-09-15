@@ -19,9 +19,9 @@
 // int fallocate(int fd, int mode, off_t offset, off_t len);
 SYSFUZZ(fallocate, __NR_fallocate, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_fallocate,                                // int
-	                         typelib_fd_get(this),                                      // int fd
-	                         typelib_get_integer_selection(1, FALLOC_FL_KEEP_SIZE),     // int mode
+    return spawn_syscall_lwp(this, NULL, __NR_fallocate,                                // int
+                             typelib_get_resource(this, NULL, RES_FILE, RF_NONE),       // int fd
+                             typelib_get_integer_selection(1, FALLOC_FL_KEEP_SIZE),     // int mode
                              typelib_get_integer(),                                     // off_t offset
                              typelib_get_integer());                                    // off_t len
 }

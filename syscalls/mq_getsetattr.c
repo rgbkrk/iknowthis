@@ -21,7 +21,7 @@ SYSFUZZ(mq_getsetattr, __NR_mq_getsetattr, SYS_NONE, CLONE_DEFAULT, 0)
     gint        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_getsetattr,                             // mqd_t
-                                typelib_fd_get(this),                                       // mqd_t mqdes
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // mqd_t mqdes
                                 typelib_get_buffer(&newattr, PAGE_SIZE),                    // struct mq_attr *newattr
                                 typelib_get_buffer(&oldattr, PAGE_SIZE));                   // struct mq_attr *oldattr
 

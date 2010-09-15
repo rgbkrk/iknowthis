@@ -19,7 +19,7 @@ SYSFUZZ(timerfd_gettime, __NR_timerfd_gettime, SYS_NONE, CLONE_DEFAULT, 1000)
     gpointer    value;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_timerfd_gettime,                                           // int
-                                typelib_fd_get(this),                                                       // int fd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),                        // int fd
                                 typelib_get_buffer(&value, PAGE_SIZE));                                     // struct itimerspec *value
 
     typelib_clear_buffer(value);

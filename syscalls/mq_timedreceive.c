@@ -23,7 +23,7 @@ SYSFUZZ(mq_timedreceive, __NR_mq_timedreceive, SYS_NONE, CLONE_DEFAULT, 0)
     gint        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_timedreceive,                           // ssize_t
-                                typelib_fd_get(this),                                       // mqd_t mqdes
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // mqd_t mqdes
                                 typelib_get_buffer(&msg_ptr, PAGE_SIZE),                    // char *msg_ptr
                                 typelib_get_integer(),                                      // size_t msg_len
                                 typelib_get_buffer(&msg_prio, PAGE_SIZE),                   // unsigned *msg_prio

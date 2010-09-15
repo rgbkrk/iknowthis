@@ -12,15 +12,16 @@
 #include "iknowthis.h"
 
 // Duplicate a file descriptor.
+// int dup3(int oldfd, int newfd, int flags);
 SYSFUZZ(dup3, __NR_dup3, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-	gint    retcode;
-	gint    result;
+    gint    retcode;
+    gint    result;
 
     // XXX: BROKEN
-	retcode = spawn_syscall_lwp(this, &result, __NR_dup3,                                   // int
-	                            typelib_fd_get(this),                                       // int oldfd
-	                            typelib_fd_get(this),                                       // int newfd
+    retcode = spawn_syscall_lwp(this, &result, __NR_dup3,                                   // int
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // int oldfd
+                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // int newfd
                                 typelib_get_integer());                                     // int flags
 
     return retcode;
