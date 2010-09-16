@@ -26,7 +26,7 @@ static gboolean destroy_io_context(guintptr ctx)
 SYSFUZZ(io_setup, __NR_io_setup, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gint        retcode;
-	guintptr    ctx;
+    guintptr    ctx;
 
     // Ctx must be initialised to zero before call.
     memset(&ctx, 0x00, sizeof ctx);
@@ -38,7 +38,8 @@ SYSFUZZ(io_setup, __NR_io_setup, SYS_NONE, CLONE_DEFAULT, 0)
 
     // Record the new context if that worked.
     if (retcode == ESUCCESS) {
-        g_assert_cmpint(ctx, >, 0);
+        // This can be negative, apparently.
+        // g_assert_cmpint(ctx, >, 0);
         typelib_add_resource(this, ctx, RES_AIOCTX, RF_NONE, destroy_io_context);
     }
 
