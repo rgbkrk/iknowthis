@@ -19,9 +19,9 @@
 // write a callback.
 
 typedef struct {
-	guintptr            resource;                   // Resource descriptor.
-	guint               flags;                      // Any flags to modify typelib behaviour.
-	GSList             *trace;                      // List of callers.
+    guintptr            resource;                   // Resource descriptor.
+    guint               flags;                      // Any flags to modify typelib behaviour.
+    GSList             *trace;                      // List of callers.
     destroy_callback_t  destroy;                    // Callback to destroy this resource.
 } resource_t;
 
@@ -29,7 +29,7 @@ typedef struct {
 static GSList *type_resource_list[kNumResources];
 
 // How many descriptors should I remember?
-#define MAX_RESOURCE_COUNT 128
+#define MAX_RESOURCE_COUNT 512
 
 // Learn a new one, saving into a linked list.
 gboolean typelib_add_resource(syscall_fuzzer_t *this, guintptr descriptor, guint type, guint flags, destroy_callback_t destroy)
@@ -40,7 +40,7 @@ gboolean typelib_add_resource(syscall_fuzzer_t *this, guintptr descriptor, guint
     guint        count  = 0;
 
     g_assert_cmpint(type, <, kNumResources);
-    
+
     record->resource    = descriptor;
     record->flags       = flags;
     record->trace       = g_slist_append(NULL, this);
@@ -52,7 +52,7 @@ gboolean typelib_add_resource(syscall_fuzzer_t *this, guintptr descriptor, guint
     if (count > MAX_RESOURCE_COUNT) {
         node    = g_slist_nth(*list, g_random_int_range(0, count));
         record  = node->data;
-        
+
         if (record->destroy(record->resource) != true) {
             g_warning("destroy callback for fuzzer %s returned false, possible resource leak.", this->name);
         }
@@ -76,22 +76,22 @@ gboolean typelib_add_resource(syscall_fuzzer_t *this, guintptr descriptor, guint
 // Return a random entry from the list.
 guintptr typelib_get_resource(syscall_fuzzer_t *this, guintptr *ret, guint type, guint flags)
 {
-	resource_t  *record = NULL;
+    resource_t  *record = NULL;
     GSList      *node   = NULL;
     GSList     **list   = &type_resource_list[type];
-	guint        len    = 0;
+    guint        len    = 0;
     guintptr     desc   = 0;
 
     // Check I have some available.
     if ((len = g_slist_length(*list))) {
-	    node   = g_slist_nth(*list, g_random_int_range(0, len));
-	    record = node->data;
+        node   = g_slist_nth(*list, g_random_int_range(0, len));
+        record = node->data;
         desc   = record->resource;
 
         // Check if caller wants me to remove this resource.
         if (flags & RF_TAKEOWNERSHIP) {
             *list = g_slist_delete_link(*list, node);
-            
+
             g_slist_free(record->trace);
             g_free(record);
 
@@ -99,8 +99,8 @@ guintptr typelib_get_resource(syscall_fuzzer_t *this, guintptr *ret, guint type,
         }
     } else {
         // I don't know how else this can fail.
-    	g_assert_cmpint(len, ==, 0);
-        
+        g_assert_cmpint(len, ==, 0);
+
         // Use an invalid descriptor.
         return -1;
     }

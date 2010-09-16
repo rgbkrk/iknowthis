@@ -96,6 +96,8 @@ SYSFUZZ(fcntl, __NR_fcntl, SYS_NONE, CLONE_DEFAULT, 0)
         case F_GETLK64:
         case F_SETLK64:
         case F_SETLKW64:
+        case G_GETOWN_EX:
+        case G_SETOWN_EX:
             retcode = spawn_syscall_lwp(this, &result, __NR_fcntl,                          // int
                                         typelib_get_resource(this, NULL, RES_FILE, RF_NONE),// int fd
                                         cmd,                                                // int cmd

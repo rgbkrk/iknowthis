@@ -88,7 +88,7 @@ SYSFUZZ(fcntl64, __NR_fcntl64, SYS_NONE, CLONE_DEFAULT, 0)
 
     // Try to work out what happened.
     if (retcode == EFAULT) {
-        g_critical("fcntl cmd %#x returned EFAULT, fixme", cmd);
+        g_critical("fcntl64 cmd %#x returned EFAULT, fixme", cmd);
     }
 
     return retcode;
