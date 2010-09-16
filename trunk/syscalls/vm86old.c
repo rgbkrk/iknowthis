@@ -13,7 +13,7 @@
 #include "iknowthis.h"
 
 // Enter virtual 8086 mode.
-SYSFUZZ(vm86old, __NR_vm86old, SYS_NONE, CLONE_FORK, 100)
+SYSFUZZ(vm86old, __NR_vm86old, SYS_DISABLED, CLONE_FORK, 100)
 {
 	gpointer    info;
 	gint        retcode;

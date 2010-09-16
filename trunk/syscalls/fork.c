@@ -28,27 +28,12 @@ static gboolean destroy_forked_process(guintptr pid)
     return true;
 }
 
-#if 0
-// Add a resource limit so we don't fork bomb the machine.
-static void __constructor limit_user_processes(void)
-{
-	struct rlimit lim = {
-		.rlim_cur   = 512,
-		.rlim_max   = 512,
-    };
-
-    if (setrlimit(RLIMIT_NPROC, &lim) != 0) {
-    	g_warning("unable to setup process limit, forkbombs might be possible");
-    }
-}
-#endif
-
 // Create a child process.
 // pid_t fork(void);
 SYSFUZZ(fork, __NR_fork, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gint            retcode;
-	pid_t           pid;
+	pid_t           pid = -1;
 
     // I think the lwp syscall code may not handle this well, luckily fork() is
     // simple enough that I can handle it here.

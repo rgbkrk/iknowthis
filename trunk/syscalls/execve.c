@@ -15,23 +15,40 @@
 // int execve(const char *filename, char *const argv[], char *const envp[]);
 SYSFUZZ(execve, __NR_execve, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint      retcode;
-    gpointer  argv[] = { NULL, NULL };
-    gpointer  envp[] = { NULL, NULL };
-    gchar    *path;
+    gint        retcode;
+    guint       nargs;
+    guint       nenv;
+    gpointer   *argv;
+    gpointer   *envp;
+    gchar      *path;
 
-    typelib_get_buffer(&argv[0], PAGE_SIZE);
-    typelib_get_buffer(&envp[0], PAGE_SIZE);
+    // Choose how many parameters to generate.
+    nargs   = g_random_int_range(0, 128);
+    nenv    = g_random_int_range(0, 128);
 
+    // Allocate space for pointers.
+    argv    = g_malloc0_n(nargs + 1, sizeof(gpointer));
+    envp    = g_malloc0_n(nenv  + 1, sizeof(gpointer));
+
+    // Allocate data.
+    while (nenv)  typelib_get_buffer(&envp[--nenv], PAGE_SIZE);
+    while (nargs) typelib_get_buffer(&argv[--nargs], PAGE_SIZE);
+
+    // Execute system call.
     retcode = spawn_syscall_lwp(this, NULL, __NR_execve,                                      // int
                                 typelib_get_pathname(&path),                                  // const char *filename
                                 &argv,                                                        // char *const argv[]
                                 &envp);                                                       // char *const envp[]
 
+    // Clean up
     g_free(path);
-    typelib_clear_buffer(argv[0]);
-    typelib_clear_buffer(envp[0]);
+
+    // Clear each arg.
+    while (argv[nargs]) typelib_clear_buffer(argv[nargs++]);
+    while (envp[nenv]) typelib_clear_buffer(envp[nenv++]);
+
+    g_free(argv);
+    g_free(envp);
 
     return retcode;
 }
-

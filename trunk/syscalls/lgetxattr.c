@@ -21,11 +21,11 @@ SYSFUZZ(lgetxattr, __NR_lgetxattr, SYS_NONE, CLONE_DEFAULT, 0)
     gchar      *pathname;
 
     // Execute systemcall.
-    retcode = spawn_syscall_lwp(this, NULL, __NR_lgetxattr,                              // int
+    retcode = spawn_syscall_lwp(this, NULL, __NR_lgetxattr,                             // int
                                 typelib_get_pathname(&pathname),                        // const char *pathname
-                                typelib_get_buffer(&name, g_random_int_range(0, 8192)), // const char *name
-                                typelib_get_buffer(&value, g_random_int_range(0, 8192)),// const void *value
-                                typelib_get_integer());                                 // size_t size;
+                                typelib_get_buffer(&name, PAGE_SIZE),                   // const char *name
+                                typelib_get_buffer(&value, PAGE_SIZE),                  // const void *value
+                                typelib_get_integer_range(0, PAGE_SIZE));               // size_t size;
 
     typelib_clear_buffer(name);
     typelib_clear_buffer(value);
