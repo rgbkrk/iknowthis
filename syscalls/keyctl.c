@@ -15,7 +15,8 @@
 // Manipulate the kernel’s key management facility
 // long keyctl(int cmd, ...); (up to 4 arguments)
 // XXX: i bet i need typelib support for those serials.
-SYSFUZZ(keyctl, __NR_keyctl, SYS_NONE, CLONE_DEFAULT, 0)
+// XXX: re-enable when ubuntu is fixed.
+SYSFUZZ(keyctl, __NR_keyctl, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
     gint        retcode;
     gint        cmd;
