@@ -67,7 +67,7 @@ static void __constructor typelib_find_mount_points(void)
 
     // There must be at least one filesystem.
     g_assert_cmpuint(fs_mount_points->len, >, 0);
-        
+
     g_debug("discovered %u mountpoints from /proc/mounts", fs_mount_points->len);
 
     return;
@@ -115,7 +115,7 @@ gchar * typelib_get_pathname(gchar **pathname)
             // Old version, prepend the root string.
             *pathname = g_strjoin(NULL, root, G_DIR_SEPARATOR_S, fpath, NULL);
         }
-        
+
         // Signal nftw that we want to stop.
         return FTW_STOP;
     }
