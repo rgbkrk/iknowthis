@@ -26,8 +26,8 @@ guint              process_nesting_depth;                // Nested process depth
 
 int main(int argc, char **argv)
 {
-	GTimer         *timer       = NULL;
-	gint            returncode  = 0;
+    GTimer         *timer       = NULL;
+    gint            returncode  = 0;
     guint           total       = 0;
 
     // Print some stats
@@ -49,8 +49,8 @@ int main(int argc, char **argv)
     signal(SIGXFSZ, SIG_IGN);
 
     while (true) {
-    	// Select a random fuzzer.
-    	syscall_fuzzer_t *fuzzer = &system_call_fuzzers[
+        // Select a random fuzzer.
+        syscall_fuzzer_t *fuzzer = &system_call_fuzzers[
             g_random_int_range(0, MAX_SYSCALL_NUM)
         ];
 
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
         total++;
 
         //g_message("fuzzer %s selected, %u total executions", fuzzer->name, fuzzer->total);
-        
+
         // Execute the fuzzer, timing the operation.
         g_timer_start(timer);
 
@@ -72,14 +72,14 @@ int main(int argc, char **argv)
 
         // Terminate timer.
         g_timer_stop(timer);
-        
+
         // Keep a running average of speed for this fuzzer.
         fuzzer->average = ((fuzzer->average * fuzzer->total) + g_timer_elapsed(timer, NULL))
                             / (fuzzer->total + 1);
-        
+
         // And keep track of executions.
         fuzzer->total++;
-        
+
         //g_message("fuzzer %s executed in %f seconds, returned %d (%s)",
         //          fuzzer->name,
         //          g_timer_elapsed(timer, NULL),
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 
         // Should I ignore this?
         if (fuzzer->flags & SYS_VOID) {
-        	returncode = ESUCCESS;
+            returncode = ESUCCESS;
         }
 
         // Is this supposed to fail?
@@ -99,25 +99,25 @@ int main(int argc, char **argv)
 
         // Record error distribution to spot poor coverage.
         if (returncode != ESUCCESS) {
-        	error_record_t *error, key = { returncode, 0 };
+            error_record_t *error, key = { returncode, 0 };
 
             // Make sure this looks sane.
-        	g_assert_cmpuint(fuzzer->numerrors, <, MAX_ERROR_CODES);
-        	g_assert_cmpuint(fuzzer->failures, <, fuzzer->total);
+            g_assert_cmpuint(fuzzer->numerrors, <, MAX_ERROR_CODES);
+            g_assert_cmpuint(fuzzer->failures, <, fuzzer->total);
 
             // Define compare callback for lsearch().
             gint compare_error(gconstpointer a, gconstpointer b)
             {
-            	return ((const error_record_t *)(a))->error 
-            	    -  ((const error_record_t *)(b))->error;
+                return ((const error_record_t *)(a))->error 
+                    -  ((const error_record_t *)(b))->error;
             }
 
             // XXX: if this is a bottleneck, qsort on insertion and use bsearch().
-        	error = lsearch(&key,                   // key
-        	                fuzzer->errors,         // base
-        	                &fuzzer->numerrors,     // num
-        	                sizeof key,             // size
-        	                compare_error);         // compare
+            error = lsearch(&key,                   // key
+                            fuzzer->errors,         // base
+                            &fuzzer->numerrors,     // num
+                            sizeof key,             // size
+                            compare_error);         // compare
 
             // I don't expect this routine to fail.
             g_assert(error);
@@ -127,18 +127,17 @@ int main(int argc, char **argv)
 
             // Check if it's new.
             if (error->count++ == 0) {
-            	//g_message("fuzzer %s returned a new error, %s (%u executions, %u failures).",
-            	//          fuzzer->name,
-            	//          g_strerror(error->error),
-            	//          fuzzer->total,
-            	//          fuzzer->failures);
-
+                //g_message("fuzzer %s returned a new error, %s (%u executions, %u failures).",
+                //          fuzzer->name,
+                //          g_strerror(error->error),
+                //          fuzzer->total,
+                //          fuzzer->failures);
             }
 
             //if (fuzzer->total > 1024) {
-            //	if (fuzzer->failures == fuzzer->total && fuzzer->numerrors == 1) {
-            //		g_message("disabled boring fuzzer %s", fuzzer->name);
-            //		fuzzer->flags |= SYS_DISABLED;
+            //  if (fuzzer->failures == fuzzer->total && fuzzer->numerrors == 1) {
+            //      g_message("disabled boring fuzzer %s", fuzzer->name);
+            //      fuzzer->flags |= SYS_DISABLED;
             //    }
             //}
         }
