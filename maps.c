@@ -26,7 +26,7 @@ gboolean maps_contains_address(GSList *maps, guintptr address)
         maps = maps->next;
 
         if (map->start <= address && address <= map->end) {
-            g_debug("found %#x - %#x, %c%c%c%c",
+            g_debug("found %#lx - %#lx, %c%c%c%c",
                     map->start,
                     map->end,
                     map->perms.r,
@@ -77,7 +77,7 @@ void maps_print_diff(GSList *before, GSList *after)
                                  i->data,
                                  maps_full_compare)) {
 
-            g_debug("Map was modified or removed: %#x-%#x", m->start, m->end);
+            g_debug("Map was modified or removed: %#" G_GINTPTR_MODIFIER "x-%#" G_GINTPTR_MODIFIER "x", m->start, m->end);
         }
     }
 
@@ -87,7 +87,7 @@ void maps_print_diff(GSList *before, GSList *after)
         if (!g_slist_find_custom(before,
                                  i->data,
                                  maps_full_compare)) {
-            g_debug("Map was added or split: %#x-%#x", m->start, m->end);
+            g_debug("Map was added or split: %#" G_GINTPTR_MODIFIER "x-%#" G_GINTPTR_MODIFIER "x", m->start, m->end);
         }
     }
 
@@ -164,7 +164,7 @@ gchar * maps_get_entry(guintptr address)
         //      maps.
 
         // Parse map.
-        if (sscanf(split[i], "%x-%x %*c%*c%*c%*c %*x %*x:%*x %*u %*[^\n]", &start, &end) == 2) {
+        if (sscanf(split[i], "%" G_GINTPTR_MODIFIER "x-%" G_GINTPTR_MODIFIER "x %*c%*c%*c%*c %*x %*x:%*x %*u %*[^\n]", &start, &end) == 2) {
             // Check for match with address.
             if (start <= address && end >= address) {
                 // Looks good, we found a match.
@@ -220,7 +220,7 @@ GSList *maps_take_snapshot(void)
 
         // Parse map.
         // 00654000-00672000 r-xp 00000000 fd:01 19824      /lib/ld-2.12.so
-        if (sscanf(split[i], "%x-%x %c%c%c%c %x %hhx:%hhx %u %[^\n]",
+        if (sscanf(split[i], "%" G_GINTPTR_MODIFIER "x-%" G_GINTPTR_MODIFIER "x %c%c%c%c %x %hhx:%hhx %u %[^\n]",
                              &record->start,
                              &record->end,
                              &record->perms.r,
@@ -252,7 +252,7 @@ void maps_pretty_print_snapshot(GSList *snapshot)
     while (snapshot) {
         struct map *data = snapshot->data;
 
-        g_message("%08x-%08x %c%c%c%c %08x %hhx:%hhx %10u %s",
+        g_message("%08" G_GINTPTR_MODIFIER "x-%08" G_GINTPTR_MODIFIER "x %c%c%c%c %08x %hhx:%hhx %10u %s",
                   data->start,
                   data->end,
                   data->perms.r,
@@ -329,7 +329,7 @@ bool maps_compare_snapshots(GSList *before,
     GSList *snapshot    = maps_take_snapshot();
     GSList *i           = snapshot;
 
-    if (address == MAP_FAILED) {
+    if (GUINT_TO_POINTER(address) == MAP_FAILED) {
         maps_destroy_list(snapshot);
         return true;
     }

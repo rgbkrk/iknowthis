@@ -135,7 +135,7 @@ gchar * typelib_get_pathname(gchar **pathname)
         // Reached the end of the tree. Okay, make something up.
         *pathname = g_strdup_printf("%s%s%s", root,
                                               G_DIR_SEPARATOR_S,
-                                              typelib_random_buffer(junk, sizeof junk - 1));
+                                              (gchar *) typelib_random_buffer(junk, sizeof junk - 1));
     }
 
     // Complete.

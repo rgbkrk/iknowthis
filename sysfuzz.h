@@ -3,8 +3,6 @@
 
 #include <sched.h>
 
-#include "unistdlocal.h"
-
 #ifndef PAGE_SIZE
 # define PAGE_SIZE 0x1000
 #endif
@@ -35,32 +33,32 @@ enum {
 
 // Some convenience clone combinations.
 enum {
-	CLONE_FORK      = 0,
-	CLONE_DEFAULT   = CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_SYSVSEM | CLONE_IO,
-	CLONE_SAFER     = CLONE_FS | CLONE_FILES | CLONE_IO,
+    CLONE_FORK      = 0,
+    CLONE_DEFAULT   = CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_SYSVSEM | CLONE_IO,
+    CLONE_SAFER     = CLONE_FS | CLONE_FILES | CLONE_IO,
 };
 
 // No way any syscall can return more than this number of errors.
 #define MAX_ERROR_CODES 128
 
 typedef struct {
-	guint       error;                              // Errno value
-	guint       count;                              // Number of times seen.
+    guint       error;                              // Errno value
+    guint       count;                              // Number of times seen.
 } error_record_t;
 
 typedef struct {
-	gint           (*callback)(gpointer);           // Fuzzer subroutine.
-	gchar           *name;                          // System call or fuzzer name
-	guint           flags;                          // Fuzzer flags.
-	guint           total;                          // Total number of executions.
-	guint           failures;                       // Total number of failures.
-	guint           shared;                         // Flags for clone(2) describing what it's safe share.
-	guint           number;                         // Syscall number, used for debugging.
-	guint           timeout;                        // Microseconds allowed to execute for.
-	gdouble         average;                        // Average time fuzzer takes to execute.
-	guint           numerrors;                      // Unique error codes recorded.
-	pid_t           pid;                            // Process Id of last fuzzer.
-	error_record_t  errors[MAX_ERROR_CODES];        // error statistics.
+    gint           (*callback)(gpointer);           // Fuzzer subroutine.
+    gchar           *name;                          // System call or fuzzer name
+    guint           flags;                          // Fuzzer flags.
+    guint           total;                          // Total number of executions.
+    guint           failures;                       // Total number of failures.
+    guint           shared;                         // Flags for clone(2) describing what it's safe share.
+    guint           number;                         // Syscall number, used for debugging.
+    guint           timeout;                        // Microseconds allowed to execute for.
+    gdouble         average;                        // Average time fuzzer takes to execute.
+    gsize           numerrors;                      // Unique error codes recorded.
+    pid_t           pid;                            // Process Id of last fuzzer.
+    error_record_t  errors[MAX_ERROR_CODES];        // error statistics.
 } syscall_fuzzer_t;
 
 // Wrapper function around syscall() to return errno.
