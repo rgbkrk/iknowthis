@@ -17,16 +17,28 @@
 static gpointer fuzzerstack;
 static gpointer watchdogstack;
 
+struct context {
+    gint    *status;
+    gint     sysno;
+    gulong   arg0;
+    gulong   arg1;
+    gulong   arg2;
+    gulong   arg3;
+    gulong   arg4;
+    gulong   arg5;
+    gulong   arg6;
+};
+
 static void __constructor init_thread_stacks(void)
 {
     fuzzerstack   = mmap(NULL,
-                         getpagesize() * 8,
+                         getpagesize() * 32,
                          PROT_READ | PROT_WRITE,
                          MAP_ANONYMOUS | MAP_PRIVATE | MAP_GROWSDOWN,
                          -1,
                          0);
     watchdogstack = mmap(NULL,
-                         getpagesize() * 8,
+                         getpagesize() * 32,
                          PROT_READ | PROT_WRITE,
                          MAP_ANONYMOUS | MAP_PRIVATE | MAP_GROWSDOWN,
                          -1,
@@ -35,8 +47,8 @@ static void __constructor init_thread_stacks(void)
     g_assert(fuzzerstack != MAP_FAILED);
     g_assert(watchdogstack != MAP_FAILED);
 
-    fuzzerstack     += getpagesize() * 4;
-    watchdogstack   += getpagesize() * 4;
+    fuzzerstack     += getpagesize() * 16;
+    watchdogstack   += getpagesize() * 16;
 
     return;
 }
@@ -77,68 +89,64 @@ static gint watchdog_thread_func(gpointer this)
     return 0;
 }
 
-// Execute a systemcall.
-gint lwp_systemcall_routine(gpointer context)
+// Execute a systemcall, extract the required parameters from the passed
+// structure.
+gint lwp_systemcall_routine(struct context *context)
 {
-    gint **status = context;
-    gint   result;
-
     // Initialise, in case I'm killed.
-    **status = -ESUCCESS;
+    *(context->status) = -ESUCCESS;
 
-    __asm__ __volatile__(
-        "push       %%ebp                       \n" // Save ebp
-        "mov        %[context],  %%eax          \n" // Find address of parameters.
-        "mov        0x08(%%eax), %%ebx          \n" // arg0
-        "mov        0x0c(%%eax), %%ecx          \n" // arg1
-        "mov        0x10(%%eax), %%edx          \n" // arg2
-        "mov        0x14(%%eax), %%esi          \n" // arg3
-        "mov        0x18(%%eax), %%edi          \n" // arg4
-        "mov        0x1c(%%eax), %%ebp          \n" // arg5
-        "mov        0x04(%%eax), %%eax          \n" // Systemcall number.
-        "xor        $0xDEADBEEF, %%esp          \n" // Obscure esp to catch kernel trusting it.
-        "int        $0x80                       \n" // System call.
-        "xor        $0xDEADBEEF, %%esp          \n" // Restore esp.
-        "pop        %%ebp                       \n" // Restore ebp
-            :          "=a"  (result)
-            : [context] "m"  (context)
-            : "%ebx", "%ecx", "%edx", "%esi", "%edi"
-    );
-
-    // Save result.
-    **status = result;
-
+    // Execute system call.
+    *(context->status) = syscall(context->sysno,
+                                 context->arg0,
+                                 context->arg1,
+                                 context->arg2,
+                                 context->arg3,
+                                 context->arg4,
+                                 context->arg5,
+                                 context->arg6);
     return 0;
 }
 
 gint spawn_syscall_lwp(syscall_fuzzer_t *this, gint *status, gint sysno, ...)
 {
-    gint   watchdogpid, childpid;
-    gint   watchdogstatus, childstatus;
-    gint   watchdogret;
-    gint   retcode;
+    gint            watchdogpid, childpid;
+    gint            watchdogstatus, childstatus;
+    gint            watchdogret;
+    gint            retcode;
+    va_list         ap;
+    struct context  context = {
+        .status     = status ? status : &retcode,
+        .sysno      = sysno,
+    };
 
-    // Quick sanity check.
-    g_assert_cmpint(this->number, ==, sysno);
+    va_start(ap, sysno);
 
-    // If caller doesn't want the return code, I'll save it.
-    status = status ? status : &retcode;
+    // FIXME: just va_copy and parse the va_list around, but this doesnt work
+    //        reliably on x64, find out why.
+    context.arg0    = va_arg(ap, gulong);
+    context.arg1    = va_arg(ap, gulong);
+    context.arg2    = va_arg(ap, gulong);
+    context.arg3    = va_arg(ap, gulong);
+    context.arg4    = va_arg(ap, gulong);
+    context.arg5    = va_arg(ap, gulong);
+    context.arg6    = va_arg(ap, gulong);
 
     // If nothing can go wrong with this call, don't waste time
     // with clones.
     if (this->flags & SYS_SAFE) {
-        if (lwp_systemcall_routine(&status) != 0) {
+        if (lwp_systemcall_routine(&context) != 0) {
             g_warning("fuzzer %s was marked safe, but something weird happened", this->name);
         }
 
         // Calculate return code.
-        return (unsigned)(*status) >= 0xfffff001
-                ? - *status
+        return (unsigned)(*(context.status)) >= 0xfffff001
+                ? - *(context.status)
                 : 0;
     }
 
     // Spawn the fuzzer.
-    if ((this->pid = clone(lwp_systemcall_routine, fuzzerstack, this->shared, &status)) == -1) {
+    if ((this->pid = clone(lwp_systemcall_routine, fuzzerstack, this->shared, &context)) == -1) {
         g_critical("failed to spawn lwp for fuzzer %s, %s", this->name, g_strerror(errno));
     }
 
@@ -173,8 +181,8 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, gint *status, gint sysno, ...)
 
     // Child completed before timeout.
     if (WIFEXITED(childstatus)) {
-        return (unsigned)(*status) >= 0xfffff001
-                    ? - *status
+        return (unsigned)(*(context.status)) >= 0xfffff001
+                    ? - *(context.status)
                     : 0;
     }
 
@@ -201,6 +209,9 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, gint *status, gint sysno, ...)
     if (WIFSIGNALED(watchdogstatus)) {
         g_debug("watchdog terminated with %d", WTERMSIG(childstatus));
     }
+
+    // Done with stack frame.
+    va_end(ap);
 
     // FIXME: What else could happen?
     g_assert_not_reached();

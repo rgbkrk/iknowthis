@@ -26,19 +26,19 @@
 // This should allow us to recreate the life of a vma.
 
 struct vma {
-	union {
-		guintptr    i;                          // Integer.
-		gpointer    p;                          // Pointer.
+    union {
+        guintptr    i;                          // Integer.
+        gpointer    p;                          // Pointer.
     }        address;                       // Start address,
-	gsize    size;                          // Size in bytes.
-	gint     flags;                         // Any flags to modify typelib behaviour.
-	GSList  *trace;                         // List of actions.
+    gsize    size;                          // Size in bytes.
+    gint     flags;                         // Any flags to modify typelib behaviour.
+    GSList  *trace;                         // List of actions.
 };
 
 struct trace {
-	syscall_fuzzer_t    *caller;            // Caller.
-	time_t               timestamp;         // Timestamp when this action occurred.
-	gchar               *map;               // /proc/pid/maps entry at time of call.
+    syscall_fuzzer_t    *caller;            // Caller.
+    time_t               timestamp;         // Timestamp when this action occurred.
+    gchar               *map;               // /proc/pid/maps entry at time of call.
 };
 
 static GSList *memory_map_list;             // A record of mapped pages.
@@ -64,10 +64,10 @@ void typelib_vma_new(syscall_fuzzer_t *this, guintptr address, gsize size, gint 
 
     // Check if we should perform additional sanity checks.
     if (vma->flags & VMA_DEBUG) {
-    	g_debug("fuzzer %s created new debug vma %#x, size %#x", this->name, address, size);
+        g_debug("fuzzer %s created new debug vma %#" G_GINTPTR_MODIFIER  "x, size %#" G_GSIZE_MODIFIER "x", this->name, address, size);
 
         // Dump the new object.
-    	typelib_vma_prettyprint(vma);
+        typelib_vma_prettyprint(vma);
     }
 
     // Record this new resource.
@@ -101,26 +101,26 @@ void typelib_vma_new(syscall_fuzzer_t *this, guintptr address, gsize size, gint 
 // XXX: i also need moved, resized, etc, no?
 void typelib_vma_stale(syscall_fuzzer_t *this, guintptr address)
 {
-	struct vma *vma;
-	GSList     *node;
-	
+    struct vma *vma;
+    GSList     *node;
+
     g_assert(this);
 
-	// Find in the list.
-	node  = g_slist_find_custom(memory_map_list,
-	                            &address,
-	                            typelib_vma_compare);
-    
+    // Find in the list.
+    node  = g_slist_find_custom(memory_map_list,
+                                &address,
+                                typelib_vma_compare);
+
     // Sanity checks.
     g_assert(node);
     g_assert(node->data);
 
     // Get the description out of list node.
-	vma = node->data;
+    vma = node->data;
 
     // Check if debugging requested.
     if (vma->flags & VMA_DEBUG) {
-        g_debug("fuzzer %s reports vma %#x is stale.", this->name, address);
+        g_debug("fuzzer %s reports vma %#" G_GINTPTR_MODIFIER "x is stale.", this->name, address);
 
         // Show a trace.
         typelib_vma_prettyprint(vma);
@@ -128,7 +128,7 @@ void typelib_vma_stale(syscall_fuzzer_t *this, guintptr address)
 
     // Remove from the list.
     memory_map_list = g_slist_delete_link(memory_map_list, node);
-    
+
     // Destroy the record for this resource.
     typelib_vma_destroy(vma, false);
 
@@ -138,27 +138,27 @@ void typelib_vma_stale(syscall_fuzzer_t *this, guintptr address)
 // Return a random entry from the list.
 guintptr typelib_get_vma(syscall_fuzzer_t *this, guintptr *address, gsize *size)
 {
-	struct vma *vma;
-	guint       len;
+    struct vma *vma;
+    guint       len;
 
     // Sanity checks.
     g_assert(this);
 
     // Check I have some available.
     if ((len = g_slist_length(memory_map_list))) {
-    	// I do, Choose a random list element.
-	    GSList *node = g_slist_nth(memory_map_list, g_random_int_range(0, len));
-        
+        // I do, Choose a random list element.
+        GSList *node = g_slist_nth(memory_map_list, g_random_int_range(0, len));
+
         // Check it looks sane.
         g_assert(node);
         g_assert(node->data);
 
-	    // Grab the struct from list node.
-	    vma = node->data;
+        // Grab the struct from list node.
+        vma = node->data;
     } else {
         // I don't know how else this can fail.
-    	g_assert_cmpint(len, ==, 0);
-        
+        g_assert_cmpint(len, ==, 0);
+
         // Okay, use an invalid number.
         if (size) *size = 0;
         if (address) *address = GPOINTER_TO_UINT(MAP_FAILED);
@@ -183,7 +183,7 @@ guintptr typelib_get_vma(syscall_fuzzer_t *this, guintptr *address, gsize *size)
 // Return a pointer to a trace structure.
 static struct trace *typelib_vma_trace(syscall_fuzzer_t *this, guintptr address)
 {
-	struct trace *trace = g_malloc0(sizeof *trace);
+    struct trace *trace = g_malloc0(sizeof *trace);
 
     g_assert(this);
 
@@ -201,29 +201,29 @@ static void typelib_vma_destroy(struct vma *vma, gboolean unmapvma)
     // GFunc used to destroy trace list.
     void typelib_vma_destroy_trace(gpointer data, gpointer user)
     {
-    	struct trace *trace = data;
+        struct trace *trace = data;
         g_free(trace->map);
         g_free(trace);
     }
 
     // Check if we should perform additional sanity checks.
     if (vma->flags & VMA_DEBUG) {
-    	g_debug("debug vma %#x, size %#x is being destroyed", vma->address.i, vma->size);
-        
+        g_debug("debug vma %#" G_GINTPTR_MODIFIER "x, size %#" G_GSIZE_MODIFIER "x is being destroyed", vma->address.i, vma->size);
+
         // Dump the new object.
-    	typelib_vma_prettyprint(vma);
+        typelib_vma_prettyprint(vma);
     }
 
     // Release if requested.
     if (unmapvma && munmap(vma->address.p, vma->size) == -1) {
-    	if (vma->flags & VMA_HUGE) {
-    		while (munmap(vma->address.p, vma->size) == -1) {
-    			g_message("scanning for hugepage size, trying %#x...", vma->size);
-    			vma->size += PAGE_SIZE;
+        if (vma->flags & VMA_HUGE) {
+            while (munmap(vma->address.p, vma->size) == -1) {
+                g_message("scanning for hugepage size, trying %#" G_GSIZE_MODIFIER "x...", vma->size);
+                vma->size += PAGE_SIZE;
             }
         } else {
             // Dump some debugging information.
-            g_warning("failed unmap vma %#x, %s", vma->address.i, g_strerror(errno));
+            g_warning("failed unmap vma %#" G_GINTPTR_MODIFIER "x, %s", vma->address.i, g_strerror(errno));
             typelib_vma_prettyprint(vma);
             abort();
         }
@@ -248,8 +248,8 @@ static void typelib_vma_prettyprint(struct vma *vma)
     gchar  *date = g_alloca(26);
     guint   i    = 0;
 
-    g_debug("Dump of vma %#x follows.", vma->address.i);
-    g_debug("\tVMA Size:             %#x", vma->size);
+    g_debug("Dump of vma %#" G_GINTPTR_MODIFIER "x follows.", vma->address.i);
+    g_debug("\tVMA Size:             %#" G_GSIZE_MODIFIER "x", vma->size);
     g_debug("\tTrace Length:         %u", g_slist_length(node));
     g_debug("\tFlags Set:            %u", vma->flags);
     g_debug("\tResource Object:      %p", vma);
@@ -257,19 +257,19 @@ static void typelib_vma_prettyprint(struct vma *vma)
 
     // Dump the trace.
     while (node) {
-    	struct trace *trace;
-    	
-    	trace = node->data;
-    	node  = node->next;
+        struct trace *trace;
+
+        trace = node->data;
+        node  = node->next;
 
         // Read the timestamp.
         ctime_r(&trace->timestamp, date);
 
-    	g_debug("%3u. %s %s %s",
-    	    i++,
-    	    trace->caller->name,
-    	    g_strchomp(date),
-    	    trace->map);
+        g_debug("%3u. %s %s %s",
+            i++,
+            trace->caller->name,
+            g_strchomp(date),
+            trace->map);
     }
 }
 

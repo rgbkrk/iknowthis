@@ -127,11 +127,11 @@ int main(int argc, char **argv)
 
             // Check if it's new.
             if (error->count++ == 0) {
-                //g_message("fuzzer %s returned a new error, %s (%u executions, %u failures).",
-                //          fuzzer->name,
-                //          g_strerror(error->error),
-                //          fuzzer->total,
-                //          fuzzer->failures);
+                g_message("fuzzer %s returned a new error, %s (%u executions, %u failures).",
+                          fuzzer->name,
+                          g_strerror(error->error),
+                          fuzzer->total,
+                          fuzzer->failures);
             }
 
             //if (fuzzer->total > 1024) {
