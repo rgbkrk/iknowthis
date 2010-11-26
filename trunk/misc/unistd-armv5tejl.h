@@ -1,1105 +1,413 @@
-/* Copyright (C) 1991-2006, 2007 Free Software Foundation, Inc.
-   This file is part of the GNU C Library.
+/*
+ *  linux/include/asm-arm/unistd.h
+ *
+ *  Copyright (C) 2001-2005 Russell King
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * Please forward _all_ changes to this file to rmk@arm.linux.org.uk,
+ * no matter what the change is.  Thanks!
+ */
+#ifndef __ASM_ARM_UNISTD_H
+#define __ASM_ARM_UNISTD_H
 
-   The GNU C Library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2.1 of the License, or (at your option) any later version.
+#define __NR_OABI_SYSCALL_BASE	0x900000
 
-   The GNU C Library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
-
-   You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+#if defined(__thumb__) || defined(__ARM_EABI__)
+#define __NR_SYSCALL_BASE	0
+#else
+#define __NR_SYSCALL_BASE	__NR_OABI_SYSCALL_BASE
+#endif
 
 /*
- *	POSIX Standard: 2.10 Symbolic Constants		<unistd.h>
+ * This file contains the system call numbers.
  */
 
-#ifndef	_UNISTD_H
-#define	_UNISTD_H	1
+#define __NR_restart_syscall		(__NR_SYSCALL_BASE+  0)
+#define __NR_exit			(__NR_SYSCALL_BASE+  1)
+#define __NR_fork			(__NR_SYSCALL_BASE+  2)
+#define __NR_read			(__NR_SYSCALL_BASE+  3)
+#define __NR_write			(__NR_SYSCALL_BASE+  4)
+#define __NR_open			(__NR_SYSCALL_BASE+  5)
+#define __NR_close			(__NR_SYSCALL_BASE+  6)
+					/* 7 was sys_waitpid */
+#define __NR_creat			(__NR_SYSCALL_BASE+  8)
+#define __NR_link			(__NR_SYSCALL_BASE+  9)
+#define __NR_unlink			(__NR_SYSCALL_BASE+ 10)
+#define __NR_execve			(__NR_SYSCALL_BASE+ 11)
+#define __NR_chdir			(__NR_SYSCALL_BASE+ 12)
+#define __NR_time			(__NR_SYSCALL_BASE+ 13)
+#define __NR_mknod			(__NR_SYSCALL_BASE+ 14)
+#define __NR_chmod			(__NR_SYSCALL_BASE+ 15)
+#define __NR_lchown			(__NR_SYSCALL_BASE+ 16)
+					/* 17 was sys_break */
+					/* 18 was sys_stat */
+#define __NR_lseek			(__NR_SYSCALL_BASE+ 19)
+#define __NR_getpid			(__NR_SYSCALL_BASE+ 20)
+#define __NR_mount			(__NR_SYSCALL_BASE+ 21)
+#define __NR_umount			(__NR_SYSCALL_BASE+ 22)
+#define __NR_setuid			(__NR_SYSCALL_BASE+ 23)
+#define __NR_getuid			(__NR_SYSCALL_BASE+ 24)
+#define __NR_stime			(__NR_SYSCALL_BASE+ 25)
+#define __NR_ptrace			(__NR_SYSCALL_BASE+ 26)
+#define __NR_alarm			(__NR_SYSCALL_BASE+ 27)
+					/* 28 was sys_fstat */
+#define __NR_pause			(__NR_SYSCALL_BASE+ 29)
+#define __NR_utime			(__NR_SYSCALL_BASE+ 30)
+					/* 31 was sys_stty */
+					/* 32 was sys_gtty */
+#define __NR_access			(__NR_SYSCALL_BASE+ 33)
+#define __NR_nice			(__NR_SYSCALL_BASE+ 34)
+					/* 35 was sys_ftime */
+#define __NR_sync			(__NR_SYSCALL_BASE+ 36)
+#define __NR_kill			(__NR_SYSCALL_BASE+ 37)
+#define __NR_rename			(__NR_SYSCALL_BASE+ 38)
+#define __NR_mkdir			(__NR_SYSCALL_BASE+ 39)
+#define __NR_rmdir			(__NR_SYSCALL_BASE+ 40)
+#define __NR_dup			(__NR_SYSCALL_BASE+ 41)
+#define __NR_pipe			(__NR_SYSCALL_BASE+ 42)
+#define __NR_times			(__NR_SYSCALL_BASE+ 43)
+					/* 44 was sys_prof */
+#define __NR_brk			(__NR_SYSCALL_BASE+ 45)
+#define __NR_setgid			(__NR_SYSCALL_BASE+ 46)
+#define __NR_getgid			(__NR_SYSCALL_BASE+ 47)
+					/* 48 was sys_signal */
+#define __NR_geteuid			(__NR_SYSCALL_BASE+ 49)
+#define __NR_getegid			(__NR_SYSCALL_BASE+ 50)
+#define __NR_acct			(__NR_SYSCALL_BASE+ 51)
+#define __NR_umount2			(__NR_SYSCALL_BASE+ 52)
+					/* 53 was sys_lock */
+#define __NR_ioctl			(__NR_SYSCALL_BASE+ 54)
+#define __NR_fcntl			(__NR_SYSCALL_BASE+ 55)
+					/* 56 was sys_mpx */
+#define __NR_setpgid			(__NR_SYSCALL_BASE+ 57)
+					/* 58 was sys_ulimit */
+					/* 59 was sys_olduname */
+#define __NR_umask			(__NR_SYSCALL_BASE+ 60)
+#define __NR_chroot			(__NR_SYSCALL_BASE+ 61)
+#define __NR_ustat			(__NR_SYSCALL_BASE+ 62)
+#define __NR_dup2			(__NR_SYSCALL_BASE+ 63)
+#define __NR_getppid			(__NR_SYSCALL_BASE+ 64)
+#define __NR_getpgrp			(__NR_SYSCALL_BASE+ 65)
+#define __NR_setsid			(__NR_SYSCALL_BASE+ 66)
+#define __NR_sigaction			(__NR_SYSCALL_BASE+ 67)
+					/* 68 was sys_sgetmask */
+					/* 69 was sys_ssetmask */
+#define __NR_setreuid			(__NR_SYSCALL_BASE+ 70)
+#define __NR_setregid			(__NR_SYSCALL_BASE+ 71)
+#define __NR_sigsuspend			(__NR_SYSCALL_BASE+ 72)
+#define __NR_sigpending			(__NR_SYSCALL_BASE+ 73)
+#define __NR_sethostname		(__NR_SYSCALL_BASE+ 74)
+#define __NR_setrlimit			(__NR_SYSCALL_BASE+ 75)
+#define __NR_getrlimit			(__NR_SYSCALL_BASE+ 76)	/* Back compat 2GB limited rlimit */
+#define __NR_getrusage			(__NR_SYSCALL_BASE+ 77)
+#define __NR_gettimeofday		(__NR_SYSCALL_BASE+ 78)
+#define __NR_settimeofday		(__NR_SYSCALL_BASE+ 79)
+#define __NR_getgroups			(__NR_SYSCALL_BASE+ 80)
+#define __NR_setgroups			(__NR_SYSCALL_BASE+ 81)
+#define __NR_select			(__NR_SYSCALL_BASE+ 82)
+#define __NR_symlink			(__NR_SYSCALL_BASE+ 83)
+					/* 84 was sys_lstat */
+#define __NR_readlink			(__NR_SYSCALL_BASE+ 85)
+#define __NR_uselib			(__NR_SYSCALL_BASE+ 86)
+#define __NR_swapon			(__NR_SYSCALL_BASE+ 87)
+#define __NR_reboot			(__NR_SYSCALL_BASE+ 88)
+#define __NR_readdir			(__NR_SYSCALL_BASE+ 89)
+#define __NR_mmap			(__NR_SYSCALL_BASE+ 90)
+#define __NR_munmap			(__NR_SYSCALL_BASE+ 91)
+#define __NR_truncate			(__NR_SYSCALL_BASE+ 92)
+#define __NR_ftruncate			(__NR_SYSCALL_BASE+ 93)
+#define __NR_fchmod			(__NR_SYSCALL_BASE+ 94)
+#define __NR_fchown			(__NR_SYSCALL_BASE+ 95)
+#define __NR_getpriority		(__NR_SYSCALL_BASE+ 96)
+#define __NR_setpriority		(__NR_SYSCALL_BASE+ 97)
+					/* 98 was sys_profil */
+#define __NR_statfs			(__NR_SYSCALL_BASE+ 99)
+#define __NR_fstatfs			(__NR_SYSCALL_BASE+100)
+					/* 101 was sys_ioperm */
+#define __NR_socketcall			(__NR_SYSCALL_BASE+102)
+#define __NR_syslog			(__NR_SYSCALL_BASE+103)
+#define __NR_setitimer			(__NR_SYSCALL_BASE+104)
+#define __NR_getitimer			(__NR_SYSCALL_BASE+105)
+#define __NR_stat			(__NR_SYSCALL_BASE+106)
+#define __NR_lstat			(__NR_SYSCALL_BASE+107)
+#define __NR_fstat			(__NR_SYSCALL_BASE+108)
+					/* 109 was sys_uname */
+					/* 110 was sys_iopl */
+#define __NR_vhangup			(__NR_SYSCALL_BASE+111)
+					/* 112 was sys_idle */
+#define __NR_syscall			(__NR_SYSCALL_BASE+113) /* syscall to call a syscall! */
+#define __NR_wait4			(__NR_SYSCALL_BASE+114)
+#define __NR_swapoff			(__NR_SYSCALL_BASE+115)
+#define __NR_sysinfo			(__NR_SYSCALL_BASE+116)
+#define __NR_ipc			(__NR_SYSCALL_BASE+117)
+#define __NR_fsync			(__NR_SYSCALL_BASE+118)
+#define __NR_sigreturn			(__NR_SYSCALL_BASE+119)
+#define __NR_clone			(__NR_SYSCALL_BASE+120)
+#define __NR_setdomainname		(__NR_SYSCALL_BASE+121)
+#define __NR_uname			(__NR_SYSCALL_BASE+122)
+					/* 123 was sys_modify_ldt */
+#define __NR_adjtimex			(__NR_SYSCALL_BASE+124)
+#define __NR_mprotect			(__NR_SYSCALL_BASE+125)
+#define __NR_sigprocmask		(__NR_SYSCALL_BASE+126)
+					/* 127 was sys_create_module */
+#define __NR_init_module		(__NR_SYSCALL_BASE+128)
+#define __NR_delete_module		(__NR_SYSCALL_BASE+129)
+					/* 130 was sys_get_kernel_syms */
+#define __NR_quotactl			(__NR_SYSCALL_BASE+131)
+#define __NR_getpgid			(__NR_SYSCALL_BASE+132)
+#define __NR_fchdir			(__NR_SYSCALL_BASE+133)
+#define __NR_bdflush			(__NR_SYSCALL_BASE+134)
+#define __NR_sysfs			(__NR_SYSCALL_BASE+135)
+#define __NR_personality		(__NR_SYSCALL_BASE+136)
+					/* 137 was sys_afs_syscall */
+#define __NR_setfsuid			(__NR_SYSCALL_BASE+138)
+#define __NR_setfsgid			(__NR_SYSCALL_BASE+139)
+#define __NR__llseek			(__NR_SYSCALL_BASE+140)
+#define __NR_getdents			(__NR_SYSCALL_BASE+141)
+#define __NR__newselect			(__NR_SYSCALL_BASE+142)
+#define __NR_flock			(__NR_SYSCALL_BASE+143)
+#define __NR_msync			(__NR_SYSCALL_BASE+144)
+#define __NR_readv			(__NR_SYSCALL_BASE+145)
+#define __NR_writev			(__NR_SYSCALL_BASE+146)
+#define __NR_getsid			(__NR_SYSCALL_BASE+147)
+#define __NR_fdatasync			(__NR_SYSCALL_BASE+148)
+#define __NR__sysctl			(__NR_SYSCALL_BASE+149)
+#define __NR_mlock			(__NR_SYSCALL_BASE+150)
+#define __NR_munlock			(__NR_SYSCALL_BASE+151)
+#define __NR_mlockall			(__NR_SYSCALL_BASE+152)
+#define __NR_munlockall			(__NR_SYSCALL_BASE+153)
+#define __NR_sched_setparam		(__NR_SYSCALL_BASE+154)
+#define __NR_sched_getparam		(__NR_SYSCALL_BASE+155)
+#define __NR_sched_setscheduler		(__NR_SYSCALL_BASE+156)
+#define __NR_sched_getscheduler		(__NR_SYSCALL_BASE+157)
+#define __NR_sched_yield		(__NR_SYSCALL_BASE+158)
+#define __NR_sched_get_priority_max	(__NR_SYSCALL_BASE+159)
+#define __NR_sched_get_priority_min	(__NR_SYSCALL_BASE+160)
+#define __NR_sched_rr_get_interval	(__NR_SYSCALL_BASE+161)
+#define __NR_nanosleep			(__NR_SYSCALL_BASE+162)
+#define __NR_mremap			(__NR_SYSCALL_BASE+163)
+#define __NR_setresuid			(__NR_SYSCALL_BASE+164)
+#define __NR_getresuid			(__NR_SYSCALL_BASE+165)
+					/* 166 was sys_vm86 */
+					/* 167 was sys_query_module */
+#define __NR_poll			(__NR_SYSCALL_BASE+168)
+#define __NR_nfsservctl			(__NR_SYSCALL_BASE+169)
+#define __NR_setresgid			(__NR_SYSCALL_BASE+170)
+#define __NR_getresgid			(__NR_SYSCALL_BASE+171)
+#define __NR_prctl			(__NR_SYSCALL_BASE+172)
+#define __NR_rt_sigreturn		(__NR_SYSCALL_BASE+173)
+#define __NR_rt_sigaction		(__NR_SYSCALL_BASE+174)
+#define __NR_rt_sigprocmask		(__NR_SYSCALL_BASE+175)
+#define __NR_rt_sigpending		(__NR_SYSCALL_BASE+176)
+#define __NR_rt_sigtimedwait		(__NR_SYSCALL_BASE+177)
+#define __NR_rt_sigqueueinfo		(__NR_SYSCALL_BASE+178)
+#define __NR_rt_sigsuspend		(__NR_SYSCALL_BASE+179)
+#define __NR_pread64			(__NR_SYSCALL_BASE+180)
+#define __NR_pwrite64			(__NR_SYSCALL_BASE+181)
+#define __NR_chown			(__NR_SYSCALL_BASE+182)
+#define __NR_getcwd			(__NR_SYSCALL_BASE+183)
+#define __NR_capget			(__NR_SYSCALL_BASE+184)
+#define __NR_capset			(__NR_SYSCALL_BASE+185)
+#define __NR_sigaltstack		(__NR_SYSCALL_BASE+186)
+#define __NR_sendfile			(__NR_SYSCALL_BASE+187)
+					/* 188 reserved */
+					/* 189 reserved */
+#define __NR_vfork			(__NR_SYSCALL_BASE+190)
+#define __NR_ugetrlimit			(__NR_SYSCALL_BASE+191)	/* SuS compliant getrlimit */
+#define __NR_mmap2			(__NR_SYSCALL_BASE+192)
+#define __NR_truncate64			(__NR_SYSCALL_BASE+193)
+#define __NR_ftruncate64		(__NR_SYSCALL_BASE+194)
+#define __NR_stat64			(__NR_SYSCALL_BASE+195)
+#define __NR_lstat64			(__NR_SYSCALL_BASE+196)
+#define __NR_fstat64			(__NR_SYSCALL_BASE+197)
+#define __NR_lchown32			(__NR_SYSCALL_BASE+198)
+#define __NR_getuid32			(__NR_SYSCALL_BASE+199)
+#define __NR_getgid32			(__NR_SYSCALL_BASE+200)
+#define __NR_geteuid32			(__NR_SYSCALL_BASE+201)
+#define __NR_getegid32			(__NR_SYSCALL_BASE+202)
+#define __NR_setreuid32			(__NR_SYSCALL_BASE+203)
+#define __NR_setregid32			(__NR_SYSCALL_BASE+204)
+#define __NR_getgroups32		(__NR_SYSCALL_BASE+205)
+#define __NR_setgroups32		(__NR_SYSCALL_BASE+206)
+#define __NR_fchown32			(__NR_SYSCALL_BASE+207)
+#define __NR_setresuid32		(__NR_SYSCALL_BASE+208)
+#define __NR_getresuid32		(__NR_SYSCALL_BASE+209)
+#define __NR_setresgid32		(__NR_SYSCALL_BASE+210)
+#define __NR_getresgid32		(__NR_SYSCALL_BASE+211)
+#define __NR_chown32			(__NR_SYSCALL_BASE+212)
+#define __NR_setuid32			(__NR_SYSCALL_BASE+213)
+#define __NR_setgid32			(__NR_SYSCALL_BASE+214)
+#define __NR_setfsuid32			(__NR_SYSCALL_BASE+215)
+#define __NR_setfsgid32			(__NR_SYSCALL_BASE+216)
+#define __NR_getdents64			(__NR_SYSCALL_BASE+217)
+#define __NR_pivot_root			(__NR_SYSCALL_BASE+218)
+#define __NR_mincore			(__NR_SYSCALL_BASE+219)
+#define __NR_madvise			(__NR_SYSCALL_BASE+220)
+#define __NR_fcntl64			(__NR_SYSCALL_BASE+221)
+					/* 222 for tux */
+					/* 223 is unused */
+#define __NR_gettid			(__NR_SYSCALL_BASE+224)
+#define __NR_readahead			(__NR_SYSCALL_BASE+225)
+#define __NR_setxattr			(__NR_SYSCALL_BASE+226)
+#define __NR_lsetxattr			(__NR_SYSCALL_BASE+227)
+#define __NR_fsetxattr			(__NR_SYSCALL_BASE+228)
+#define __NR_getxattr			(__NR_SYSCALL_BASE+229)
+#define __NR_lgetxattr			(__NR_SYSCALL_BASE+230)
+#define __NR_fgetxattr			(__NR_SYSCALL_BASE+231)
+#define __NR_listxattr			(__NR_SYSCALL_BASE+232)
+#define __NR_llistxattr			(__NR_SYSCALL_BASE+233)
+#define __NR_flistxattr			(__NR_SYSCALL_BASE+234)
+#define __NR_removexattr		(__NR_SYSCALL_BASE+235)
+#define __NR_lremovexattr		(__NR_SYSCALL_BASE+236)
+#define __NR_fremovexattr		(__NR_SYSCALL_BASE+237)
+#define __NR_tkill			(__NR_SYSCALL_BASE+238)
+#define __NR_sendfile64			(__NR_SYSCALL_BASE+239)
+#define __NR_futex			(__NR_SYSCALL_BASE+240)
+#define __NR_sched_setaffinity		(__NR_SYSCALL_BASE+241)
+#define __NR_sched_getaffinity		(__NR_SYSCALL_BASE+242)
+#define __NR_io_setup			(__NR_SYSCALL_BASE+243)
+#define __NR_io_destroy			(__NR_SYSCALL_BASE+244)
+#define __NR_io_getevents		(__NR_SYSCALL_BASE+245)
+#define __NR_io_submit			(__NR_SYSCALL_BASE+246)
+#define __NR_io_cancel			(__NR_SYSCALL_BASE+247)
+#define __NR_exit_group			(__NR_SYSCALL_BASE+248)
+#define __NR_lookup_dcookie		(__NR_SYSCALL_BASE+249)
+#define __NR_epoll_create		(__NR_SYSCALL_BASE+250)
+#define __NR_epoll_ctl			(__NR_SYSCALL_BASE+251)
+#define __NR_epoll_wait			(__NR_SYSCALL_BASE+252)
+#define __NR_remap_file_pages		(__NR_SYSCALL_BASE+253)
+					/* 254 for set_thread_area */
+					/* 255 for get_thread_area */
+#define __NR_set_tid_address		(__NR_SYSCALL_BASE+256)
+#define __NR_timer_create		(__NR_SYSCALL_BASE+257)
+#define __NR_timer_settime		(__NR_SYSCALL_BASE+258)
+#define __NR_timer_gettime		(__NR_SYSCALL_BASE+259)
+#define __NR_timer_getoverrun		(__NR_SYSCALL_BASE+260)
+#define __NR_timer_delete		(__NR_SYSCALL_BASE+261)
+#define __NR_clock_settime		(__NR_SYSCALL_BASE+262)
+#define __NR_clock_gettime		(__NR_SYSCALL_BASE+263)
+#define __NR_clock_getres		(__NR_SYSCALL_BASE+264)
+#define __NR_clock_nanosleep		(__NR_SYSCALL_BASE+265)
+#define __NR_statfs64			(__NR_SYSCALL_BASE+266)
+#define __NR_fstatfs64			(__NR_SYSCALL_BASE+267)
+#define __NR_tgkill			(__NR_SYSCALL_BASE+268)
+#define __NR_utimes			(__NR_SYSCALL_BASE+269)
+#define __NR_arm_fadvise64_64		(__NR_SYSCALL_BASE+270)
+#define __NR_pciconfig_iobase		(__NR_SYSCALL_BASE+271)
+#define __NR_pciconfig_read		(__NR_SYSCALL_BASE+272)
+#define __NR_pciconfig_write		(__NR_SYSCALL_BASE+273)
+#define __NR_mq_open			(__NR_SYSCALL_BASE+274)
+#define __NR_mq_unlink			(__NR_SYSCALL_BASE+275)
+#define __NR_mq_timedsend		(__NR_SYSCALL_BASE+276)
+#define __NR_mq_timedreceive		(__NR_SYSCALL_BASE+277)
+#define __NR_mq_notify			(__NR_SYSCALL_BASE+278)
+#define __NR_mq_getsetattr		(__NR_SYSCALL_BASE+279)
+#define __NR_waitid			(__NR_SYSCALL_BASE+280)
+#define __NR_socket			(__NR_SYSCALL_BASE+281)
+#define __NR_bind			(__NR_SYSCALL_BASE+282)
+#define __NR_connect			(__NR_SYSCALL_BASE+283)
+#define __NR_listen			(__NR_SYSCALL_BASE+284)
+#define __NR_accept			(__NR_SYSCALL_BASE+285)
+#define __NR_getsockname		(__NR_SYSCALL_BASE+286)
+#define __NR_getpeername		(__NR_SYSCALL_BASE+287)
+#define __NR_socketpair			(__NR_SYSCALL_BASE+288)
+#define __NR_send			(__NR_SYSCALL_BASE+289)
+#define __NR_sendto			(__NR_SYSCALL_BASE+290)
+#define __NR_recv			(__NR_SYSCALL_BASE+291)
+#define __NR_recvfrom			(__NR_SYSCALL_BASE+292)
+#define __NR_shutdown			(__NR_SYSCALL_BASE+293)
+#define __NR_setsockopt			(__NR_SYSCALL_BASE+294)
+#define __NR_getsockopt			(__NR_SYSCALL_BASE+295)
+#define __NR_sendmsg			(__NR_SYSCALL_BASE+296)
+#define __NR_recvmsg			(__NR_SYSCALL_BASE+297)
+#define __NR_semop			(__NR_SYSCALL_BASE+298)
+#define __NR_semget			(__NR_SYSCALL_BASE+299)
+#define __NR_semctl			(__NR_SYSCALL_BASE+300)
+#define __NR_msgsnd			(__NR_SYSCALL_BASE+301)
+#define __NR_msgrcv			(__NR_SYSCALL_BASE+302)
+#define __NR_msgget			(__NR_SYSCALL_BASE+303)
+#define __NR_msgctl			(__NR_SYSCALL_BASE+304)
+#define __NR_shmat			(__NR_SYSCALL_BASE+305)
+#define __NR_shmdt			(__NR_SYSCALL_BASE+306)
+#define __NR_shmget			(__NR_SYSCALL_BASE+307)
+#define __NR_shmctl			(__NR_SYSCALL_BASE+308)
+#define __NR_add_key			(__NR_SYSCALL_BASE+309)
+#define __NR_request_key		(__NR_SYSCALL_BASE+310)
+#define __NR_keyctl			(__NR_SYSCALL_BASE+311)
+#define __NR_semtimedop			(__NR_SYSCALL_BASE+312)
+#define __NR_vserver			(__NR_SYSCALL_BASE+313)
+#define __NR_ioprio_set			(__NR_SYSCALL_BASE+314)
+#define __NR_ioprio_get			(__NR_SYSCALL_BASE+315)
+#define __NR_inotify_init		(__NR_SYSCALL_BASE+316)
+#define __NR_inotify_add_watch		(__NR_SYSCALL_BASE+317)
+#define __NR_inotify_rm_watch		(__NR_SYSCALL_BASE+318)
+#define __NR_mbind			(__NR_SYSCALL_BASE+319)
+#define __NR_get_mempolicy		(__NR_SYSCALL_BASE+320)
+#define __NR_set_mempolicy		(__NR_SYSCALL_BASE+321)
+#define __NR_openat			(__NR_SYSCALL_BASE+322)
+#define __NR_mkdirat			(__NR_SYSCALL_BASE+323)
+#define __NR_mknodat			(__NR_SYSCALL_BASE+324)
+#define __NR_fchownat			(__NR_SYSCALL_BASE+325)
+#define __NR_futimesat			(__NR_SYSCALL_BASE+326)
+#define __NR_fstatat64			(__NR_SYSCALL_BASE+327)
+#define __NR_unlinkat			(__NR_SYSCALL_BASE+328)
+#define __NR_renameat			(__NR_SYSCALL_BASE+329)
+#define __NR_linkat			(__NR_SYSCALL_BASE+330)
+#define __NR_symlinkat			(__NR_SYSCALL_BASE+331)
+#define __NR_readlinkat			(__NR_SYSCALL_BASE+332)
+#define __NR_fchmodat			(__NR_SYSCALL_BASE+333)
+#define __NR_faccessat			(__NR_SYSCALL_BASE+334)
+					/* 335 for pselect6 */
+					/* 336 for ppoll */
+#define __NR_unshare			(__NR_SYSCALL_BASE+337)
+#define __NR_set_robust_list		(__NR_SYSCALL_BASE+338)
+#define __NR_get_robust_list		(__NR_SYSCALL_BASE+339)
+#define __NR_splice			(__NR_SYSCALL_BASE+340)
+#define __NR_arm_sync_file_range	(__NR_SYSCALL_BASE+341)
+#define __NR_sync_file_range2		__NR_arm_sync_file_range
+#define __NR_tee			(__NR_SYSCALL_BASE+342)
+#define __NR_vmsplice			(__NR_SYSCALL_BASE+343)
+#define __NR_move_pages			(__NR_SYSCALL_BASE+344)
+#define __NR_getcpu			(__NR_SYSCALL_BASE+345)
+					/* 346 for epoll_pwait */
+#define __NR_kexec_load			(__NR_SYSCALL_BASE+347)
+#define __NR_utimensat			(__NR_SYSCALL_BASE+348)
+#define __NR_signalfd			(__NR_SYSCALL_BASE+349)
+#define __NR_timerfd_create		(__NR_SYSCALL_BASE+350)
+#define __NR_eventfd			(__NR_SYSCALL_BASE+351)
+#define __NR_fallocate			(__NR_SYSCALL_BASE+352)
+#define __NR_timerfd_settime		(__NR_SYSCALL_BASE+353)
+#define __NR_timerfd_gettime		(__NR_SYSCALL_BASE+354)
 
-#include <features.h>
+/*
+ * The following SWIs are ARM private.
+ */
+#define __ARM_NR_BASE			(__NR_SYSCALL_BASE+0x0f0000)
+#define __ARM_NR_breakpoint		(__ARM_NR_BASE+1)
+#define __ARM_NR_cacheflush		(__ARM_NR_BASE+2)
+#define __ARM_NR_usr26			(__ARM_NR_BASE+3)
+#define __ARM_NR_usr32			(__ARM_NR_BASE+4)
+#define __ARM_NR_set_tls		(__ARM_NR_BASE+5)
 
-__BEGIN_DECLS
-
-/* These may be used to determine what facilities are present at compile time.
-   Their values can be obtained at run time from `sysconf'.  */
-
-/* POSIX Standard approved as ISO/IEC 9945-1 as of December 2001.  */
-#define	_POSIX_VERSION	200112L
-
-/* These are not #ifdef __USE_POSIX2 because they are
-   in the theoretically application-owned namespace.  */
-
-/* The utilities on GNU systems also correspond to this version.  */
-#define _POSIX2_VERSION	200112L
-
-/* If defined, the implementation supports the
-   C Language Bindings Option.  */
-#define	_POSIX2_C_BIND	200112L
-
-/* If defined, the implementation supports the
-   C Language Development Utilities Option.  */
-#define	_POSIX2_C_DEV	200112L
-
-/* If defined, the implementation supports the
-   Software Development Utilities Option.  */
-#define	_POSIX2_SW_DEV	200112L
-
-/* If defined, the implementation supports the
-   creation of locales with the localedef utility.  */
-#define _POSIX2_LOCALEDEF       200112L
-
-/* X/Open version number to which the library conforms.  It is selectable.  */
-#ifdef __USE_XOPEN2K
-# define _XOPEN_VERSION	600
-#elif defined __USE_UNIX98
-# define _XOPEN_VERSION	500
-#else
-# define _XOPEN_VERSION	4
+/*
+ * The following syscalls are obsolete and no longer available for EABI.
+ */
+#if defined(__ARM_EABI__) && !defined(__KERNEL__)
+#undef __NR_time
+#undef __NR_umount
+#undef __NR_stime
+#undef __NR_alarm
+#undef __NR_utime
+#undef __NR_getrlimit
+#undef __NR_select
+#undef __NR_readdir
+#undef __NR_mmap
+#undef __NR_socketcall
+#undef __NR_syscall
+#undef __NR_ipc
 #endif
 
-/* Commands and utilities from XPG4 are available.  */
-#define _XOPEN_XCU_VERSION	4
-
-/* We are compatible with the old published standards as well.  */
-#define _XOPEN_XPG2	1
-#define _XOPEN_XPG3	1
-#define _XOPEN_XPG4	1
-
-/* The X/Open Unix extensions are available.  */
-#define _XOPEN_UNIX	1
-
-/* Encryption is present.  */
-#define	_XOPEN_CRYPT	1
-
-/* The enhanced internationalization capabilities according to XPG4.2
-   are present.  */
-#define	_XOPEN_ENH_I18N	1
-
-/* The legacy interfaces are also available.  */
-#define _XOPEN_LEGACY	1
-
-
-/* Get values of POSIX options:
-
-   If these symbols are defined, the corresponding features are
-   always available.  If not, they may be available sometimes.
-   The current values can be obtained with `sysconf'.
-
-   _POSIX_JOB_CONTROL		Job control is supported.
-   _POSIX_SAVED_IDS		Processes have a saved set-user-ID
-				and a saved set-group-ID.
-   _POSIX_REALTIME_SIGNALS	Real-time, queued signals are supported.
-   _POSIX_PRIORITY_SCHEDULING	Priority scheduling is supported.
-   _POSIX_TIMERS		POSIX.4 clocks and timers are supported.
-   _POSIX_ASYNCHRONOUS_IO	Asynchronous I/O is supported.
-   _POSIX_PRIORITIZED_IO	Prioritized asynchronous I/O is supported.
-   _POSIX_SYNCHRONIZED_IO	Synchronizing file data is supported.
-   _POSIX_FSYNC			The fsync function is present.
-   _POSIX_MAPPED_FILES		Mapping of files to memory is supported.
-   _POSIX_MEMLOCK		Locking of all memory is supported.
-   _POSIX_MEMLOCK_RANGE		Locking of ranges of memory is supported.
-   _POSIX_MEMORY_PROTECTION	Setting of memory protections is supported.
-   _POSIX_MESSAGE_PASSING	POSIX.4 message queues are supported.
-   _POSIX_SEMAPHORES		POSIX.4 counting semaphores are supported.
-   _POSIX_SHARED_MEMORY_OBJECTS	POSIX.4 shared memory objects are supported.
-   _POSIX_THREADS		POSIX.1c pthreads are supported.
-   _POSIX_THREAD_ATTR_STACKADDR	Thread stack address attribute option supported.
-   _POSIX_THREAD_ATTR_STACKSIZE	Thread stack size attribute option supported.
-   _POSIX_THREAD_SAFE_FUNCTIONS	Thread-safe functions are supported.
-   _POSIX_THREAD_PRIORITY_SCHEDULING
-				POSIX.1c thread execution scheduling supported.
-   _POSIX_THREAD_PRIO_INHERIT	Thread priority inheritance option supported.
-   _POSIX_THREAD_PRIO_PROTECT	Thread priority protection option supported.
-   _POSIX_THREAD_PROCESS_SHARED	Process-shared synchronization supported.
-   _POSIX_PII			Protocol-independent interfaces are supported.
-   _POSIX_PII_XTI		XTI protocol-indep. interfaces are supported.
-   _POSIX_PII_SOCKET		Socket protocol-indep. interfaces are supported.
-   _POSIX_PII_INTERNET		Internet family of protocols supported.
-   _POSIX_PII_INTERNET_STREAM	Connection-mode Internet protocol supported.
-   _POSIX_PII_INTERNET_DGRAM	Connectionless Internet protocol supported.
-   _POSIX_PII_OSI		ISO/OSI family of protocols supported.
-   _POSIX_PII_OSI_COTS		Connection-mode ISO/OSI service supported.
-   _POSIX_PII_OSI_CLTS		Connectionless ISO/OSI service supported.
-   _POSIX_POLL			Implementation supports `poll' function.
-   _POSIX_SELECT		Implementation supports `select' and `pselect'.
-
-   _XOPEN_REALTIME		X/Open realtime support is available.
-   _XOPEN_REALTIME_THREADS	X/Open realtime thread support is available.
-   _XOPEN_SHM			Shared memory interface according to XPG4.2.
-
-   _XBS5_ILP32_OFF32		Implementation provides environment with 32-bit
-				int, long, pointer, and off_t types.
-   _XBS5_ILP32_OFFBIG		Implementation provides environment with 32-bit
-				int, long, and pointer and off_t with at least
-				64 bits.
-   _XBS5_LP64_OFF64		Implementation provides environment with 32-bit
-				int, and 64-bit long, pointer, and off_t types.
-   _XBS5_LPBIG_OFFBIG		Implementation provides environment with at
-				least 32 bits int and long, pointer, and off_t
-				with at least 64 bits.
-
-   If any of these symbols is defined as -1, the corresponding option is not
-   true for any file.  If any is defined as other than -1, the corresponding
-   option is true for all files.  If a symbol is not defined at all, the value
-   for a specific file can be obtained from `pathconf' and `fpathconf'.
-
-   _POSIX_CHOWN_RESTRICTED	Only the super user can use `chown' to change
-				the owner of a file.  `chown' can only be used
-				to change the group ID of a file to a group of
-				which the calling process is a member.
-   _POSIX_NO_TRUNC		Pathname components longer than
-				NAME_MAX generate an error.
-   _POSIX_VDISABLE		If defined, if the value of an element of the
-				`c_cc' member of `struct termios' is
-				_POSIX_VDISABLE, no character will have the
-				effect associated with that element.
-   _POSIX_SYNC_IO		Synchronous I/O may be performed.
-   _POSIX_ASYNC_IO		Asynchronous I/O may be performed.
-   _POSIX_PRIO_IO		Prioritized Asynchronous I/O may be performed.
-
-   Support for the Large File Support interface is not generally available.
-   If it is available the following constants are defined to one.
-   _LFS64_LARGEFILE		Low-level I/O supports large files.
-   _LFS64_STDIO			Standard I/O supports large files.
-   */
-
-#include <bits/posix_opt.h>
-
-/* Get the environment definitions from Unix98.  */
-#ifdef __USE_UNIX98
-# include <bits/environments.h>
-#endif
-
-/* Standard file descriptors.  */
-#define	STDIN_FILENO	0	/* Standard input.  */
-#define	STDOUT_FILENO	1	/* Standard output.  */
-#define	STDERR_FILENO	2	/* Standard error output.  */
-
-
-/* All functions that are not declared anywhere else.  */
-
-#include <bits/types.h>
-
-#ifndef	__ssize_t_defined
-typedef __ssize_t ssize_t;
-# define __ssize_t_defined
-#endif
-
-#define	__need_size_t
-#define __need_NULL
-#include <stddef.h>
-
-#if defined __USE_XOPEN || defined __USE_XOPEN2K
-/* The Single Unix specification says that some more types are
-   available here.  */
-# ifndef __gid_t_defined
-typedef __gid_t gid_t;
-#  define __gid_t_defined
-# endif
-
-# ifndef __uid_t_defined
-typedef __uid_t uid_t;
-#  define __uid_t_defined
-# endif
-
-# ifndef __off_t_defined
-#  ifndef __USE_FILE_OFFSET64
-typedef __off_t off_t;
-#  else
-typedef __off64_t off_t;
-#  endif
-#  define __off_t_defined
-# endif
-# if defined __USE_LARGEFILE64 && !defined __off64_t_defined
-typedef __off64_t off64_t;
-#  define __off64_t_defined
-# endif
-
-# ifndef __useconds_t_defined
-typedef __useconds_t useconds_t;
-#  define __useconds_t_defined
-# endif
-
-# ifndef __pid_t_defined
-typedef __pid_t pid_t;
-#  define __pid_t_defined
-# endif
-#endif	/* X/Open */
-
-#if defined __USE_MISC || defined __USE_XOPEN_EXTENDED
-# ifndef __intptr_t_defined
-typedef __intptr_t intptr_t;
-#  define __intptr_t_defined
-# endif
-#endif
-
-#if defined __USE_BSD || defined __USE_XOPEN
-# ifndef __socklen_t_defined
-typedef __socklen_t socklen_t;
-#  define __socklen_t_defined
-# endif
-#endif
-
-/* Values for the second argument to access.
-   These may be OR'd together.  */
-#define	R_OK	4		/* Test for read permission.  */
-#define	W_OK	2		/* Test for write permission.  */
-#define	X_OK	1		/* Test for execute permission.  */
-#define	F_OK	0		/* Test for existence.  */
-
-/* Test for access to NAME using the real UID and real GID.  */
-extern int access (__const char *__name, int __type) __THROW __nonnull ((1));
-
-#ifdef __USE_GNU
-/* Test for access to NAME using the effective UID and GID
-   (as normal file operations use).  */
-extern int euidaccess (__const char *__name, int __type)
-     __THROW __nonnull ((1));
-
-/* An alias for `euidaccess', used by some other systems.  */
-extern int eaccess (__const char *__name, int __type)
-     __THROW __nonnull ((1));
-#endif
-
-#ifdef __USE_ATFILE
-/* Test for access to FILE relative to the directory FD is open on.
-   If AT_EACCESS is set in FLAG, then use effective IDs like `eaccess',
-   otherwise use real IDs like `access'.  */
-extern int faccessat (int __fd, __const char *__file, int __type, int __flag)
-     __THROW __nonnull ((2)) __wur;
-#endif /* Use GNU.  */
-
-
-/* Values for the WHENCE argument to lseek.  */
-#ifndef	_STDIO_H		/* <stdio.h> has the same definitions.  */
-# define SEEK_SET	0	/* Seek from beginning of file.  */
-# define SEEK_CUR	1	/* Seek from current position.  */
-# define SEEK_END	2	/* Seek from end of file.  */
-#endif
-
-#if defined __USE_BSD && !defined L_SET
-/* Old BSD names for the same constants; just for compatibility.  */
-# define L_SET		SEEK_SET
-# define L_INCR		SEEK_CUR
-# define L_XTND		SEEK_END
-#endif
-
-
-/* Move FD's file position to OFFSET bytes from the
-   beginning of the file (if WHENCE is SEEK_SET),
-   the current position (if WHENCE is SEEK_CUR),
-   or the end of the file (if WHENCE is SEEK_END).
-   Return the new file position.  */
-#ifndef __USE_FILE_OFFSET64
-extern __off_t lseek (int __fd, __off_t __offset, int __whence) __THROW;
-#else
-# ifdef __REDIRECT_NTH
-extern __off64_t __REDIRECT_NTH (lseek,
-				 (int __fd, __off64_t __offset, int __whence),
-				 lseek64);
-# else
-#  define lseek lseek64
-# endif
-#endif
-#ifdef __USE_LARGEFILE64
-extern __off64_t lseek64 (int __fd, __off64_t __offset, int __whence)
-     __THROW;
-#endif
-
-/* Close the file descriptor FD.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern int close (int __fd);
-
-/* Read NBYTES into BUF from FD.  Return the
-   number read, -1 for errors or 0 for EOF.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern ssize_t read (int __fd, void *__buf, size_t __nbytes) __wur;
-
-/* Write N bytes of BUF to FD.  Return the number written, or -1.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern ssize_t write (int __fd, __const void *__buf, size_t __n) __wur;
-
-#ifdef __USE_UNIX98
-# ifndef __USE_FILE_OFFSET64
-/* Read NBYTES into BUF from FD at the given position OFFSET without
-   changing the file pointer.  Return the number read, -1 for errors
-   or 0 for EOF.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern ssize_t pread (int __fd, void *__buf, size_t __nbytes,
-		      __off_t __offset) __wur;
-
-/* Write N bytes of BUF to FD at the given position OFFSET without
-   changing the file pointer.  Return the number written, or -1.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern ssize_t pwrite (int __fd, __const void *__buf, size_t __n,
-		       __off_t __offset) __wur;
-# else
-#  ifdef __REDIRECT
-extern ssize_t __REDIRECT (pread, (int __fd, void *__buf, size_t __nbytes,
-				   __off64_t __offset),
-			   pread64) __wur;
-extern ssize_t __REDIRECT (pwrite, (int __fd, __const void *__buf,
-				    size_t __nbytes, __off64_t __offset),
-			   pwrite64) __wur;
-#  else
-#   define pread pread64
-#   define pwrite pwrite64
-#  endif
-# endif
-
-# ifdef __USE_LARGEFILE64
-/* Read NBYTES into BUF from FD at the given position OFFSET without
-   changing the file pointer.  Return the number read, -1 for errors
-   or 0 for EOF.  */
-extern ssize_t pread64 (int __fd, void *__buf, size_t __nbytes,
-			__off64_t __offset) __wur;
-/* Write N bytes of BUF to FD at the given position OFFSET without
-   changing the file pointer.  Return the number written, or -1.  */
-extern ssize_t pwrite64 (int __fd, __const void *__buf, size_t __n,
-			 __off64_t __offset) __wur;
-# endif
-#endif
-
-/* Create a one-way communication channel (pipe).
-   If successful, two file descriptors are stored in PIPEDES;
-   bytes written on PIPEDES[1] can be read from PIPEDES[0].
-   Returns 0 if successful, -1 if not.  */
-extern int pipe (int __pipedes[2]) __THROW __wur;
-
-/* Schedule an alarm.  In SECONDS seconds, the process will get a SIGALRM.
-   If SECONDS is zero, any currently scheduled alarm will be cancelled.
-   The function returns the number of seconds remaining until the last
-   alarm scheduled would have signaled, or zero if there wasn't one.
-   There is no return value to indicate an error, but you can set `errno'
-   to 0 and check its value after calling `alarm', and this might tell you.
-   The signal may come late due to processor scheduling.  */
-extern unsigned int alarm (unsigned int __seconds) __THROW;
-
-/* Make the process sleep for SECONDS seconds, or until a signal arrives
-   and is not ignored.  The function returns the number of seconds less
-   than SECONDS which it actually slept (thus zero if it slept the full time).
-   If a signal handler does a `longjmp' or modifies the handling of the
-   SIGALRM signal while inside `sleep' call, the handling of the SIGALRM
-   signal afterwards is undefined.  There is no return value to indicate
-   error, but if `sleep' returns SECONDS, it probably didn't work.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern unsigned int sleep (unsigned int __seconds);
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Set an alarm to go off (generating a SIGALRM signal) in VALUE
-   microseconds.  If INTERVAL is nonzero, when the alarm goes off, the
-   timer is reset to go off every INTERVAL microseconds thereafter.
-   Returns the number of microseconds remaining before the alarm.  */
-extern __useconds_t ualarm (__useconds_t __value, __useconds_t __interval)
-     __THROW;
-
-/* Sleep USECONDS microseconds, or until a signal arrives that is not blocked
-   or ignored.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern int usleep (__useconds_t __useconds);
-#endif
-
-
-/* Suspend the process until a signal arrives.
-   This always returns -1 and sets `errno' to EINTR.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern int pause (void);
-
-
-/* Change the owner and group of FILE.  */
-extern int chown (__const char *__file, __uid_t __owner, __gid_t __group)
-     __THROW __nonnull ((1)) __wur;
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Change the owner and group of the file that FD is open on.  */
-extern int fchown (int __fd, __uid_t __owner, __gid_t __group) __THROW __wur;
-
-
-/* Change owner and group of FILE, if it is a symbolic
-   link the ownership of the symbolic link is changed.  */
-extern int lchown (__const char *__file, __uid_t __owner, __gid_t __group)
-     __THROW __nonnull ((1)) __wur;
-
-#endif /* Use BSD || X/Open Unix.  */
-
-#ifdef __USE_ATFILE
-/* Change the owner and group of FILE relative to the directory FD is open
-   on.  */
-extern int fchownat (int __fd, __const char *__file, __uid_t __owner,
-		     __gid_t __group, int __flag)
-     __THROW __nonnull ((2)) __wur;
-#endif /* Use GNU.  */
-
-/* Change the process's working directory to PATH.  */
-extern int chdir (__const char *__path) __THROW __nonnull ((1)) __wur;
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Change the process's working directory to the one FD is open on.  */
-extern int fchdir (int __fd) __THROW __wur;
-#endif
-
-/* Get the pathname of the current working directory,
-   and put it in SIZE bytes of BUF.  Returns NULL if the
-   directory couldn't be determined or SIZE was too small.
-   If successful, returns BUF.  In GNU, if BUF is NULL,
-   an array is allocated with `malloc'; the array is SIZE
-   bytes long, unless SIZE == 0, in which case it is as
-   big as necessary.  */
-extern char *getcwd (char *__buf, size_t __size) __THROW __wur;
-
-#ifdef	__USE_GNU
-/* Return a malloc'd string containing the current directory name.
-   If the environment variable `PWD' is set, and its value is correct,
-   that value is used.  */
-extern char *get_current_dir_name (void) __THROW;
-#endif
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Put the absolute pathname of the current working directory in BUF.
-   If successful, return BUF.  If not, put an error message in
-   BUF and return NULL.  BUF should be at least PATH_MAX bytes long.  */
-extern char *getwd (char *__buf)
-     __THROW __nonnull ((1)) __attribute_deprecated__ __wur;
-#endif
-
-
-/* Duplicate FD, returning a new file descriptor on the same file.  */
-extern int dup (int __fd) __THROW __wur;
-
-/* Duplicate FD to FD2, closing FD2 and making it open on the same file.  */
-extern int dup2 (int __fd, int __fd2) __THROW;
-
-/* NULL-terminated array of "NAME=VALUE" environment variables.  */
-extern char **__environ;
-#ifdef __USE_GNU
-extern char **environ;
-#endif
-
-
-/* Replace the current process, executing PATH with arguments ARGV and
-   environment ENVP.  ARGV and ENVP are terminated by NULL pointers.  */
-extern int execve (__const char *__path, char *__const __argv[],
-		   char *__const __envp[]) __THROW __nonnull ((1));
-
-#ifdef __USE_GNU
-/* Execute the file FD refers to, overlaying the running program image.
-   ARGV and ENVP are passed to the new program, as for `execve'.  */
-extern int fexecve (int __fd, char *__const __argv[], char *__const __envp[])
-     __THROW;
-#endif
-
-
-/* Execute PATH with arguments ARGV and environment from `environ'.  */
-extern int execv (__const char *__path, char *__const __argv[])
-     __THROW __nonnull ((1));
-
-/* Execute PATH with all arguments after PATH until a NULL pointer,
-   and the argument after that for environment.  */
-extern int execle (__const char *__path, __const char *__arg, ...)
-     __THROW __nonnull ((1));
-
-/* Execute PATH with all arguments after PATH until
-   a NULL pointer and environment from `environ'.  */
-extern int execl (__const char *__path, __const char *__arg, ...)
-     __THROW __nonnull ((1));
-
-/* Execute FILE, searching in the `PATH' environment variable if it contains
-   no slashes, with arguments ARGV and environment from `environ'.  */
-extern int execvp (__const char *__file, char *__const __argv[])
-     __THROW __nonnull ((1));
-
-/* Execute FILE, searching in the `PATH' environment variable if
-   it contains no slashes, with all arguments after FILE until a
-   NULL pointer and environment from `environ'.  */
-extern int execlp (__const char *__file, __const char *__arg, ...)
-     __THROW __nonnull ((1));
-
-
-#if defined __USE_MISC || defined __USE_XOPEN
-/* Add INC to priority of the current process.  */
-extern int nice (int __inc) __THROW __wur;
-#endif
-
-
-/* Terminate program execution with the low-order 8 bits of STATUS.  */
-extern void _exit (int __status) __attribute__ ((__noreturn__));
-
-
-/* Get the `_PC_*' symbols for the NAME argument to `pathconf' and `fpathconf';
-   the `_SC_*' symbols for the NAME argument to `sysconf';
-   and the `_CS_*' symbols for the NAME argument to `confstr'.  */
-#include <bits/confname.h>
-
-/* Get file-specific configuration information about PATH.  */
-extern long int pathconf (__const char *__path, int __name)
-     __THROW __nonnull ((1));
-
-/* Get file-specific configuration about descriptor FD.  */
-extern long int fpathconf (int __fd, int __name) __THROW;
-
-/* Get the value of the system variable NAME.  */
-extern long int sysconf (int __name) __THROW;
-
-#ifdef	__USE_POSIX2
-/* Get the value of the string-valued system variable NAME.  */
-extern size_t confstr (int __name, char *__buf, size_t __len) __THROW;
-#endif
-
-
-/* Get the process ID of the calling process.  */
-extern __pid_t getpid (void) __THROW;
-
-/* Get the process ID of the calling process's parent.  */
-extern __pid_t getppid (void) __THROW;
-
-/* Get the process group ID of the calling process.
-   This function is different on old BSD. */
-#ifndef __FAVOR_BSD
-extern __pid_t getpgrp (void) __THROW;
-#else
-# ifdef __REDIRECT_NTH
-extern __pid_t __REDIRECT_NTH (getpgrp, (__pid_t __pid), __getpgid);
-# else
-#  define getpgrp __getpgid
-# endif
-#endif
-
-/* Get the process group ID of process PID.  */
-extern __pid_t __getpgid (__pid_t __pid) __THROW;
-#ifdef __USE_XOPEN_EXTENDED
-extern __pid_t getpgid (__pid_t __pid) __THROW;
-#endif
-
-
-/* Set the process group ID of the process matching PID to PGID.
-   If PID is zero, the current process's process group ID is set.
-   If PGID is zero, the process ID of the process is used.  */
-extern int setpgid (__pid_t __pid, __pid_t __pgid) __THROW;
-
-#if defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Both System V and BSD have `setpgrp' functions, but with different
-   calling conventions.  The BSD function is the same as POSIX.1 `setpgid'
-   (above).  The System V function takes no arguments and puts the calling
-   process in its on group like `setpgid (0, 0)'.
-
-   New programs should always use `setpgid' instead.
-
-   The default in GNU is to provide the System V function.  The BSD
-   function is available under -D_BSD_SOURCE.  */
-
-# ifndef __FAVOR_BSD
-
-/* Set the process group ID of the calling process to its own PID.
-   This is exactly the same as `setpgid (0, 0)'.  */
-extern int setpgrp (void) __THROW;
-
-# else
-
-/* Another name for `setpgid' (above).  */
-#  ifdef __REDIRECT_NTH
-extern int __REDIRECT_NTH (setpgrp, (__pid_t __pid, __pid_t __pgrp), setpgid);
-#  else
-#   define setpgrp setpgid
-#  endif
-
-# endif	/* Favor BSD.  */
-#endif	/* Use SVID or BSD.  */
-
-/* Create a new session with the calling process as its leader.
-   The process group IDs of the session and the calling process
-   are set to the process ID of the calling process, which is returned.  */
-extern __pid_t setsid (void) __THROW;
-
-#ifdef __USE_XOPEN_EXTENDED
-/* Return the session ID of the given process.  */
-extern __pid_t getsid (__pid_t __pid) __THROW;
-#endif
-
-/* Get the real user ID of the calling process.  */
-extern __uid_t getuid (void) __THROW;
-
-/* Get the effective user ID of the calling process.  */
-extern __uid_t geteuid (void) __THROW;
-
-/* Get the real group ID of the calling process.  */
-extern __gid_t getgid (void) __THROW;
-
-/* Get the effective group ID of the calling process.  */
-extern __gid_t getegid (void) __THROW;
-
-/* If SIZE is zero, return the number of supplementary groups
-   the calling process is in.  Otherwise, fill in the group IDs
-   of its supplementary groups in LIST and return the number written.  */
-extern int getgroups (int __size, __gid_t __list[]) __THROW __wur;
-
-#ifdef	__USE_GNU
-/* Return nonzero iff the calling process is in group GID.  */
-extern int group_member (__gid_t __gid) __THROW;
-#endif
-
-/* Set the user ID of the calling process to UID.
-   If the calling process is the super-user, set the real
-   and effective user IDs, and the saved set-user-ID to UID;
-   if not, the effective user ID is set to UID.  */
-extern int setuid (__uid_t __uid) __THROW;
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Set the real user ID of the calling process to RUID,
-   and the effective user ID of the calling process to EUID.  */
-extern int setreuid (__uid_t __ruid, __uid_t __euid) __THROW;
-#endif
-
-#if defined __USE_BSD || defined __USE_XOPEN2K
-/* Set the effective user ID of the calling process to UID.  */
-extern int seteuid (__uid_t __uid) __THROW;
-#endif /* Use BSD.  */
-
-/* Set the group ID of the calling process to GID.
-   If the calling process is the super-user, set the real
-   and effective group IDs, and the saved set-group-ID to GID;
-   if not, the effective group ID is set to GID.  */
-extern int setgid (__gid_t __gid) __THROW;
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Set the real group ID of the calling process to RGID,
-   and the effective group ID of the calling process to EGID.  */
-extern int setregid (__gid_t __rgid, __gid_t __egid) __THROW;
-#endif
-
-#if defined __USE_BSD || defined __USE_XOPEN2K
-/* Set the effective group ID of the calling process to GID.  */
-extern int setegid (__gid_t __gid) __THROW;
-#endif /* Use BSD.  */
-
-#ifdef __USE_GNU
-/* Fetch the real user ID, effective user ID, and saved-set user ID,
-   of the calling process.  */
-extern int getresuid (__uid_t *__ruid, __uid_t *__euid, __uid_t *__suid)
-     __THROW;
-
-/* Fetch the real group ID, effective group ID, and saved-set group ID,
-   of the calling process.  */
-extern int getresgid (__gid_t *__rgid, __gid_t *__egid, __gid_t *__sgid)
-     __THROW;
-
-/* Set the real user ID, effective user ID, and saved-set user ID,
-   of the calling process to RUID, EUID, and SUID, respectively.  */
-extern int setresuid (__uid_t __ruid, __uid_t __euid, __uid_t __suid)
-     __THROW;
-
-/* Set the real group ID, effective group ID, and saved-set group ID,
-   of the calling process to RGID, EGID, and SGID, respectively.  */
-extern int setresgid (__gid_t __rgid, __gid_t __egid, __gid_t __sgid)
-     __THROW;
-#endif
-
-
-/* Clone the calling process, creating an exact copy.
-   Return -1 for errors, 0 to the new process,
-   and the process ID of the new process to the old process.  */
-extern __pid_t fork (void) __THROW;
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Clone the calling process, but without copying the whole address space.
-   The calling process is suspended until the new process exits or is
-   replaced by a call to `execve'.  Return -1 for errors, 0 to the new process,
-   and the process ID of the new process to the old process.  */
-extern __pid_t vfork (void) __THROW;
-#endif /* Use BSD. */
-
-
-/* Return the pathname of the terminal FD is open on, or NULL on errors.
-   The returned storage is good only until the next call to this function.  */
-extern char *ttyname (int __fd) __THROW;
-
-/* Store at most BUFLEN characters of the pathname of the terminal FD is
-   open on in BUF.  Return 0 on success, otherwise an error number.  */
-extern int ttyname_r (int __fd, char *__buf, size_t __buflen)
-     __THROW __nonnull ((2)) __wur;
-
-/* Return 1 if FD is a valid descriptor associated
-   with a terminal, zero if not.  */
-extern int isatty (int __fd) __THROW;
-
-#if defined __USE_BSD \
-    || (defined __USE_XOPEN_EXTENDED && !defined __USE_UNIX98)
-/* Return the index into the active-logins file (utmp) for
-   the controlling terminal.  */
-extern int ttyslot (void) __THROW;
-#endif
-
-
-/* Make a link to FROM named TO.  */
-extern int link (__const char *__from, __const char *__to)
-     __THROW __nonnull ((1, 2)) __wur;
-
-#ifdef __USE_ATFILE
-/* Like link but relative paths in TO and FROM are interpreted relative
-   to FROMFD and TOFD respectively.  */
-extern int linkat (int __fromfd, __const char *__from, int __tofd,
-		   __const char *__to, int __flags)
-     __THROW __nonnull ((2, 4)) __wur;
-#endif
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __USE_XOPEN2K
-/* Make a symbolic link to FROM named TO.  */
-extern int symlink (__const char *__from, __const char *__to)
-     __THROW __nonnull ((1, 2)) __wur;
-
-/* Read the contents of the symbolic link PATH into no more than
-   LEN bytes of BUF.  The contents are not null-terminated.
-   Returns the number of characters read, or -1 for errors.  */
-extern ssize_t readlink (__const char *__restrict __path,
-			 char *__restrict __buf, size_t __len)
-     __THROW __nonnull ((1, 2)) __wur;
-#endif /* Use BSD.  */
-
-#ifdef __USE_ATFILE
-/* Like symlink but a relative path in TO is interpreted relative to TOFD.  */
-extern int symlinkat (__const char *__from, int __tofd,
-		      __const char *__to) __THROW __nonnull ((1, 3)) __wur;
-
-/* Like readlink but a relative PATH is interpreted relative to FD.  */
-extern ssize_t readlinkat (int __fd, __const char *__restrict __path,
-			   char *__restrict __buf, size_t __len)
-     __THROW __nonnull ((2, 3)) __wur;
-#endif
-
-/* Remove the link NAME.  */
-extern int unlink (__const char *__name) __THROW __nonnull ((1));
-
-#ifdef __USE_ATFILE
-/* Remove the link NAME relative to FD.  */
-extern int unlinkat (int __fd, __const char *__name, int __flag)
-     __THROW __nonnull ((2));
-#endif
-
-/* Remove the directory PATH.  */
-extern int rmdir (__const char *__path) __THROW __nonnull ((1));
-
-
-/* Return the foreground process group ID of FD.  */
-extern __pid_t tcgetpgrp (int __fd) __THROW;
-
-/* Set the foreground process group ID of FD set PGRP_ID.  */
-extern int tcsetpgrp (int __fd, __pid_t __pgrp_id) __THROW;
-
-
-/* Return the login name of the user.
-
-   This function is a possible cancellation points and therefore not
-   marked with __THROW.  */
-extern char *getlogin (void);
-#if defined __USE_REENTRANT || defined __USE_POSIX199506
-/* Return at most NAME_LEN characters of the login name of the user in NAME.
-   If it cannot be determined or some other error occurred, return the error
-   code.  Otherwise return 0.
-
-   This function is a possible cancellation points and therefore not
-   marked with __THROW.  */
-extern int getlogin_r (char *__name, size_t __name_len) __nonnull ((1));
-#endif
-
-#ifdef	__USE_BSD
-/* Set the login name returned by `getlogin'.  */
-extern int setlogin (__const char *__name) __THROW __nonnull ((1));
-#endif
-
-
-#ifdef	__USE_POSIX2
-/* Get definitions and prototypes for functions to process the
-   arguments in ARGV (ARGC of them, minus the program name) for
-   options given in OPTS.  */
-# define __need_getopt
-# include <getopt.h>
-#endif
-
-
-#if defined __USE_BSD || defined __USE_UNIX98
-/* Put the name of the current host in no more than LEN bytes of NAME.
-   The result is null-terminated if LEN is large enough for the full
-   name and the terminator.  */
-extern int gethostname (char *__name, size_t __len) __THROW __nonnull ((1));
-#endif
-
-
-#if defined __USE_BSD || (defined __USE_XOPEN && !defined __USE_UNIX98)
-/* Set the name of the current host to NAME, which is LEN bytes long.
-   This call is restricted to the super-user.  */
-extern int sethostname (__const char *__name, size_t __len)
-     __THROW __nonnull ((1)) __wur;
-
-/* Set the current machine's Internet number to ID.
-   This call is restricted to the super-user.  */
-extern int sethostid (long int __id) __THROW __wur;
-
-
-/* Get and set the NIS (aka YP) domain name, if any.
-   Called just like `gethostname' and `sethostname'.
-   The NIS domain name is usually the empty string when not using NIS.  */
-extern int getdomainname (char *__name, size_t __len)
-     __THROW __nonnull ((1)) __wur;
-extern int setdomainname (__const char *__name, size_t __len)
-     __THROW __nonnull ((1)) __wur;
-
-
-/* Revoke access permissions to all processes currently communicating
-   with the control terminal, and then send a SIGHUP signal to the process
-   group of the control terminal.  */
-extern int vhangup (void) __THROW;
-
-/* Revoke the access of all descriptors currently open on FILE.  */
-extern int revoke (__const char *__file) __THROW __nonnull ((1)) __wur;
-
-
-/* Enable statistical profiling, writing samples of the PC into at most
-   SIZE bytes of SAMPLE_BUFFER; every processor clock tick while profiling
-   is enabled, the system examines the user PC and increments
-   SAMPLE_BUFFER[((PC - OFFSET) / 2) * SCALE / 65536].  If SCALE is zero,
-   disable profiling.  Returns zero on success, -1 on error.  */
-extern int profil (unsigned short int *__sample_buffer, size_t __size,
-		   size_t __offset, unsigned int __scale)
-     __THROW __nonnull ((1));
-
-
-/* Turn accounting on if NAME is an existing file.  The system will then write
-   a record for each process as it terminates, to this file.  If NAME is NULL,
-   turn accounting off.  This call is restricted to the super-user.  */
-extern int acct (__const char *__name) __THROW;
-
-
-/* Successive calls return the shells listed in `/etc/shells'.  */
-extern char *getusershell (void) __THROW;
-extern void endusershell (void) __THROW; /* Discard cached info.  */
-extern void setusershell (void) __THROW; /* Rewind and re-read the file.  */
-
-
-/* Put the program in the background, and dissociate from the controlling
-   terminal.  If NOCHDIR is zero, do `chdir ("/")'.  If NOCLOSE is zero,
-   redirects stdin, stdout, and stderr to /dev/null.  */
-extern int daemon (int __nochdir, int __noclose) __THROW __wur;
-#endif /* Use BSD || X/Open.  */
-
-
-#if defined __USE_BSD || (defined __USE_XOPEN && !defined __USE_XOPEN2K)
-/* Make PATH be the root directory (the starting point for absolute paths).
-   This call is restricted to the super-user.  */
-extern int chroot (__const char *__path) __THROW __nonnull ((1)) __wur;
-
-/* Prompt with PROMPT and read a string from the terminal without echoing.
-   Uses /dev/tty if possible; otherwise stderr and stdin.  */
-extern char *getpass (__const char *__prompt) __nonnull ((1));
-#endif /* Use BSD || X/Open.  */
-
-
-#if defined __USE_BSD || defined __USE_XOPEN
-/* Make all changes done to FD actually appear on disk.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-extern int fsync (int __fd);
-#endif /* Use BSD || X/Open.  */
-
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-
-/* Return identifier for the current host.  */
-extern long int gethostid (void);
-
-/* Make all changes done to all files actually appear on disk.  */
-extern void sync (void) __THROW;
-
-
-/* Return the number of bytes in a page.  This is the system's page size,
-   which is not necessarily the same as the hardware page size.  */
-extern int getpagesize (void)  __THROW __attribute__ ((__const__));
-
-
-/* Return the maximum number of file descriptors
-   the current process could possibly have.  */
-extern int getdtablesize (void) __THROW;
-
-
-/* Truncate FILE to LENGTH bytes.  */
-# ifndef __USE_FILE_OFFSET64
-extern int truncate (__const char *__file, __off_t __length)
-     __THROW __nonnull ((1)) __wur;
-# else
-#  ifdef __REDIRECT_NTH
-extern int __REDIRECT_NTH (truncate,
-			   (__const char *__file, __off64_t __length),
-			   truncate64) __nonnull ((1)) __wur;
-#  else
-#   define truncate truncate64
-#  endif
-# endif
-# ifdef __USE_LARGEFILE64
-extern int truncate64 (__const char *__file, __off64_t __length)
-     __THROW __nonnull ((1)) __wur;
-# endif
-
-#endif /* Use BSD || X/Open Unix.  */
-
-#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __USE_XOPEN2K
-
-/* Truncate the file FD is open on to LENGTH bytes.  */
-# ifndef __USE_FILE_OFFSET64
-extern int ftruncate (int __fd, __off_t __length) __THROW __wur;
-# else
-#  ifdef __REDIRECT_NTH
-extern int __REDIRECT_NTH (ftruncate, (int __fd, __off64_t __length),
-			   ftruncate64) __wur;
-#  else
-#   define ftruncate ftruncate64
-#  endif
-# endif
-# ifdef __USE_LARGEFILE64
-extern int ftruncate64 (int __fd, __off64_t __length) __THROW __wur;
-# endif
-
-#endif /* Use BSD || X/Open Unix || POSIX 2003.  */
-
-
-#if defined __USE_MISC || defined __USE_XOPEN_EXTENDED
-
-/* Set the end of accessible data space (aka "the break") to ADDR.
-   Returns zero on success and -1 for errors (with errno set).  */
-extern int brk (void *__addr) __THROW __wur;
-
-/* Increase or decrease the end of accessible data space by DELTA bytes.
-   If successful, returns the address the previous end of data space
-   (i.e. the beginning of the new space, if DELTA > 0);
-   returns (void *) -1 for errors (with errno set).  */
-extern void *sbrk (intptr_t __delta) __THROW;
-#endif
-
-
-#ifdef __USE_MISC
-/* Invoke `system call' number SYSNO, passing it the remaining arguments.
-   This is completely system-dependent, and not often useful.
-
-   In Unix, `syscall' sets `errno' for all errors and most calls return -1
-   for errors; in many systems you cannot pass arguments or get return
-   values for all system calls (`pipe', `fork', and `getppid' typically
-   among them).
-
-   In Mach, all system calls take normal arguments and always return an
-   error code (zero for success).  */
-extern long int syscall (long int __sysno, ...) __THROW;
-
-#endif	/* Use misc.  */
-
-
-#if (defined __USE_MISC || defined __USE_XOPEN_EXTENDED) && !defined F_LOCK
-/* NOTE: These declarations also appear in <fcntl.h>; be sure to keep both
-   files consistent.  Some systems have them there and some here, and some
-   software depends on the macros being defined without including both.  */
-
-/* `lockf' is a simpler interface to the locking facilities of `fcntl'.
-   LEN is always relative to the current file position.
-   The CMD argument is one of the following.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
-
-# define F_ULOCK 0	/* Unlock a previously locked region.  */
-# define F_LOCK  1	/* Lock a region for exclusive use.  */
-# define F_TLOCK 2	/* Test and lock a region for exclusive use.  */
-# define F_TEST  3	/* Test a region for other processes locks.  */
-
-# ifndef __USE_FILE_OFFSET64
-extern int lockf (int __fd, int __cmd, __off_t __len) __wur;
-# else
-#  ifdef __REDIRECT
-extern int __REDIRECT (lockf, (int __fd, int __cmd, __off64_t __len),
-		       lockf64) __wur;
-#  else
-#   define lockf lockf64
-#  endif
-# endif
-# ifdef __USE_LARGEFILE64
-extern int lockf64 (int __fd, int __cmd, __off64_t __len) __wur;
-# endif
-#endif /* Use misc and F_LOCK not already defined.  */
-
-
-#ifdef __USE_GNU
-
-/* Evaluate EXPRESSION, and repeat as long as it returns -1 with `errno'
-   set to EINTR.  */
-
-# define TEMP_FAILURE_RETRY(expression) \
-  (__extension__							      \
-    ({ long int __result;						      \
-       do __result = (long int) (expression);				      \
-       while (__result == -1L && errno == EINTR);			      \
-       __result; }))
-#endif
-
-#if defined __USE_POSIX199309 || defined __USE_UNIX98
-/* Synchronize at least the data part of a file with the underlying
-   media.  */
-extern int fdatasync (int __fildes);
-#endif /* Use POSIX199309 */
-
-
-/* XPG4.2 specifies that prototypes for the encryption functions must
-   be defined here.  */
-#ifdef	__USE_XOPEN
-/* Encrypt at most 8 characters from KEY using salt to perturb DES.  */
-extern char *crypt (__const char *__key, __const char *__salt)
-     __THROW __nonnull ((1, 2));
-
-/* Encrypt data in BLOCK in place if EDFLAG is zero; otherwise decrypt
-   block in place.  */
-extern void encrypt (char *__block, int __edflag) __THROW __nonnull ((1));
-
-
-/* Swab pairs bytes in the first N bytes of the area pointed to by
-   FROM and copy the result to TO.  The value of TO must not be in the
-   range [FROM - N + 1, FROM - 1].  If N is odd the first byte in FROM
-   is without partner.  */
-extern void swab (__const void *__restrict __from, void *__restrict __to,
-		  ssize_t __n) __THROW __nonnull ((1, 2));
-#endif
-
-
-/* The Single Unix specification demands this prototype to be here.
-   It is also found in <stdio.h>.  */
-#ifdef __USE_XOPEN
-/* Return the name of the controlling terminal.  */
-extern char *ctermid (char *__s) __THROW;
-#endif
-
-
-/* Define some macros helping to catch buffer overflows.  */
-#if __USE_FORTIFY_LEVEL > 0 && defined __extern_always_inline
-# include <bits/unistd.h>
-#endif
-
-__END_DECLS
-
-#endif /* unistd.h  */
+#endif /* __ASM_ARM_UNISTD_H */
