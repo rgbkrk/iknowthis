@@ -1,6 +1,5 @@
 #include <stdbool.h>
 #include <search.h>
-#include <sys/prctl.h>
 #include <unistd.h>
 #include <glib.h>
 #include <sys/types.h>

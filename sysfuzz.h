@@ -92,7 +92,7 @@ extern guint            process_nesting_depth;
         /* Verify this slot is empty */                                     \
         g_assert_cmpstr(system_call_fuzzers[_syscall].name, ==, NULL);      \
         if ((_flags) & SYS_DISABLED) {                                      \
-        	total_disabled_fuzzers++;                                       \
+            total_disabled_fuzzers++;                                       \
         } else {                                                            \
             total_registered_fuzzers++;                                     \
         }                                                                   \
