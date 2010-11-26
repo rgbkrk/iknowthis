@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <string.h>
+#include <signal.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"

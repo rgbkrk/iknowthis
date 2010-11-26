@@ -10,12 +10,20 @@
 
 #ifndef g_assert_cmpstr
 # define g_assert_cmpstr(x, y, z) 
-# define g_assert_cmpuint(x, y, z) 
-# define g_assert_cmpint(x, y, z) 
-# define guintptr unsigned
-# define gintptr signed
 # define g_strcmp0 strcmp
 # define O_CLOEXEC 04
+#endif
+#ifndef g_assert_cmpuint
+# define g_assert_cmpint(x, y, z)
+#endif
+#if !GLIB_CHECK_VERSION(2, 18, 0)
+    // Debian Armel has a crazy old glib. 
+    typedef signed long gintptr;
+    typedef unsigned long guintptr;
+    #define G_GINTPTR_FORMAT "li"
+    #define G_GUINTPTR_FORMAT "lu"
+    #define G_GINTPTR_MODIFIER "l"
+    #define G_GUINTPTR_MODIFIED "lu"
 #endif
 
 #include "resource.h"
