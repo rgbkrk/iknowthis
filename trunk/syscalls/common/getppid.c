@@ -14,8 +14,9 @@
 #include "iknowthis.h"
 
 // Get process identification.
+// pid_t getppid(void);
 SYSFUZZ(getppid, __NR_getppid, SYS_SAFE | SYS_BORING, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_getppid);             // pid_t
+    return spawn_syscall_lwp(this, NULL, __NR_getppid);             // pid_t
 }
 
