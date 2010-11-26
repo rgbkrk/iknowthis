@@ -24,6 +24,8 @@
     #define G_GUINTPTR_FORMAT "lu"
     #define G_GINTPTR_MODIFIER "l"
     #define G_GUINTPTR_MODIFIED "lu"
+    #undef g_assert_cmpstr
+    #define g_assert_cmpstr(x, y, z)
 #endif
 #if !GLIB_CHECK_VERSION(2, 24, 0)
 # define g_malloc0_n(x, y) g_malloc0((x) * (y))
