@@ -7,11 +7,12 @@ enum {
     RES_KEYSERIAL,                  // A keyring serial number.
     RES_FORK,                       // Forked child process.
     RES_FILE,                       // File descriptor.
+    RES_SHMID,                      // Segment identifier.
     kNumResources,
 };
 
 enum {
-    RF_NONE             = 0,
+    RF_NONE             = 0,        // No flags, note that RF = Resource Flags
     RF_TAKEOWNERSHIP    = 1 << 0,   // Remove from list and let caller manage.
     RF_DEBUG            = 1 << 1,   // Enable additional debugging.
 };

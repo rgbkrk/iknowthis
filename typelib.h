@@ -52,8 +52,9 @@ void            typelib_clear_iovec(gpointer iovec, gint count, guint flags);
 // Vmas.
 enum {
     VMA_NONE            = 0,
-    VMA_DEBUG           = 1 << 0,
-    VMA_HUGE            = 1 << 1,
+    VMA_DEBUG           = 1 << 0,   // Extra debugging requested.
+    VMA_HUGE            = 1 << 1,   // Possibly a HUGE_PAGE mapping.
+    VMA_SHM             = 1 << 2,   // Mapped via shmat(), not mmap, etc.
 };
 
     // Main.
