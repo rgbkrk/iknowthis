@@ -221,6 +221,12 @@ static void typelib_vma_destroy(struct vma *vma, gboolean unmapvma)
                 g_message("scanning for hugepage size, trying %#" G_GSIZE_MODIFIER "x...", vma->size);
                 vma->size += PAGE_SIZE;
             }
+        } else if (vma->flags & VMA_SHM) {
+            if (shmdt(vma->address.p) == -1) {
+                g_warning("failed to detach shm segment %p, %m", vma->address.p);
+                typelib_vma_prettyprint(vma);
+                abort();
+            }
         } else {
             // Dump some debugging information.
             g_warning("failed unmap vma %#" G_GINTPTR_MODIFIER "x, %s", vma->address.i, g_strerror(errno));
