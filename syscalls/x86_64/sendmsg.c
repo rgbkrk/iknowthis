@@ -21,7 +21,7 @@
 // ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags);
 SYSFUZZ(sendmsg, __NR_sendmsg, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    msg;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_sendmsg,                                   // ssize_t

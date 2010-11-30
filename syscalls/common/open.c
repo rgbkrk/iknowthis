@@ -22,8 +22,8 @@ static gboolean destroy_open_file(guintptr fd)
 SYSFUZZ(open, __NR_open, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gchar *pathname;
-    gint   retcode;
-    gint   fd = -1;
+    glong  retcode;
+    glong  fd = -1;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &fd, __NR_open,                       // int

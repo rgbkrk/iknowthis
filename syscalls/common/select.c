@@ -18,7 +18,7 @@ SYSFUZZ(select, __NR_select, SYS_DISABLED, CLONE_DEFAULT, 1000)
     gpointer    writefds;
     gpointer    exceptfds;
     gpointer    timeout;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_select,                                      // int
                                 typelib_get_integer(),                                        // int nfds

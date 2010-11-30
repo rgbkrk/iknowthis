@@ -11,14 +11,13 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Wait for process to change state.
 // int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
 SYSFUZZ(waitid, __NR_waitid, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gpointer     infop;
-    gint         retcode;
+    glong        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_waitid,                                                                // pid_t
                                 typelib_get_integer_selection(3, P_PID, P_PGID, P_ALL),                                 // idtype_t idtype

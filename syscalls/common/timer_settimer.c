@@ -17,7 +17,7 @@ SYSFUZZ(timer_settime, __NR_timer_settime, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    new_setting;
     gpointer    old_setting;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_timer_settime,
                                 typelib_get_integer(),                                                  // timer_t timer_id

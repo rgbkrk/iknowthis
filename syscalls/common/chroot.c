@@ -12,10 +12,11 @@
 #include "iknowthis.h"
 
 // Change root directory.
+// int chroot(const char *path);
 SYSFUZZ(chroot, __NR_chroot, SYS_FAIL, CLONE_DEFAULT, 0)
 {
-	gchar   *path;
-    gint     retcode;
+    gchar   *path;
+    glong    retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_chroot,                                    // int
                                 typelib_get_pathname(&path));                               // const char *path

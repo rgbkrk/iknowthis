@@ -16,16 +16,16 @@
 // int msync(void *addr, size_t length, int flags);
 SYSFUZZ(msync, __NR_msync, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
-	guintptr    address;
-	gsize       size;
+    glong       retcode;
+    guintptr    address;
+    gsize       size;
 
-	typelib_get_vma(this, &address, &size);
+    typelib_get_vma(this, &address, &size);
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_msync,                                         // int
-	                            address,                                                        // void *addr
-	                            size,                                                           // size_t len
-	                            typelib_get_integer_mask(MS_ASYNC | MS_INVALIDATE | MS_SYNC));  // int flags
+    retcode = spawn_syscall_lwp(this, NULL, __NR_msync,                                         // int
+                                address,                                                        // void *addr
+                                size,                                                           // size_t len
+                                typelib_get_integer_mask(MS_ASYNC | MS_INVALIDATE | MS_SYNC));  // int flags
 
     return retcode;
 }

@@ -1,5 +1,6 @@
 #ifndef __RESOURCE_H
 #define __RESOURCE_H
+#pragma once
 
 enum {
     RES_AIOCTX,                     // An asynchronous i/o context.

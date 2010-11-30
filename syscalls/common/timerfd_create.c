@@ -22,8 +22,8 @@ static gboolean destroy_open_file(guintptr fd)
 // int timerfd_create(int clockid, int flags);
 SYSFUZZ(timerfd_create, __NR_timerfd_create, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint    retcode;
-    gint    fd;
+    glong   retcode;
+    glong   fd;
 
     retcode = spawn_syscall_lwp(this, &fd, __NR_timerfd_create,                                             // int
                                 typelib_get_integer_range(0, 6),                                            // int clockid

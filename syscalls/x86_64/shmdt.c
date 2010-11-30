@@ -17,7 +17,7 @@
 // int shmdt(const void *shmaddr);
 SYSFUZZ(shmdt, __NR_shmdt, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     guintptr    address;
     gsize       size;
 

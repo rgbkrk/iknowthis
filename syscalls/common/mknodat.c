@@ -16,7 +16,7 @@
 SYSFUZZ(mknodat, __NR_mknodat, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gchar *pathname;
-    gint   retcode;
+    glong  retcode;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, NULL, __NR_mknodat,                               // int

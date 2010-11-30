@@ -32,7 +32,7 @@ SYSFUZZ(futex, __NR_futex, SYS_NONE, CLONE_DEFAULT, 1000)
     gpointer    uaddr;
     gpointer    timeout;
     gpointer    uaddr2;
-    gint        retcode;
+    glong       retcode;
     gint        cmd;
 
     cmd     = typelib_get_integer_selection(12, FUTEX_WAIT,

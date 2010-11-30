@@ -16,7 +16,7 @@
 SYSFUZZ(epoll_ctl, __NR_epoll_ctl, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    event;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_epoll_ctl,                             // int
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int fd

@@ -18,7 +18,7 @@
 // int setxattr(const char *pathname, const char  *name, const void *value, size_t size, int flags);
 SYSFUZZ(setxattr, __NR_setxattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+	glong       retcode;
     gchar      *pathname;
     gpointer    name;
     gpointer    value;

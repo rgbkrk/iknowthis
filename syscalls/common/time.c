@@ -15,7 +15,7 @@
 SYSFUZZ(time, __NR_time, SYS_SAFE, CLONE_DEFAULT, 0)
 {
 	gpointer   t;
-    gint       retcode;
+    glong      retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_time,                                 // time_t
                                 typelib_get_buffer(&t, PAGE_SIZE));                    // time_t *t

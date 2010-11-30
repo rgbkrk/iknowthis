@@ -17,7 +17,7 @@
 SYSFUZZ(iopl, __NR_iopl, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gint    level;
-	gint    retcode;
+	glong   retcode;
     
     level   = typelib_get_integer_range(0, 3);
 

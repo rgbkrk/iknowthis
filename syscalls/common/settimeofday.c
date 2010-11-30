@@ -16,7 +16,7 @@ SYSFUZZ(settimeofday, __NR_settimeofday, SYS_FAIL, CLONE_DEFAULT, 0)
 {
 	gpointer    tv;
 	gpointer    tz;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_settimeofday,                          // int
 	                            typelib_get_buffer(&tv, g_random_int_range(0, 128)),    // struct timeval *tv

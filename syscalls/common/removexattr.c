@@ -15,7 +15,7 @@
 // int removexattr(const char *pathname, const char *name);
 SYSFUZZ(removexattr, __NR_removexattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     gchar      *pathname;
     gpointer    name;
 

@@ -1,5 +1,6 @@
 #ifndef __MAPS_H
 #define __MAPS_H
+#pragma once
 
 // Approximate representation of map from proc(5) description.
 struct map {

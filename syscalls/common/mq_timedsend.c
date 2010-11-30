@@ -11,7 +11,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Send a message to a message queue.
 // mqd_t mq_timedsend(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio, const struct timespec *abs_timeout);
@@ -19,7 +18,7 @@ SYSFUZZ(mq_timedsend, __NR_mq_timedsend, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    msg_ptr;
     gpointer    abs_timeout;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_timedsend,                              // mqd_t
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // mqd_t mqdes

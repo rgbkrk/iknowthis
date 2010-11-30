@@ -17,7 +17,7 @@
 SYSFUZZ(getrusage, __NR_getrusage, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gpointer    usage;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_getrusage,                                 // int
 	                            typelib_get_integer(),                                      // int who

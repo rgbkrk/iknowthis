@@ -18,7 +18,7 @@
 // XXX: not working
 SYSFUZZ(vfork, __NR_vfork, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-	gint    retcode;
+	glong   retcode;
 	pid_t   pid;
 
     // I think the lwp syscall code may not handle this well, luckily vfork() is

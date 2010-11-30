@@ -10,7 +10,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 struct io_iocb_common {
     void                *buf;
@@ -52,15 +51,15 @@ gboolean destroy_iocb_callback(guintptr callback)
 // long io_submit (aio_context_t ctx_id, long nr, struct iocb **iocbpp);
 SYSFUZZ(io_submit, __NR_io_submit, SYS_DISABLED, CLONE_DEFAULT, 1000)
 {
-    gint            retcode;
+    glong           retcode;
     struct iocb    *iocb;
-    gint            num;
+    glong           num;
     guintptr        ctx;
 
     // io_submit() is very fussy about this structure.
     ctx                     = typelib_get_resource(this, NULL, RES_AIOCTX, RF_NONE);
     iocb                    = typelib_get_buffer(NULL, sizeof *iocb);
-    iocb->data              = (gpointer) typelib_get_integer_selection(1, 0);
+    iocb->data              = (typeof(iocb->data)) (long) typelib_get_integer_selection(1, 0);
     iocb->key               = typelib_get_integer_selection(1, 0);
     iocb->__pad1            = typelib_get_integer_selection(1, 0);
     iocb->__pad2            = typelib_get_integer_selection(1, 0);

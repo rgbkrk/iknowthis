@@ -16,7 +16,7 @@
 // XXX: make an iovec typelib
 SYSFUZZ(vmsplice, __NR_vmsplice, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    iov;
     gint        size;
 

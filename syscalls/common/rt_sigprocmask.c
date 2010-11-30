@@ -20,7 +20,7 @@ SYSFUZZ(rt_sigprocmask, __NR_rt_sigprocmask, SYS_NONE, CLONE_FORK, 0)
 {
 	gpointer    set;
     gpointer    oset;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_rt_sigprocmask,
                                 typelib_get_integer_selection(3, SIG_BLOCK, SIG_UNBLOCK, SIG_SETMASK),  // int how

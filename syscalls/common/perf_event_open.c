@@ -11,14 +11,13 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Open a performance event, associate it to a task/cpu.
 // int perf_event_open(struct perf_event_attr *attr_uptr, pid_t puid, int cpu, int group_fd, unsigned long flags);
 SYSFUZZ(perf_event_open, __NR_perf_event_open, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    attr_uptr;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_perf_event_open,                                 // int
                                 typelib_get_buffer(&attr_uptr, PAGE_SIZE),                        // struct perf_event_attr *attr_uptr

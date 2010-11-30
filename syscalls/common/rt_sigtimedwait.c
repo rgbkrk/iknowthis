@@ -21,7 +21,7 @@ SYSFUZZ(rt_sigtimedwait, __NR_rt_sigtimedwait, SYS_NONE, CLONE_DEFAULT, 1000)
 	gpointer    uthese;
 	gpointer    uinfo;
 	gpointer    uts;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_rt_sigtimedwait,                       // int
 	                            typelib_get_buffer(&uthese, g_random_int_range(0, 32)), // sigset_t *uthese

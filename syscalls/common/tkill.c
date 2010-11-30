@@ -10,12 +10,11 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Send a signal to a single process.
 SYSFUZZ(tkill, __NR_tkill, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint    retcode;
+    glong   retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_tkill,                                 // int
                                 typelib_get_resource(this, NULL, RES_FORK, RF_NONE),    // int tid

@@ -12,14 +12,13 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Set and get a process’s CPU affinity mask.
 // int sched_setaffinity(pid_t pid, unsigned int cpusetsize, cpu_set_t *mask);
 SYSFUZZ(sched_setaffinity, __NR_sched_setaffinity, SYS_NONE, CLONE_FORK, 0)
 {
     gpointer    mask;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_sched_setaffinity,                             // int
                                 typelib_get_resource(this, NULL, RES_FORK, RF_NONE),            // pid_t pid

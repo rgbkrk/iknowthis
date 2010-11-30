@@ -17,7 +17,7 @@ SYSFUZZ(symlinkat, __NR_symlinkat, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gchar   *oldpath;
     gchar   *newpath;
-    gint     retcode;
+    glong    retcode;
     gint     fd;
 
     // Relative to the current working directory.

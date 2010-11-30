@@ -21,7 +21,7 @@ SYSFUZZ(request_key, __NR_request_key, SYS_NONE, CLONE_DEFAULT, 0)
     gpointer    type;
     gpointer    desc;
     gpointer    callout;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_request_key,                                    // key_serial_t
                                 typelib_get_buffer(&type, g_random_int_range(0, 1024)),          // const char *type

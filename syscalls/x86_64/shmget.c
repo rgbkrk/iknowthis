@@ -23,8 +23,8 @@ static gboolean destroy_shm_segment(guintptr shmid)
 // int shmget(key_t key, size_t size, int shmflg);
 SYSFUZZ(shmget, __NR_shmget, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint   retcode;
-    gint   shmid = -1;
+    glong  retcode;
+    glong  shmid = -1;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &shmid, __NR_shmget,                                                                  // int

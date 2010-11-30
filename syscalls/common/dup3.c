@@ -15,8 +15,8 @@
 // int dup3(int oldfd, int newfd, int flags);
 SYSFUZZ(dup3, __NR_dup3, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-    gint    retcode;
-    gint    result;
+    glong   retcode;
+    glong   result;
 
     // XXX: BROKEN
     retcode = spawn_syscall_lwp(this, &result, __NR_dup3,                                   // int

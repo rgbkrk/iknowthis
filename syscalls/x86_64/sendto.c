@@ -21,7 +21,7 @@
 // ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
 SYSFUZZ(sendto, __NR_sendto, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    buf;
     gpointer    dest_addr;
 

@@ -15,7 +15,7 @@
 // int flistxattr(int fd, const char *list, size_t size);
 SYSFUZZ(flistxattr, __NR_flistxattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    list;
 
     // Execute systemcall.

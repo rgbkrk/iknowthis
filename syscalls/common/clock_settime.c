@@ -16,7 +16,7 @@
 SYSFUZZ(clock_settime, __NR_clock_settime, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    tp;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_clock_settime,                                            // long
                                 typelib_get_integer(),                                                     // clockid_t which_clock,

@@ -17,7 +17,7 @@
 SYSFUZZ(rt_sigsuspend, __NR_rt_sigsuspend, SYS_NONE, CLONE_DEFAULT, 100)
 {
 	gpointer    unewset;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_rt_sigsuspend,                            // int
 	                            typelib_get_buffer(&unewset, g_random_int_range(0, 32)),   // const sigset_t *mask

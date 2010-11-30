@@ -19,7 +19,7 @@ SYSFUZZ(mincore, __NR_mincore, SYS_NONE, CLONE_DEFAULT, 0)
     gpointer    vec;
     gsize       size;
     guintptr    address;
-    gint        retcode;
+    glong       retcode;
 
     typelib_get_vma(this, &address, &size);
 

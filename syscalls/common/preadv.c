@@ -14,7 +14,7 @@
 // Read from a file descriptor.
 SYSFUZZ(preadv, __NR_preadv, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    buffer;
 
     // Execute systemcall.

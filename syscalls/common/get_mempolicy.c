@@ -18,7 +18,7 @@ SYSFUZZ(get_mempolicy, __NR_get_mempolicy, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    mode;
     gpointer    nmask;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_get_mempolicy,                         // int
                                 typelib_get_buffer(&mode, g_random_int_range(0, 32)),   // int *mode

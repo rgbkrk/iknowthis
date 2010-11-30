@@ -19,7 +19,7 @@ SYSFUZZ(query_module, __NR_query_module, SYS_NONE, CLONE_DEFAULT, 0)
 	gpointer    name;
 	gpointer    buf;
 	gpointer    ret;
-	gint        retcode;
+	glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_query_module,                              // int
                                 typelib_get_buffer(&name, g_random_int_range(0, 0x1000)),   // const char *name

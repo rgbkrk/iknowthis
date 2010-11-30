@@ -18,7 +18,7 @@
 SYSFUZZ(set_tid_address, __NR_set_tid_address, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    tidptr;
-    gint        retcode;
+    glong       retcode;
 
     // Execute System Call.
     retcode = spawn_syscall_lwp(this, NULL, __NR_set_tid_address,                           // long

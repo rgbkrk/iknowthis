@@ -10,13 +10,12 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Cancel an outstanding asynchronous I/O operation
 // long io_cancel (aio_context_t ctx_id, struct iocb *iocb, struct io_event *result);
 SYSFUZZ(io_cancel, __NR_io_cancel, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    iocb        = NULL;
     gpointer    result      = NULL;
 

@@ -24,7 +24,7 @@
 //                     struct itimerspec *old_value);
 SYSFUZZ(timerfd_settime, __NR_timerfd_settime, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    new_value;
     gpointer    old_value;
 

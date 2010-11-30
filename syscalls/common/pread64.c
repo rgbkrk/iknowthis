@@ -15,7 +15,7 @@
 // ssize_t pread64(int fd, void *buf, size_t count, off_t offset);
 SYSFUZZ(pread64, __NR_pread64, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    buffer;
 
     // Execute systemcall.

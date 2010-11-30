@@ -15,7 +15,7 @@
 // int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout, const sigset_t *sigmask);
 SYSFUZZ(ppoll, __NR_ppoll, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-	gint        retcode;
+	glong       retcode;
 	gpointer    fds;
     gpointer    timeout;
     gpointer    sigmask;

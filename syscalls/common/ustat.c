@@ -16,7 +16,7 @@
 SYSFUZZ(ustat, __NR_ustat, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gpointer    buf;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_ustat,                                     // int
 	                            typelib_get_integer_mask(0xffff),                           // dev_t dev, FIXME: is mask correct for dev_t?

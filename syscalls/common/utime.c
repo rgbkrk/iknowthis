@@ -18,7 +18,7 @@ SYSFUZZ(utime, __NR_utime, SYS_SAFE, CLONE_DEFAULT, 1000)
 {
 	gchar       *filename;
 	gpointer     times;
-    gint         retcode;
+    glong        retcode;
 
     retcode     = spawn_syscall_lwp(this, NULL, __NR_utime,                                        // int
                                     typelib_get_pathname(&filename),                               // const char *filename

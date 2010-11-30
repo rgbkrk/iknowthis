@@ -20,7 +20,7 @@ SYSFUZZ(getresgid, __NR_getresgid, SYS_NONE, CLONE_DEFAULT, 0)
 	gpointer    rgid;
 	gpointer    egid;
 	gpointer    sgid;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_getresgid,                                         // int
 	                            typelib_get_buffer(&rgid, g_random_int_range(0, 8)),                // uid_t *rgid

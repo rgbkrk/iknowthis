@@ -20,7 +20,7 @@ SYSFUZZ(sysfs, __NR_sysfs, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gpointer    fsname;
 	gpointer    buf;
-	gint        retcode;
+	glong       retcode;
 
     switch (g_random_int_range(0, 4)) {
     	case    1: retcode = spawn_syscall_lwp(this, NULL, __NR_sysfs,                      // int

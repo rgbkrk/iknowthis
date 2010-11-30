@@ -15,7 +15,7 @@
 // ssize_t read(int fd, void *buf, size_t count);
 SYSFUZZ(read, __NR_read, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    buffer;
 
     // Execute systemcall.

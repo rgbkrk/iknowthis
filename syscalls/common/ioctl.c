@@ -18,7 +18,7 @@ SYSFUZZ(ioctl, __NR_ioctl, SYS_NONE, CLONE_DEFAULT, 0)
     guint        req;
     guint        arg;
     gint         fd;
-    gint         retcode;
+    glong        retcode;
     static gint  r_mask;
 
     // Choose a random ioctl request and argument.
@@ -76,7 +76,7 @@ SYSFUZZ(ioctl, __NR_ioctl, SYS_NONE, CLONE_DEFAULT, 0)
         case ENOTCONN:   // Transport endpoint is not connected
             break;
         default:
-            g_debug("unexpecter errno set by ioctl, %d (%s)", retcode, g_strerror(retcode));
+            g_debug("unexpecter errno set by ioctl, %ld (%s)", retcode, g_strerror(retcode));
             break;
     }
 

@@ -16,7 +16,7 @@ SYSFUZZ(readlink, __NR_readlink, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gchar       *pathname;
 	gpointer    buf;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_readlink,                              // ssize_t
 	                            typelib_get_pathname(&pathname),                        // const char *path

@@ -15,7 +15,7 @@
 // int execve(const char *filename, char *const argv[], char *const envp[]);
 SYSFUZZ(execve, __NR_execve, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     guint       nargs;
     guint       nenv;
     gpointer   *argv;

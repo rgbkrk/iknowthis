@@ -16,7 +16,7 @@
 SYSFUZZ(reboot, __NR_reboot, SYS_FAIL | SYS_BORING | SYS_SAFE, CLONE_DEFAULT, 0)
 {
 	gpointer    arg;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_reboot,                                     // int
                                 LINUX_REBOOT_MAGIC1,                                         // int magic

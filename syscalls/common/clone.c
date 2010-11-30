@@ -12,7 +12,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Callback for typelib_add_resource().
 static gboolean destroy_forked_process(guintptr pid)
@@ -27,7 +26,7 @@ static gboolean destroy_forked_process(guintptr pid)
 // Create a child process.
 SYSFUZZ(clone, __NR_clone, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     pid_t       pid = -1;
     gpointer    arg1;
     gpointer    arg2;

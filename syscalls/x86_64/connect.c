@@ -21,7 +21,7 @@
 // int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 SYSFUZZ(connect, __NR_connect, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    addr;
 
     retcode = syscall_fast(__NR_connect,                                                // int

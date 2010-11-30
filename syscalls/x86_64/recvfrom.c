@@ -21,7 +21,7 @@
 // ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
 SYSFUZZ(recvfrom, __NR_recvfrom, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    buf;
     gpointer    dest_addr;
 

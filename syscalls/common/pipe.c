@@ -21,7 +21,7 @@ static gboolean destroy_open_file(guintptr fd)
 SYSFUZZ(pipe, __NR_pipe, SYS_BORING, CLONE_DEFAULT, 0)
 {
     gint    pipefd[2];
-    gint    retcode;
+    glong   retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_pipe,                                              // int
                                 pipefd);                                                            // int pipefd[2]

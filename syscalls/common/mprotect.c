@@ -16,7 +16,7 @@
 // int mprotect(const void *addr, size_t len, int prot);
 SYSFUZZ(mprotect, __NR_mprotect, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+	glong       retcode;
 	guintptr    address;
 	gsize       size;
 

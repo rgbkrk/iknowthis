@@ -10,17 +10,16 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Move individual pages of a process to another node.
 // long move_pages(int pid, unsigned long count, void **pages, const int *nodes, int *status, int flags);
 SYSFUZZ(move_pages, __NR_move_pages, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-	gpointer    pages;
+    gpointer    pages;
     gpointer    nodes;
     gpointer    status;
-    gint        retcode;
-	
+    glong       retcode;
+
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, NULL, __NR_move_pages,
                                 typelib_get_resource(this, NULL, RES_FORK, RF_NONE),            // int pid

@@ -16,7 +16,7 @@
 SYSFUZZ(lookup_dcookie, __NR_lookup_dcookie, SYS_FAIL | SYS_BORING | SYS_SAFE, CLONE_DEFAULT, 0)
 {
     gpointer    buffer;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_lookup_dcookie,                        // int
                                 typelib_get_integer(),                                  // u32 addr_low

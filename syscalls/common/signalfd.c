@@ -23,8 +23,8 @@ static gboolean destroy_open_file(guintptr fd)
 SYSFUZZ(signalfd, __NR_signalfd, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    mask;
-    gint        fd;
-    gint        retcode;
+    glong       fd;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, &fd, __NR_signalfd,                                      // int
                                 typelib_get_integer_selection(1, -1),                          // int fd

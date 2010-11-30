@@ -16,11 +16,11 @@
 SYSFUZZ(clock_getres, __NR_clock_getres, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    tp;
-    gint        retcode;
+    glong       retcode;
 
-    retcode = spawn_syscall_lwp(this, NULL, __NR_clock_getres,                                             // long
-                                typelib_get_integer(),                                                     // clockid_t which_clock,
-                                typelib_get_buffer(&tp, g_random_int_range(0, 8192)));                     // struct timespec *tp
+    retcode = spawn_syscall_lwp(this, NULL, __NR_clock_getres,          // long
+                                typelib_get_integer(),                  // clockid_t which_clock,
+                                typelib_get_buffer(&tp, PAGE_SIZE));    // struct timespec *tp
 
     typelib_clear_buffer(tp);
 

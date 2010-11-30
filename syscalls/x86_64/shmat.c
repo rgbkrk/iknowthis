@@ -15,12 +15,11 @@
 
 // Shared memory operations.
 // void *shmat(int shmid, const void *shmaddr, int shmflg);
-// FIXME: i need long support in the lwp routines.
-SYSFUZZ(shmat, __NR_shmat, SYS_NONE, SYS_DISABLED, 1000)
+SYSFUZZ(shmat, __NR_shmat, SYS_DISABLED, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
-    gint        shmid = -1;
-    guintptr    result;
+    glong   retcode;
+    glong   shmid = -1;
+    glong   result;
 
     // Fetch a shmid to use.
     shmid = typelib_get_resource(this, NULL, RES_SHMID, RF_NONE);

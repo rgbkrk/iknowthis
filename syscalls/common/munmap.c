@@ -17,7 +17,7 @@
 // int munmap(void *addr, size_t length);
 SYSFUZZ(munmap, __NR_munmap, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     guintptr    address;
     gsize       size;
 

@@ -11,7 +11,6 @@
 
 #include "sysfuzz.h"
 #include "typelib.h"
-#include "resource.h"
 
 // Routines to manage generic resource descriptors that don't need any special
 // management. For example, aio contexts, key serials, etc. If you need to

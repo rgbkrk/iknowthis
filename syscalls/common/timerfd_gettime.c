@@ -15,7 +15,7 @@
 // int timerfd_gettime(int fd, struct itimerspec *curr_value);
 SYSFUZZ(timerfd_gettime, __NR_timerfd_gettime, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    value;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_timerfd_gettime,                                           // int

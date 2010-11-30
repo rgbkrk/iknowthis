@@ -14,7 +14,7 @@
 // Truncate a file to a specified length.
 SYSFUZZ(truncate, __NR_truncate, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+	glong       retcode;
 	gchar      *filename;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_truncate,                              // int

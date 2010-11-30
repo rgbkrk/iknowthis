@@ -16,7 +16,7 @@
 SYSFUZZ(swapon, __NR_swapon, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 0)
 {
 	gchar   *path;
-	gint     retcode;
+	glong    retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_swapon,                                    // int
 	                            typelib_get_pathname(&path),                                // const char *path

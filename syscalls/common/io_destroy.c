@@ -10,7 +10,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Destroy an asynchronous I/O context
 // int io_destroy (io_context_t ctx);
