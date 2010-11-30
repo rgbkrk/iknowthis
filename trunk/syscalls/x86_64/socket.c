@@ -27,7 +27,7 @@ static gboolean destroy_open_file(guintptr fd)
 // int socket(int domain, int type, int protocol);
 SYSFUZZ(socket, __NR_socket, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        fd;
+    glong       fd;
     glong       retcode;
 
     retcode = syscall_fast_ret(&fd, __NR_socket,                        // int

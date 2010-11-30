@@ -369,6 +369,10 @@ static gboolean list_fuzzer_names(const gchar *option_name, const gchar *value, 
 // runtime via --dangerous.
 static void print_danger_warning(void)
 {
+    const gint NumSecondsDelay = 10;
+
+    g_warning("You can avoid this warning in future by specifying `--dangerous` on the commandline.");
+
     g_print("\n\n\n"
             "*********************************** WARNING ************************************\n"
             "* This program is dangerous, and will deliberately try to break your system.   *\n"
@@ -378,10 +382,17 @@ static void print_danger_warning(void)
             "* This program is intended to be used on isolated test or virtualised systems, *\n"
             "* as an unprivileged user. Make sure any nfs or hgfs mounts are intended.      *\n"
             "*                                                                              *\n"
-            "* I will sleep for five seconds before continuing. Interrupt me now if this is *\n"
+            "* I will sleep for %3u seconds before continuing. Interrupt me now if this is  *\n"
             "* not what you want.                                                           *\n"
-            "********************************************************************************\n\n\n\a");
-    g_warning("You can avoid this warning in future by specifying `--dangerous` on the commandline.");
-    sleep(5);
+            "********************************************************************************\n\n\n\a",
+            NumSecondsDelay);
+
+    // Give the user a chance to cancel.
+    for (gint i = 1; i <= NumSecondsDelay; i++) {
+        g_print("%d...\a", i); sleep(1);
+    }
+
+    g_print("\n");
+
     return;
 }
