@@ -9,6 +9,8 @@ enum {
     RES_FORK,                       // Forked child process.
     RES_FILE,                       // File descriptor.
     RES_SHMID,                      // Segment identifier.
+    RES_SEMID,                      // Semaphore set.
+    RES_MSGQ,                       // Message queue.
     kNumResources,
 };
 

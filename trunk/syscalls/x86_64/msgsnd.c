@@ -20,15 +20,13 @@ SYSFUZZ(msgsnd, __NR_msgsnd, SYS_NONE, CLONE_DEFAULT, 1000)
     gpointer    msgp;
     glong       retcode;
 
-    // Note that despite the whole mqd_t stuff, these are just file
-    // descriptors. I might give them their own resource descriptor at some
-    // point.
     retcode = spawn_syscall_lwp(this, NULL, __NR_msgsnd,                                    // int
-                                typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // int msqid
+                                typelib_get_resource(this, NULL, RES_MSGQ, RF_NONE),        // int msqid
                                 typelib_get_buffer(&msgp, PAGE_SIZE),                       // const void *msgp
                                 typelib_get_integer_range(0, PAGE_SIZE),                    // size_t msgsz
                                 typelib_get_integer());                                     // int msgflg
 
     typelib_clear_buffer(msgp);
+
     return retcode;
 }
