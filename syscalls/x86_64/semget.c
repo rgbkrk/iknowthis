@@ -14,16 +14,18 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
+// I don't know how to query this at runtime.
+#define SEMMSL 32768
+
 // Callback for typelib_add_resource().
 static gboolean destroy_semaphore(guintptr semid)
 {
-    return semctl(semid, IPC_RMID, NULL) != -1;
+    return semctl(semid, -1, IPC_RMID) != -1;
 }
 
 // Get a semaphore set identifier.
-// int shmget(key_t key, size_t size, int shmflg);
-// XXX THIS DOESNT WORK, REWRITE
-SYSFUZZ(semget, __NR_semget, SYS_DISABLED, CLONE_DEFAULT, 1000)
+// int semget(key_t key, int nsems, int semflg);
+SYSFUZZ(semget, __NR_semget, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     glong  retcode;
     glong  semid = -1;
@@ -31,12 +33,12 @@ SYSFUZZ(semget, __NR_semget, SYS_DISABLED, CLONE_DEFAULT, 1000)
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &semid, __NR_semget,                                                                   // int
                                       typelib_get_integer_selection(2, IPC_PRIVATE, typelib_get_integer()),                  // key_t key
-                                      typelib_get_integer(),                                                                 // size_t size
-                                      typelib_get_integer_mask(IPC_CREAT | IPC_EXCL | SHM_HUGETLB | SHM_NORESERVE | 0777));  // int shmflg
+                                      typelib_get_integer_range(0, SEMMSL),                                                  // int nsems
+                                      typelib_get_integer_mask(IPC_CREAT | IPC_EXCL | 0777));                                // int semflg
 
     // Record the new shmid.
     if (retcode == ESUCCESS) {
-        typelib_add_resource(this, semid, RES_SHMID, RF_NONE, destroy_semaphore);
+        typelib_add_resource(this, semid, RES_SEMID, RF_NONE, destroy_semaphore);
     }
 
     return retcode;
