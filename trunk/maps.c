@@ -61,11 +61,13 @@ static gint maps_full_compare(gconstpointer a, gconstpointer b)
     return 0;
 }
 
+#if 0
 static gint maps_addr_compare(gconstpointer a, gconstpointer b)
 {
     return ((const struct map *)(a))->start
          - ((const struct map *)(b))->start;
 }
+#endif
 
 void maps_print_diff(GSList *before, GSList *after)
 {

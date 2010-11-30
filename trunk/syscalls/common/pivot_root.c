@@ -17,7 +17,7 @@ SYSFUZZ(pivot_root, __NR_pivot_root, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 0)
 {
 	gchar       *new_root;
 	gchar       *put_old;
-	gint         retcode;
+	glong        retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_pivot_root,                            // int
 	                            typelib_get_pathname(&new_root),                        // const char *new_root

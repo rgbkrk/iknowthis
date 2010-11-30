@@ -11,7 +11,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Receive a message from a message queue.
 // ssize_t mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio, const struct timespec *abs_timeout);
@@ -20,7 +19,7 @@ SYSFUZZ(mq_timedreceive, __NR_mq_timedreceive, SYS_NONE, CLONE_DEFAULT, 0)
     gpointer    msg_ptr;
     gpointer    msg_prio;
     gpointer    abs_timeout;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_timedreceive,                           // ssize_t
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // mqd_t mqdes

@@ -27,8 +27,8 @@ static gboolean destroy_open_file(guintptr fd)
 // int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 SYSFUZZ(accept, __NR_accept, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
-    gint        fd;
+    glong       retcode;
+    glong       fd;
     gpointer    addr;
     gpointer    addrlen;
 
@@ -41,7 +41,7 @@ SYSFUZZ(accept, __NR_accept, SYS_NONE, CLONE_DEFAULT, 1000)
     // Check for new socket.
     if (retcode == ESUCCESS) {
         // Seems unlikely this would happen by chance.
-        g_debug("unexpected: retrieved a new socket descriptor %d from accept", fd);
+        g_debug("unexpected: retrieved a new socket descriptor %ld from accept", fd);
 
         typelib_add_resource(this, fd, RES_FILE, RF_NONE, destroy_open_file);
     }

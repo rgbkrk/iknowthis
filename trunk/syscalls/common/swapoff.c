@@ -16,7 +16,7 @@
 // int swapoff(const char *path);
 SYSFUZZ(swapoff, __NR_swapoff, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+	glong       retcode;
 	gchar      *path;
 
     retcode = syscall_fast(__NR_swapoff,                           // int

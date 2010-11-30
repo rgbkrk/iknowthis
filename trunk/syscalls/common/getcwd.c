@@ -15,7 +15,7 @@
 // long getcwd(char *buf, unsigned long size);
 SYSFUZZ(getcwd, __NR_getcwd, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+	glong       retcode;
 	gpointer    buf;
 	
     // Execute systemcall.

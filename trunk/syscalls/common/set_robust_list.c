@@ -16,7 +16,7 @@
 SYSFUZZ(set_robust_list, __NR_set_robust_list, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer     head;
-    gint         retcode;
+    glong        retcode;
 
     // This routine rejects any call where sizeof(*head) != len.
     retcode = spawn_syscall_lwp(this, NULL, __NR_set_robust_list,                                       // long

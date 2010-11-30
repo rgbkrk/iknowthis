@@ -11,14 +11,13 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Register for notification when a message is available
 // mqd_t mq_notify(mqd_t mqdes, const struct sigevent *notification);
 SYSFUZZ(mq_notify, __NR_mq_notify, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    notification;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_notify,                                // mqd_t
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),       // mqd_t mqdes

@@ -17,7 +17,7 @@ SYSFUZZ(nanosleep, __NR_nanosleep, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gpointer    req;
     gpointer    rem;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_nanosleep,
                                 typelib_get_buffer(&req, g_random_int_range(0, PAGE_SIZE)),   // const struct timespec *req

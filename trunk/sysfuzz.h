@@ -1,5 +1,6 @@
 #ifndef __SYSFUZZ_H
 #define __SYSFUZZ_H
+#pragma once
 
 #include <sched.h>
 
@@ -21,6 +22,8 @@ enum {
 };
 
 // Flags that modify the behaviour of a fuzzer.
+// If you modify this list, remember to update any pretty printers that dump
+// these flags, like list_fuzzer_names().
 enum {
     SYS_NONE        = 0,
     SYS_DISABLED    = 1 << 0,           // Fuzzer is disabled.
@@ -42,12 +45,12 @@ enum {
 #define MAX_ERROR_CODES 128
 
 typedef struct {
-    guint       error;                              // Errno value
-    guint       count;                              // Number of times seen.
+    gulong      error;                              // Errno value
+    gulong      count;                              // Number of times seen.
 } error_record_t;
 
 typedef struct {
-    gint           (*callback)(gpointer);           // Fuzzer subroutine.
+    glong          (*callback)(gpointer);           // Fuzzer subroutine.
     gchar           *name;                          // System call or fuzzer name
     guint           flags;                          // Fuzzer flags.
     guint           total;                          // Total number of executions.
@@ -86,7 +89,7 @@ extern guint            total_disabled_fuzzers;
 extern guint            process_nesting_depth;
 
 #define SYSFUZZ(_name, _syscall, _flags, _cloneflags, _timeout)             \
-    static gint __fuzz__ ## _name (gpointer ignored);                       \
+    static glong __fuzz__ ## _name (gpointer ignored);                      \
     static void __constructor __const__ ## _name (void)                     \
     {                                                                       \
         /* Verify this slot is empty */                                     \
@@ -104,7 +107,7 @@ extern guint            process_nesting_depth;
         system_call_fuzzers[_syscall].number   = _syscall;                  \
         return;                                                             \
     }                                                                       \
-    static gint __fuzz__ ## _name (gpointer this)
+    static glong __fuzz__ ## _name (gpointer this)
 
 #else
 # warning sysfuzz.h included twice

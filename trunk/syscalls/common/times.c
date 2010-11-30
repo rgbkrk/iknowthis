@@ -16,7 +16,7 @@
 SYSFUZZ(times, __NR_times, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gpointer    buf;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_times,                                 // clock_t
 	                            typelib_get_buffer(&buf, g_random_int_range(0, 128)));  // struct tms *buf

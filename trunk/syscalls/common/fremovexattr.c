@@ -15,7 +15,7 @@
 // int fremovexattr(int fd, const char *name);
 SYSFUZZ(fremovexattr, __NR_fremovexattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    name;
 
     // Execute systemcall.

@@ -17,7 +17,7 @@
 // XXX: i bet i need typelib support for those serials.
 SYSFUZZ(keyctl, __NR_keyctl, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     gint        cmd;
 
     cmd     =   g_random_int_range(0, 32);

@@ -21,8 +21,8 @@ static gboolean destroy_open_file(guintptr fd)
 // int epoll_create(int size);
 SYSFUZZ(epoll_create, __NR_epoll_create, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        fd;
-    gint        retcode;
+    glong   fd;
+    glong   retcode;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &fd, __NR_epoll_create,                           // int

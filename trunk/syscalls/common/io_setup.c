@@ -11,7 +11,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Callback for typelib_add_resource().
 static gboolean destroy_io_context(guintptr ctx)
@@ -25,7 +24,7 @@ static gboolean destroy_io_context(guintptr ctx)
 // int io_setup (int maxevents, io_context_t *ctxp);
 SYSFUZZ(io_setup, __NR_io_setup, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     guintptr    ctx;
 
     // Ctx must be initialised to zero before call.

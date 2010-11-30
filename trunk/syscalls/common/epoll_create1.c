@@ -21,17 +21,17 @@ static gboolean destroy_open_file(guintptr fd)
 // int epoll_create(int size);
 SYSFUZZ(epoll_create1, __NR_epoll_create1, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        fd;
-    gint        retcode;
+    glong       fd;
+    glong       retcode;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &fd, __NR_epoll_create1,                          // int
                                 typelib_get_integer());                                 // int size
 
     if (retcode == ESUCCESS) {
-        // Because basically nothing can go wrong with epoll_create, it will
-        // quickly saturate my available file descriptors with epollfds. So
-        // only keep them every so often.
+        // NOTE: Because basically nothing can go wrong with epoll_create1,
+        //       it will saturate all the available space in my fd list very
+        //       quickly. Therefore, only allow it occassionally.
         if (g_random_int_range(0, 64)) {
             close(fd);
         } else {

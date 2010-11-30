@@ -15,7 +15,7 @@
 // Returns information on overall system statistics.
 SYSFUZZ(sysinfo, __NR_sysinfo, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+	glong       retcode;
 	gpointer    info;
 
 	retcode = syscall_fast(__NR_sysinfo,                                                    // int

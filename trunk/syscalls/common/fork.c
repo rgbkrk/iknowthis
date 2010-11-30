@@ -16,7 +16,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Callback for typelib_add_resource().
 static gboolean destroy_forked_process(guintptr pid)
@@ -32,7 +31,7 @@ static gboolean destroy_forked_process(guintptr pid)
 // pid_t fork(void);
 SYSFUZZ(fork, __NR_fork, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint            retcode;
+    glong           retcode;
     pid_t           pid = -1;
 
     // I think the lwp syscall code may not handle this well, luckily fork() is

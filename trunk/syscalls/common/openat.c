@@ -18,11 +18,12 @@ static gboolean destroy_open_file(guintptr fd)
 }
 
 // Open and possibly create a file or device.
+// int openat(int dirfd, const char *pathname, int flags, mode_t mode);
 SYSFUZZ(openat, __NR_openat, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gchar *pathname;
-    gint   retcode;
-    gint   fd = -1;
+    glong  retcode;
+    glong  fd = -1;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &fd, __NR_openat,                                     // int

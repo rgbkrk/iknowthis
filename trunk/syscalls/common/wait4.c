@@ -11,7 +11,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Wait for process to change state, BSD style.
 // pid_t wait4(pid_t pid, int *status, int options, struct rusage *rusage);
@@ -19,7 +18,7 @@ SYSFUZZ(wait4, __NR_wait4, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gpointer     status;
     gpointer     rusage;
-    gint         retcode;
+    glong        retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_wait4,                                                                 // pid_t
                                 typelib_get_resource(this, NULL, RES_FORK, RF_NONE),                                    // pid_t pid

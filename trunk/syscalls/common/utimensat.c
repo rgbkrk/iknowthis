@@ -17,7 +17,7 @@ SYSFUZZ(utimensat, __NR_utimensat, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gchar       *filename;
     gpointer     times;
-    gint         retcode;
+    glong        retcode;
 
     retcode     = spawn_syscall_lwp(this, NULL, __NR_utimensat,                                    // int
                                     typelib_get_resource(this, NULL, RES_FILE, RF_NONE),           // int dirfd

@@ -16,7 +16,7 @@ SYSFUZZ(epoll_pwait, __NR_epoll_pwait, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gpointer    events;
     gpointer    sigmask;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_epoll_pwait,                               // int
                                 typelib_get_buffer(&events, g_random_int_range(0, 8192)),   // struct epoll_event *events

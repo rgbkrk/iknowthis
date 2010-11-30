@@ -15,7 +15,7 @@
 SYSFUZZ(rmdir, __NR_rmdir, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gchar   *pathname;
-	gint     retcode;
+	glong    retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_rmdir,                                             // int
 	                            typelib_get_pathname(&pathname));                                   // const char *pathname

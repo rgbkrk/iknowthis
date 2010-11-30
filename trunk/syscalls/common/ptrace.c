@@ -11,17 +11,16 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Process trace.
 // long ptrace(enum __ptrace_request request, pid_t pid, void *addr, void *data);
 SYSFUZZ(ptrace, __NR_ptrace, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gint        request;
     guintptr    addr;
     guintptr    data;
-    gboolean    pointer;   
+    gboolean    pointer;
 
     pointer = false;
     addr    = typelib_get_integer();
@@ -30,16 +29,16 @@ SYSFUZZ(ptrace, __NR_ptrace, SYS_NONE, CLONE_DEFAULT, 1000)
 
     // Maybe OR in the extended options.
     if (g_random_int_range(0, 3) == 0) {
-    	request |= 0x4200;
+        request |= 0x4200;
     }
 
     switch (request) {
-    	case PTRACE_POKETEXT:
-    	case PTRACE_POKEDATA:
-    	case PTRACE_SETREGS:
-    	case PTRACE_SETFPREGS:
-    	        // FIXME: I don't currently support these.
-    	        return ENOSYS;
+        case PTRACE_POKETEXT:
+        case PTRACE_POKEDATA:
+        case PTRACE_SETREGS:
+        case PTRACE_SETFPREGS:
+                // FIXME: I don't currently support these.
+                return ENOSYS;
         case PTRACE_GETREGS:
         case PTRACE_GETFPREGS:
         case PTRACE_GETSIGINFO:
@@ -66,7 +65,7 @@ SYSFUZZ(ptrace, __NR_ptrace, SYS_NONE, CLONE_DEFAULT, 1000)
         case PTRACE_DETACH:
                 // Probably can do this..
                 // data    = typelib_get_integer_range(0, NSIG);
-                // 
+                //
                 // But I don't want to kill it too often..
                 data    = typelib_get_integer_selection(1, 0);
                 break;
@@ -80,7 +79,7 @@ SYSFUZZ(ptrace, __NR_ptrace, SYS_NONE, CLONE_DEFAULT, 1000)
                                 data);                                                  // void *data
 
     if (pointer) {
-    	typelib_clear_buffer(GUINT_TO_POINTER(data));
+        typelib_clear_buffer(GUINT_TO_POINTER(data));
     }
 
     return retcode;

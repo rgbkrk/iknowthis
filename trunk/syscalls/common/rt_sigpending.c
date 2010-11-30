@@ -17,7 +17,7 @@
 SYSFUZZ(rt_sigpending, __NR_rt_sigpending, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gpointer    set;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_rt_sigpending,                         // int
 	                            typelib_get_buffer(&set, g_random_int_range(0, 32)),    // sigset_t *set

@@ -18,7 +18,7 @@
 SYSFUZZ(kexec_load, __NR_kexec_load, SYS_FAIL | SYS_BORING | SYS_SAFE, CLONE_DEFAULT, 0)
 {
     gpointer    segments;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_kexec_load,                                // long
                                 typelib_get_integer(),                                      // unsigned long entry

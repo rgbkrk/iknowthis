@@ -13,7 +13,7 @@
 
 SYSFUZZ(pselect6, __NR_pselect6, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-	gint        retcode;
+	glong       retcode;
     gpointer    readfds;
     gpointer    writefds;
     gpointer    exceptfds;

@@ -17,7 +17,7 @@ SYSFUZZ(timer_create, __NR_timer_create, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    timer_event_spec;
     gpointer    created_timer_id;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_timer_create,
                                 typelib_get_integer_range(0, 6),                                        // clockid_t which_clock,

@@ -10,13 +10,12 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Send signal sig to one specific thread, tgid
 // long sys_tgkill (int tgid, int pid, int sig);
 SYSFUZZ(tgkill, __NR_tgkill, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint    retcode;
+    glong   retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_tgkill,                                // int
                                 typelib_get_resource(this, NULL, RES_FORK, RF_NONE),    // int tgid

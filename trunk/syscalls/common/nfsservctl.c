@@ -18,7 +18,7 @@ SYSFUZZ(nfsservctl, __NR_nfsservctl, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    argp;
     gpointer    resp;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_nfsservctl,                                // long
                                 typelib_get_integer_range(0, 6),                            // int cmd

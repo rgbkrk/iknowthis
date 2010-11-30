@@ -22,8 +22,8 @@ static gboolean destroy_open_file(guintptr fd)
 // int eventfd(unsigned int initval, int flags);
 SYSFUZZ(eventfd, __NR_eventfd, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
-    gint        fd;
+    glong       retcode;
+    glong       fd;
 
     retcode = spawn_syscall_lwp(this, &fd, __NR_eventfd,                                        // int
                                 typelib_get_integer(),                                          // int initval

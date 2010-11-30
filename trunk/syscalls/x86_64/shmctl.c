@@ -18,7 +18,7 @@
 SYSFUZZ(shmctl, __NR_shmctl, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gint     cmd;
-    gint     retcode;
+    glong    retcode;
     gpointer buf;
 
     // Choose a command.

@@ -17,7 +17,7 @@ SYSFUZZ(sigaltstack, __NR_sigaltstack, SYS_NONE, CLONE_FORK, 0)
 {
 	gpointer    ss;
 	gpointer    oss;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_sigaltstack,                           // int
                                 typelib_get_buffer(&ss, g_random_int_range(0, 32)),     // const stack_t *ss

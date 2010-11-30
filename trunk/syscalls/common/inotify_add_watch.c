@@ -17,7 +17,7 @@
 SYSFUZZ(inotify_add_watch, __NR_inotify_add_watch, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gchar   *pathname;
-    gint     retcode;
+    glong    retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_inotify_add_watch,                             // int
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),            // int fd

@@ -12,14 +12,15 @@
 #include "iknowthis.h"
 
 // Change permissions of a file.
+// int chmod(const char *path, mode_t mode);
 SYSFUZZ(chmod, __NR_chmod, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gchar *pathname;
-	gint   retcode;
+    gchar *pathname;
+    glong  retcode;
 
-	// Execute systemcall.
-	retcode = spawn_syscall_lwp(this, NULL, __NR_chmod,             // int
-	                            typelib_get_pathname(&pathname),    // const char *pathname
+    // Execute systemcall.
+    retcode = spawn_syscall_lwp(this, NULL, __NR_chmod,             // int
+                                typelib_get_pathname(&pathname),    // const char *pathname
                                 typelib_get_integer());             // mode_t mode
 
     g_free(pathname);

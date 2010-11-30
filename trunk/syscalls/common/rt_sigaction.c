@@ -17,7 +17,7 @@ SYSFUZZ(rt_sigaction, __NR_rt_sigaction, SYS_NONE, CLONE_FORK, 0)
 {
 	gpointer    act;
 	gpointer    oldact;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_rt_sigaction,                              // int
 	                            typelib_get_integer(),                                      // int signum

@@ -17,7 +17,7 @@ SYSFUZZ(renameat, __NR_renameat, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gchar *oldpath;
     gchar *newpath;
-    gint   retcode;
+    glong  retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_renameat,                                          // int
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),                // int dirfd

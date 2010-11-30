@@ -16,7 +16,7 @@
 // int fgetxattr(int fd, const char *name, void *value, size_t size);
 SYSFUZZ(fgetxattr, __NR_fgetxattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    name;
     gpointer    value;
 

@@ -18,7 +18,7 @@ SYSFUZZ(mount, __NR_mount, SYS_FAIL, CLONE_DEFAULT, 0)
     gchar   *target;
     gpointer filesystemtype;
     gpointer data;
-    gint     retcode;
+    glong    retcode;
 
     // XXX: parse /proc/filesystems in typelib, typelib_fs_get?
     retcode = spawn_syscall_lwp(this, NULL, __NR_mount,                                      // int

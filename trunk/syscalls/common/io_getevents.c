@@ -10,14 +10,13 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Read asynchronous I/O events from the completion queue.
 // long io_getevents (aio_context_t ctx_id, long min_nr, long nr,
 //                    struct io_event *events, struct timespec *timeout);
 SYSFUZZ(io_getevents, __NR_io_getevents, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    events;
     gpointer    timeout;
 

@@ -11,16 +11,14 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Get/set the list of robust futexes.
-// long get_robust_list(int pid, struct robust_list_head **head_ptr,
-//                      size_t *len_ptr);
+// long get_robust_list(int pid, struct robust_list_head **head_ptr, size_t *len_ptr);
 SYSFUZZ(get_robust_list, __NR_get_robust_list, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    head;
     gpointer    len;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_get_robust_list,                               // long
                                 typelib_get_resource(this, NULL, RES_FORK, RF_NONE),            // pid_t pid

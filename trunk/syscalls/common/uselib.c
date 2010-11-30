@@ -16,7 +16,7 @@
 SYSFUZZ(uselib, __NR_uselib, SYS_NONE, CLONE_FORK, 1000)
 {
 	gchar   *library;
-	gint     retcode;
+	glong    retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_uselib,                                    // int
 	                            typelib_get_pathname(&library));                            // const char *library

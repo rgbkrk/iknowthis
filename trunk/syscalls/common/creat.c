@@ -10,7 +10,6 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Callback for typelib_add_resource().
 static gboolean destroy_open_file(guintptr fd)
@@ -23,8 +22,8 @@ static gboolean destroy_open_file(guintptr fd)
 SYSFUZZ(creat, __NR_creat, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gchar *pathname;
-    gint   retcode;
-    gint   fd;
+    glong  retcode;
+    glong  fd;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &fd, __NR_creat,                 // int

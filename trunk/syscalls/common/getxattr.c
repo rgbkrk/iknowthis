@@ -15,7 +15,7 @@
 // int getxattr(const char *pathname, const char *name, void *value, size_t size);
 SYSFUZZ(getxattr, __NR_getxattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    name;
     gpointer    value;
     gchar      *pathname;

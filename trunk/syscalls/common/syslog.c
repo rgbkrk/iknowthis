@@ -16,7 +16,7 @@
 // int syslog(int type, char *bufp, int len);
 SYSFUZZ(syslog, __NR_syslog, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+	glong       retcode;
 	gpointer    bufp;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_syslog,                                     // int

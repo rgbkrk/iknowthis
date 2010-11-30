@@ -17,9 +17,10 @@
 static gpointer fuzzerstack;
 static gpointer watchdogstack;
 
+// System call number and parameters, and where the return value should go.
 struct context {
-    gint    *status;
-    gint     sysno;
+    glong   *status;
+    glong    sysno;
     gulong   arg0;
     gulong   arg1;
     gulong   arg2;
@@ -29,6 +30,7 @@ struct context {
     gulong   arg6;
 };
 
+// Allocate space for lwp stacks.
 static void __constructor init_thread_stacks(void)
 {
     fuzzerstack   = mmap(NULL,
@@ -91,8 +93,10 @@ static gint watchdog_thread_func(gpointer this)
 
 // Execute a systemcall, extract the required parameters from the passed
 // structure.
-gint lwp_systemcall_routine(struct context *context)
+gint lwp_systemcall_routine(gpointer param)
 {
+    struct context *context = param;
+
     // Initialise, in case I'm killed.
     *(context->status) = -ESUCCESS;
 
@@ -108,13 +112,14 @@ gint lwp_systemcall_routine(struct context *context)
     return 0;
 }
 
-gint spawn_syscall_lwp(syscall_fuzzer_t *this, gint *status, gint sysno, ...)
+gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
 {
     gint            watchdogpid, childpid;
     gint            watchdogstatus, childstatus;
     gint            watchdogret;
-    gint            retcode;
+    glong           retcode;
     va_list         ap;
+
     struct context  context = {
         .status     = status ? status : &retcode,
         .sysno      = sysno,
@@ -140,7 +145,7 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, gint *status, gint sysno, ...)
         }
 
         // Calculate return code.
-        return (unsigned)(*(context.status)) >= 0xfffff001
+        return (gulong)(*(context.status)) >= (gulong)(-4095)
                 ? - *(context.status)
                 : 0;
     }
@@ -181,9 +186,9 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, gint *status, gint sysno, ...)
 
     // Child completed before timeout.
     if (WIFEXITED(childstatus)) {
-        return (unsigned)(*(context.status)) >= 0xfffff001
-                    ? - *(context.status)
-                    : 0;
+        return (gulong)(*(context.status)) >= (gulong)(-4095)
+                ? - *(context.status)
+                : 0;
     }
 
     // Child crashed.

@@ -17,7 +17,7 @@ SYSFUZZ(splice, __NR_splice, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     off_t    off_in;
     off_t    off_out;
-    gint     retcode;
+    glong    retcode;
 
     off_in  = typelib_get_integer_range(0, PAGE_SIZE);
     off_out = typelib_get_integer_range(0, PAGE_SIZE);

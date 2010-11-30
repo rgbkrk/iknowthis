@@ -17,7 +17,7 @@
 SYSFUZZ(modify_ldt, __NR_modify_ldt, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gpointer    ptr;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = syscall_fast(__NR_modify_ldt,                                                 // int
                            typelib_get_integer_range(0, 1),                                 // int func

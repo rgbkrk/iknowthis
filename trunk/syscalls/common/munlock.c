@@ -16,7 +16,7 @@
 // int munlock(const void *addr, size_t len);
 SYSFUZZ(munlock, __NR_munlock, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gint        retcode;
+	glong       retcode;
 	guintptr    address;
 	gsize       size;
 

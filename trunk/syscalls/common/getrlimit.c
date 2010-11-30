@@ -20,7 +20,7 @@
 SYSFUZZ(getrlimit, __NR_getrlimit, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gpointer    rlim;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_getrlimit,                                 // int
 	                            typelib_get_integer_range(0, __RLIMIT_NLIMITS),             // int resource

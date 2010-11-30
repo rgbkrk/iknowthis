@@ -13,13 +13,12 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
-#include "resource.h"
 
 // Set and get scheduling parameters.
 // int sched_setparam(pid_t pid, const struct sched_param *param);
 SYSFUZZ(sched_setparam, __NR_sched_setparam, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint                 retcode;
+    glong                retcode;
     struct sched_param  *param;
 
     param = typelib_get_buffer(NULL, sizeof *param);

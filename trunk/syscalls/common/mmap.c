@@ -28,7 +28,7 @@
 SYSFUZZ(mmap, __NR_mmap, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gintptr     address;
-    gint        retcode;
+    glong       retcode;
     struct __packed {
         guintptr    addr;
         gsize       length;

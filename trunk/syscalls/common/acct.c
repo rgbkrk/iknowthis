@@ -16,11 +16,11 @@
 // Switch process accounting on or off.
 SYSFUZZ(acct, __NR_acct, SYS_FAIL | SYS_BORING | SYS_SAFE, CLONE_DEFAULT, 1000)
 {
-	gchar   *filename;
-	gint     retcode;
+    gchar   *filename;
+    glong    retcode;
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_acct,              // int
-	                            typelib_get_pathname(&filename));   // const char *filename
+    retcode = spawn_syscall_lwp(this, NULL, __NR_acct,                      // int
+                                      typelib_get_pathname(&filename));     // const char *filename
 
     g_free(filename);
 

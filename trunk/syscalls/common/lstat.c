@@ -16,7 +16,7 @@ SYSFUZZ(lstat, __NR_lstat, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gchar       *pathname;
     gpointer    buf;
-    gint        retcode;
+    glong       retcode;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, NULL, __NR_lstat,                                  // int

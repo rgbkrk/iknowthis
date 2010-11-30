@@ -1,5 +1,6 @@
 #ifndef __TYPELIB_H
 #define __TYPELIB_H
+#pragma once
 
 #ifndef __constructor
 # define __constructor __attribute__((constructor))

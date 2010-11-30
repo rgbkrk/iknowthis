@@ -17,7 +17,7 @@
 SYSFUZZ(mq_unlink, __NR_mq_unlink, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gchar      *name;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_unlink,                 // mqd_t
                                 typelib_get_pathname(&name));               // const char *name

@@ -18,7 +18,7 @@ SYSFUZZ(mq_getsetattr, __NR_mq_getsetattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    newattr;
     gpointer    oldattr;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_mq_getsetattr,                             // mqd_t
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),        // mqd_t mqdes

@@ -17,7 +17,7 @@
 SYSFUZZ(getgroups, __NR_getgroups, SYS_NONE, CLONE_DEFAULT, 0)
 {
 	gpointer    list;
-	gint        retcode;
+	glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_getgroups,                                 // int
                                 typelib_get_integer(),                                      // int size

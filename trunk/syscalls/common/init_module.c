@@ -17,7 +17,7 @@ SYSFUZZ(init_module, __NR_init_module, SYS_FAIL, CLONE_DEFAULT, 0)
 {
 	gpointer    name;
 	gpointer    image;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_init_module,                               // int
 	                            typelib_get_buffer(&name, g_random_int_range(0, 0x1000)),   // const char *name

@@ -15,7 +15,7 @@
 SYSFUZZ(getitimer, __NR_getitimer, SYS_NONE, CLONE_FORK, 0)
 {
 	gpointer    c;
-	gint        retcode;
+	glong       retcode;
 
 	retcode = spawn_syscall_lwp(this, NULL, __NR_getitimer,                             // int
 	                            typelib_get_integer(),                                  // int which

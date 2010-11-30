@@ -17,7 +17,7 @@ SYSFUZZ(clock_nanosleep, __NR_clock_nanosleep, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gpointer    rqtp;
     gpointer    rmtp;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_clock_nanosleep,                                           // long
                                 typelib_get_integer(),                                                      // clockid_t which_clock,

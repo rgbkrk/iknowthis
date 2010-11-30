@@ -16,7 +16,7 @@
 // int setuid(uid_t uid);
 SYSFUZZ(setuid, __NR_setuid, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     gint        uid;
 
     uid     = g_random_boolean() ?typelib_get_integer() : getuid();

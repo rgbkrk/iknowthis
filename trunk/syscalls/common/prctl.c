@@ -25,7 +25,7 @@ SYSFUZZ(prctl, __NR_prctl, SYS_NONE, CLONE_DEFAULT, 1000)
     guintptr    arg3;
     guintptr    arg4;
     guintptr    arg5;
-    gint        retcode;
+    glong       retcode;
     gboolean    pointer;
     
     option  = typelib_get_integer_range(0, 128);

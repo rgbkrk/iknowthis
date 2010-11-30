@@ -15,7 +15,7 @@
 // int listxattr(const char *pathname, const char *list, size_t size);
 SYSFUZZ(listxattr, __NR_listxattr, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint        retcode;
+    glong       retcode;
     gchar      *pathname;
     gpointer    list;
 

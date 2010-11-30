@@ -15,7 +15,7 @@
 // ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset);
 SYSFUZZ(pwrite64, __NR_pwrite64, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-    gint        retcode;
+    glong       retcode;
     gpointer    buffer;
 
     // Execute systemcall.

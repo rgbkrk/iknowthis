@@ -17,7 +17,7 @@
 SYSFUZZ(mbind, __NR_mbind, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    nmask;
-    gint        retcode;
+    glong       retcode;
     guintptr    address;
     gsize       size;
 

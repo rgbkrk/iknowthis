@@ -17,7 +17,7 @@ SYSFUZZ(linkat, __NR_linkat, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gchar *oldpath;
     gchar *newpath;
-    gint   retcode;
+    glong  retcode;
 
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, NULL, __NR_linkat,                                            // int

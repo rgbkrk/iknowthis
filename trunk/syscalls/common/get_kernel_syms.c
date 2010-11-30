@@ -19,7 +19,7 @@
 SYSFUZZ(get_kernel_syms, __NR_get_kernel_syms, SYS_FAIL, CLONE_DEFAULT, 0)
 {
     gpointer    table;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_get_kernel_syms,
                                 typelib_get_buffer(&table, g_random_int_range(0, PAGE_SIZE)));  // const char *name

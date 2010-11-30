@@ -21,18 +21,16 @@ static gboolean destroy_open_file(guintptr fd)
 // int dup(int oldfd);
 SYSFUZZ(dup, __NR_dup, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint    fd;
-    gint    retcode;
+    glong   fd;
+    glong   retcode;
 
     retcode = spawn_syscall_lwp(this, &fd, __NR_dup,                                                // int
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE));               // int oldfd
 
     if (retcode == ESUCCESS) {
-        // Note that because basically nothing can go wrong with dup,
-        // it will saturate all the available space in my fd list very
-        // quickly.
-
-        // Therefore, only allow it occassionally.
+        // NOTE: Because basically nothing can go wrong with dup,
+        //       it will saturate all the available space in my fd list very
+        //       quickly. Therefore, only allow it occassionally.
         if (g_random_int_range(0, 1024)) {
             // Throw it away.
             close(fd);

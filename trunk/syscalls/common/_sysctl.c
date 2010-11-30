@@ -16,7 +16,7 @@
 // int _sysctl(struct __sysctl_args *args);
 SYSFUZZ(_sysctl, __NR__sysctl, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    gint                    retcode;
+    glong                   retcode;
     struct __sysctl_args    args = {
     	.oldval     = NULL,
     	.newval     = NULL,

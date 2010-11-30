@@ -16,7 +16,7 @@
 SYSFUZZ(sendfile, __NR_sendfile, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gpointer    offset;
-    gint        retcode;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_sendfile,                              // ssize_t
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int out_fd
