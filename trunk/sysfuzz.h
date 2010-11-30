@@ -11,7 +11,7 @@
 # define CLONE_IO 0
 #endif
 
-// Customer errno values, must be <= 0. These are used to represent errors
+// Custom errno values, must be <= 0. These are used to represent errors
 // outside of errno, such as a process exited, or a timeout expiring.
 enum {
     ESUCCESS        =  0,               // No error.
@@ -26,8 +26,8 @@ enum {
     SYS_DISABLED    = 1 << 0,           // Fuzzer is disabled.
     SYS_FAIL        = 1 << 1,           // Failure is expected, warn on success.
     SYS_TIMEOUT     = 1 << 2,           // Timeout is expected.
-    SYS_VOID        = 1 << 3,           // Fuzzer does not return a useful value.
-    SYS_BORING      = 1 << 4,           // Fuzzer will always return the same value.
+    SYS_VOID        = 1 << 3,           // Fuzzer does not return a useful value. (e.g. exit).
+    SYS_BORING      = 1 << 4,           // Fuzzer expected to always return the same value.
     SYS_SAFE        = 1 << 5,           // Fuzzer is safe to run without separation.
 };
 
