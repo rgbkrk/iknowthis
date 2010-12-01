@@ -31,7 +31,7 @@ SYSFUZZ(recvmmsg, __NR_recvmmsg, SYS_NONE, CLONE_DEFAULT, 1000)
     gpointer    mmsg;
     gpointer    timeout;
 
-    retcode = spawn_syscall_lwp(this, NULL, __NR_recvmsg,                                   // ssize_t
+    retcode = spawn_syscall_lwp(this, NULL, __NR_recvmmsg,                                  // ssize_t
                                       typelib_get_resource(this, NULL, RES_FILE, RF_NONE),  // int fd
                                       typelib_get_buffer(&mmsg, PAGE_SIZE),                 // const struct msghdr *mmsg
                                       typelib_get_integer(),                                // unsigned int vlen

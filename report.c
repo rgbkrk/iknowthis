@@ -8,161 +8,282 @@
 #include <asm/unistd.h>
 #include <sched.h>
 #include <stdio.h>
+#include <ClearSilver.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
 
-syscall_fuzzer_t   system_call_fuzzers[MAX_SYSCALL_NUM]; // Fuzzer definitions for each system call.
-guint              total_registered_fuzzers;             // Total number of registered fuzzers.
-guint              total_disabled_fuzzers;               // Number of fuzzers that have been disabled.
-
-void prettyprint_fuzzer(FILE *output, syscall_fuzzer_t *fuzzer)
+// This routine adds some global error statistics to the HDF tree, as well as
+// calculating the total number of tests executed and total number of fuzzers
+// currently enabled.
+static void generate_global_statistics(HDF *hdf)
 {
-	guint i;
+    const gint   MaxErrnoValue = 1024;
+    HDF         *errors        = NULL;
+    guint        total         = 0;
+    guint        failures      = 0;
+    guint        successes     = 0;
+    guint        fuzzercount   = 0;
 
-    fprintf(output, "Statistics for %s follow\n", fuzzer->name);
-    fprintf(output, "\tTotal:       %u\n", fuzzer->total);
-    fprintf(output, "\tFailure:     %u\n", fuzzer->failures);
-    fprintf(output, "\tSuccess:     %u\n", fuzzer->total - fuzzer->failures);
-    fprintf(output, "\tSpeed:       %f\n", fuzzer->average);
+    // Create the Global Errors heirarchy.
+    hdf_set_value(hdf, "Global.errors", NULL);
 
-    fprintf(output, "\tError Code Distribution:\n");
+    // Retrieve that object.
+    errors = hdf_get_obj(hdf, "Global.errors");
 
-    // Dump all the known errors for this fuzzer.
-    for (i = 0; i < fuzzer->numerrors; i++) {
-    	fprintf(output,"\t\t%10u\t%10d\t%s\n",
-    	        fuzzer->errors[i].count,
-    	        fuzzer->errors[i].error,
-    	        g_strerror(fuzzer->errors[i].error));
+    // Quick compare callback for lfind().
+    gint compare_error(gconstpointer a, gconstpointer b)
+    {
+        return ((const error_record_t *)(a))->error
+            -  ((const error_record_t *)(b))->error;
     }
 
-    fprintf(output, "\n");
+    // For every errno code possible, count how many times each fuzzer has seen
+    // it. This is obviously not optimal, but this is not a performance
+    // critical lookup.
+    for (guint code = 0; code < MaxErrnoValue; code++) {
+        error_record_t  *error = NULL;
+        error_record_t   key   = { code, 0 };
+        guint            count = 0;
+
+        // For every system call, check if it has this errno.
+        for (guint sysno = 0; sysno < MAX_SYSCALL_NUM; sysno++) {
+
+            // Retrieve pointer to this fuzzer.
+            syscall_fuzzer_t *fuzzer = &system_call_fuzzers[sysno];
+
+            // Sanity checks.
+            g_assert_cmpuint(fuzzer->numerrors, <, MAX_ERROR_CODES);
+
+            // Search it's errors structure for this errno.
+            error = lfind(&key,                   // key
+                          fuzzer->errors,         // base
+                          &fuzzer->numerrors,     // num
+                          sizeof key,             // size
+                          compare_error);         // compare
+
+            // If there was a hit, add it to the count.
+            if (error) {
+                count += error->count;
+            }
+
+            // Keep track of statistics, only for the first iteration.
+            if (code == 0) {
+                total       += fuzzer->total;
+                failures    += fuzzer->failures;
+                successes   += fuzzer->total - fuzzer->failures;
+
+                // Count the fuzzers that are enabled.
+                if (fuzzer->name && !(fuzzer->flags & SYS_DISABLED)) {
+                    fuzzercount++;
+                }
+            }
+        }
+
+        // Add the final count to the data if it was non-zero.
+        if (count) {
+            gchar *nodedesc  = g_strdup_printf("%u.description", code);
+            gchar *nodecount = g_strdup_printf("%u.count", code);
+
+            hdf_set_value(errors, nodedesc, g_strerror(code));
+            hdf_set_int_value(errors, nodecount, count);
+
+            // Clean up.
+            g_free(nodedesc);
+            g_free(nodecount);
+        }
+    }
+
+    // Add some global statistics.
+    hdf_set_int_value(hdf, "Global.num_fuzzers", fuzzercount);
+    hdf_set_int_value(hdf, "Global.total_executions", total);
+    hdf_set_int_value(hdf, "Global.total_failures", failures);
+    hdf_set_int_value(hdf, "Global.total_successes", successes);
+
+    return;
+}
+
+
+// This routine scans the list of fuzzers for best and worst performers, and
+// adds an appropriate node to the HDF.
+static void generate_fuzzer_statistics(HDF *hdf)
+{
+    syscall_fuzzer_t    *fastest = NULL;
+    syscall_fuzzer_t    *slowest = NULL;
+
+    // For every system call, collect statistics.
+    for (guint sysno = 0; sysno < MAX_SYSCALL_NUM; sysno++) {
+
+        // Retrieve pointer to this fuzzer.
+        syscall_fuzzer_t *fuzzer = &system_call_fuzzers[sysno];
+
+        if (!fuzzer->name || (fuzzer->flags & SYS_DISABLED))
+            continue;
+
+        // Compare statistics.
+        if (!fastest || fuzzer->average < fastest->average)
+            fastest = fuzzer;
+        if (!slowest || fuzzer->average > slowest->average)
+            slowest = fuzzer;
+    }
+
+    g_assert(fastest);
+    g_assert(slowest);
+
+    hdf_set_value(hdf, "Global.fastest_fuzzer.name", fastest->name);
+    hdf_set_int_value(hdf, "Global.fastest_fuzzer.speed", fastest->average * 1000000);
+
+    hdf_set_value(hdf, "Global.slowest_fuzzer.name", slowest->name);
+    hdf_set_int_value(hdf, "Global.slowest_fuzzer.speed", slowest->average * 1000000);
+
+    return;
+}
+
+// This routine adds lots of details about this specific fuzzer to the HDF.
+void pretty_print_fuzzer(HDF *hdf, syscall_fuzzer_t *fuzzer)
+{
+    gchar   *name          = g_strdup_printf("Fuzzer.%u", fuzzer->number);
+    HDF     *info          = NULL;
+
+    // Create an heirarchy for this fuzzer
+    hdf_set_value(hdf, name, NULL);
+
+    // Retrieve that object.
+    info = hdf_get_obj(hdf, name);
+
+    hdf_set_value(info, "Name", fuzzer->name);
+    hdf_set_int_value(info, "Total", fuzzer->total);
+    hdf_set_int_value(info, "Failures", fuzzer->failures);
+    hdf_set_value(info, "Errors", NULL);
+
+    // Now switch to error tree.
+    info = hdf_get_obj(info, "Errors");
+
+    // Enumerate all the errors this fuzzer has seen.
+    for (gint i; i < fuzzer->numerrors; i++) {
+        gchar *error = g_strdup_printf("%u.error", i);
+        gchar *count = g_strdup_printf("%u.count", i);
+
+        hdf_set_value(info, error, g_strerror(fuzzer->errors[i].error));
+        hdf_set_int_value(info, count, fuzzer->errors[i].count);
+
+        g_free(error);
+        g_free(count);
+    }
+
+    g_free(name);
     return;
 }
 
 void create_fuzzer_report(void)
 {
-    FILE    *report;
-    time_t   timestamp = time(0);
-    guint    count;
-    guint    i;
-    
-    g_message("generating progress report");
+    GTimeVal currenttime;
+    gchar   *time;
+    HDF     *hdf;
 
-    if ((report = fopen("/tmp/iknowthis.txt", "w+")) == NULL) {
-    	fprintf(stderr, "unable to open report file, %m\n");
-    	return;
+    if (hdf_init(&hdf) != STATUS_OK) {
+        g_error("failed to initialise HDF library, cannot generate report");
+        return;
     }
-    
-    g_assert(report);
 
-    fprintf(report, "iknowthis report generated on by process %u.\n\nDate: %s\n",
-                    getpid(),
-                    ctime(&timestamp));
-                    
+    // Record the creation time.
+    g_get_current_time(&currenttime);
 
-    fprintf(report, "The following system call numbers do not have fuzzers\n"
-                    "associated with them.\n\n");
+    hdf_set_value(hdf, "Page.date", time = g_time_val_to_iso8601(&currenttime));
 
-    for (count = 0, i = 0; i < MAX_SYSCALL_NUM; i++) {
+    g_free(time);
+
+    // First create the global error statistics.
+    generate_global_statistics(hdf);
+
+    // Get some overall fuzzer stats (Slowest, Fastest, etc.)
+    generate_fuzzer_statistics(hdf);
+
+    // Create some empty hdf nodes.
+    hdf_set_value(hdf, "Global.fuzzer_missing", NULL);        // Not defined
+    hdf_set_value(hdf, "Global.fuzzer_disabled", NULL);       // Defined but disabled
+    hdf_set_value(hdf, "Global.fuzzer_always_fails", NULL);   // Always fail, but not marked SYS_FAIL.
+    hdf_set_value(hdf, "Global.fuzzer_always_same", NULL);    // Always return the same value, but not marked SYS_BORING.
+    hdf_set_value(hdf, "Global.fuzzer_not_boring", NULL);     // Marked SYS_BORING, but returning multiple values.
+
+    // Now we need to create a list of interesting events the user needs to
+    // investigate. The first one is system calls that have no associated
+    // fuzzers, so scan the list for fuzzers with NULL callback.
+
+    for (guint i = 0; i < MAX_SYSCALL_NUM; i++) {
+        // Is the system call undefined?
         if (system_call_fuzzers[i].callback == NULL) {
-            fprintf(report, "%s%u%s", count % 8 == 0 ? "\t" : " ",
-                                      i,
-                                      count % 8 == 7 ? "\n" : ",");
-            count++;
+            gchar   *node = g_strdup_printf("%u.number", i);
+            hdf_set_int_value(hdf_get_obj(hdf, "Global.fuzzer_missing"),
+                              node,
+                              i);
+            g_free(node);
+
+            // There are no other useful statistics from this.
+            continue;
         }
-    }
 
-    fprintf(report, "\n\n");
-    fprintf(report, "The following fuzzers have been disabled are not being\n"
-                    "tested.\n\n");
+        pretty_print_fuzzer(hdf, &system_call_fuzzers[i]);
 
-    for (count = 0, i = 0; i < MAX_SYSCALL_NUM; i++) {
+        // Is the system call disabled?
         if (system_call_fuzzers[i].flags & SYS_DISABLED) {
-            fprintf(report, "%s%s%s", count % 8 == 0 ? "\t" : " ",
-                                      system_call_fuzzers[i].name,
-                                      count % 8 == 7 ? "\n" : ",");
-            count++;
+            gchar *node = g_strdup_printf("%u.name", i);
+            hdf_set_value(hdf_get_obj(hdf, "Global.fuzzer_disabled"),
+                          node,
+                          system_call_fuzzers[i].name);
+            g_free(node);
+
+            // Nothing else useful can happen to disabled fuzzers.
+            continue;
+        }
+
+        // We can't do any more analysis if it has never been executed, so check here.
+        if (system_call_fuzzers[i].total == 0)
+            continue;
+
+        // Does it always fail, but not marked SYS_FAIL?
+        if (system_call_fuzzers[i].total == system_call_fuzzers[i].failures && !(system_call_fuzzers[i].flags & SYS_FAIL)) {
+            gchar *node = g_strdup_printf("%u.name", i);
+            hdf_set_value(hdf_get_obj(hdf, "Global.fuzzer_always_fails"),
+                          node,
+                          system_call_fuzzers[i].name);
+            g_free(node);
+        }
+
+        // Does it always return the same value, but not marked SYS_BORING?
+        if (((system_call_fuzzers[i].total == system_call_fuzzers[i].failures
+                        && system_call_fuzzers[i].numerrors == 1)
+                    || system_call_fuzzers[i].numerrors == 0)
+                && !(system_call_fuzzers[i].flags & SYS_BORING)) {
+            gchar *node = g_strdup_printf("%u.name", i);
+            hdf_set_value(hdf_get_obj(hdf, "Global.fuzzer_always_same"),
+                          node,
+                          system_call_fuzzers[i].name);
+            g_free(node);
+        }
+
+        // Is it marked SYS_BORING, but returns multiple value?
+        if ((system_call_fuzzers[i].flags & SYS_BORING) && (system_call_fuzzers[i].failures == 0 || system_call_fuzzers[i].numerrors == 1)) {
+            gchar *node = g_strdup_printf("%u.name", i);
+            hdf_set_value(hdf_get_obj(hdf, "Global.fuzzer_not_boring"),
+                          node,
+                          system_call_fuzzers[i].name);
+            g_free(node);
+        }
+
+        // Is it marked SYS_FAIL, but succeeded?
+        if ((system_call_fuzzers[i].flags & SYS_FAIL) && (system_call_fuzzers[i].failures != system_call_fuzzers[i].total)) {
+            gchar *node = g_strdup_printf("%u.name", i);
+            hdf_set_value(hdf_get_obj(hdf, "Global.fuzzer_not_failing"),
+                          node,
+                          system_call_fuzzers[i].name);
+            g_free(node);
         }
     }
 
-    fprintf(report, "\n\n");
-    fprintf(report, "The following fuzzers have never succeeded, but are not\n"
-                    "marked SYS_FAIL.\n\n"
-                    "If you do not expect these fuzzers to succeed (for example,\n"
-                    "they require privileges), please annotate them accordingly.\n\n");
-
-    for (count = 0, i = 0; i < MAX_SYSCALL_NUM; i++) {
-        if (system_call_fuzzers[i].callback == NULL)
-            continue;
-        if (system_call_fuzzers[i].flags & SYS_DISABLED)
-            continue;
-        if (system_call_fuzzers[i].flags & SYS_FAIL)
-            continue;
-
-        if (system_call_fuzzers[i].total == system_call_fuzzers[i].failures) {
-            fprintf(report, "%s%s%s", count % 8 == 0 ? "\t" : " ",
-                                      system_call_fuzzers[i].name,
-                                      count % 8 == 7 ? "\n" : ",");
-            count++;
-        }
-    }
-
-    fprintf(report, "\n\n");
-    fprintf(report, "The following fuzzers always return the same value, and may not be\n"
-                    "achieving the desired level of coverage.\n\n");
-
-    for (count = 0, i = 0; i < MAX_SYSCALL_NUM; i++) {
-        if (system_call_fuzzers[i].callback == NULL)
-            continue;
-        if (system_call_fuzzers[i].flags & SYS_DISABLED)
-            continue;
-        if (system_call_fuzzers[i].flags & SYS_BORING)
-        	continue;
-        if (system_call_fuzzers[i].flags & SYS_VOID)
-        	continue;
-
-        if (system_call_fuzzers[i].failures == 0 
-                || (system_call_fuzzers[i].failures == system_call_fuzzers[i].total 
-                        && system_call_fuzzers[i].numerrors == 1)) {
-            fprintf(report, "%s%s%s", count % 8 == 0 ? "\t" : " ",
-                                      system_call_fuzzers[i].name,
-                                      count % 8 == 7 ? "\n" : ",");
-            count++;
-        }
-    }
-
-    fprintf(report, "\n\n");
-    fprintf(report, "The following fuzzers are marked boring, but have returned multiple values\n\n");
-
-    for (count = 0, i = 0; i < MAX_SYSCALL_NUM; i++) {
-        if (system_call_fuzzers[i].callback == NULL)
-            continue;
-        if (system_call_fuzzers[i].flags & SYS_DISABLED)
-            continue;
-        if (!(system_call_fuzzers[i].flags & SYS_BORING))
-            continue;
-        if (system_call_fuzzers[i].numerrors > 1 || (system_call_fuzzers[i].numerrors == 1 && system_call_fuzzers[i].failures < system_call_fuzzers[i].total)) {
-            fprintf(report, "%s%s%s", count % 8 == 0 ? "\t" : " ",
-                                      system_call_fuzzers[i].name,
-                                      count % 8 == 7 ? "\n" : ",");
-            count++;
-        }
-    }
-
-    fprintf(report, "\n\n");
-    fprintf(report, "Detailed statistics for all fuzzers follows.\n\n\n");
-
-    for (i = 0; i < MAX_SYSCALL_NUM; i++) {
-        if (system_call_fuzzers[i].callback == NULL)
-            continue;
-        if (system_call_fuzzers[i].flags & SYS_DISABLED)
-            continue;
-        prettyprint_fuzzer(report, &system_call_fuzzers[i]);
-    }
-
-    fclose(report);
-
+    hdf_write_file(hdf, "output.hdf");
+    hdf_destroy(&hdf);
     return;
+
 }

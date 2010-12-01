@@ -174,6 +174,10 @@ int main(int argc, char **argv)
             //    }
             //}
         }
+
+        if (total % 1024 == 0) {
+            create_fuzzer_report();
+        }
     }
 
     g_timer_destroy(timer);

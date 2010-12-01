@@ -127,6 +127,8 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
 
     va_start(ap, sysno);
 
+    g_assert_cmpint(this->number, ==, sysno);
+
     // FIXME: just va_copy and parse the va_list around, but this doesnt work
     //        reliably on x64, find out why.
     context.arg0    = va_arg(ap, gulong);
