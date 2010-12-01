@@ -25,7 +25,7 @@ SYSFUZZ(getsockname, __NR_getsockname, SYS_NONE, CLONE_DEFAULT, 1000)
     gpointer    addr;
     gpointer    addrlen;
 
-    retcode = spawn_syscall_lwp(this, NULL, __NR_accept,                                    // int
+    retcode = spawn_syscall_lwp(this, NULL, __NR_getsockname,                               // int
                                       typelib_get_resource(this, NULL, RES_FILE, RF_NONE),  // int sockfd
                                       typelib_get_buffer(&addr, PAGE_SIZE),                 // struct sockaddr *addr
                                       typelib_get_buffer(&addrlen, PAGE_SIZE));             // socklen_t *addrlen;
