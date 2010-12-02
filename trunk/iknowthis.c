@@ -1,18 +1,23 @@
-#include <stdbool.h>
-#include <search.h>
-#include <unistd.h>
+#include <asm/unistd.h>
+#include <errno.h>
 #include <glib.h>
+#include <sched.h>
+#include <search.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <sys/ipc.h>
+#include <sys/mman.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <asm/unistd.h>
-#include <sched.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
+#include <sys/select.h>
+#include <sys/socket.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
+#include <string.h>
+#include <microhttpd.h>
+#include <ClearSilver.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
@@ -24,10 +29,21 @@ guint              total_disabled_fuzzers;               // Number of fuzzers th
 guint              process_nesting_depth;                // Nested process depth.
 guint              skip_danger_warning;                  // Dont print the warning message on startup.
 
+static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, socklen_t addrlen);
+static gint httpd_access_handler(gpointer cls,
+                                 struct MHD_Connection *connection,
+                                 const gchar *url,
+                                 const gchar *method,
+                                 const gchar *version,
+                                 const gchar *upload_data,
+                                 gsize *upload_data_size,
+                                 gpointer *con_cls);
+
+
+void create_fuzzer_report(HDF *hdf);
 static void print_danger_warning(void);
 static gboolean disable_enable_fuzzer_range(const gchar *option_name, const gchar *value, gpointer data, GError **error);
 static gboolean list_fuzzer_names(const gchar *option_name, const gchar *value, gpointer data, GError **error);
-
 
 // Command line options.
 static GOptionEntry parameters[] = {
@@ -45,6 +61,15 @@ int main(int argc, char **argv)
     GOptionContext *context     = NULL;
     glong           returncode  = 0;
     guint           total       = 0;
+    struct MHD_Daemon * d;
+
+    d = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
+                         8080,
+                         httpd_connect_policy,
+                         NULL,
+                         httpd_access_handler,
+                         NULL,
+                         MHD_OPTION_END);
 
     // Print some stats
     g_message("welcome to iknowthis, a linux system call fuzzer, pid %5u", getpid());
@@ -173,10 +198,6 @@ int main(int argc, char **argv)
             //      fuzzer->flags |= SYS_DISABLED;
             //    }
             //}
-        }
-
-        if (total % 1024 == 0) {
-            create_fuzzer_report();
         }
     }
 
@@ -399,4 +420,67 @@ static void print_danger_warning(void)
     g_print("\n");
 
     return;
+}
+
+// Callback from HTTP server, send it report data.
+static gint httpd_access_handler(gpointer cls,
+                                 struct MHD_Connection *connection,
+                                 const gchar *url,
+                                 const gchar *method,
+                                 const gchar *version,
+                                 const gchar *upload_data,
+                                 gsize *upload_data_size,
+                                 gpointer *con_cls)
+{
+    CSPARSE             *parse      = NULL;
+    HDF                 *hdf        = NULL;
+    gchar               *output     = NULL;
+    struct MHD_Response *response   = NULL;
+
+    // Create a callback for clearsilver output.
+    NEOERR * get_clearsilver_output(gpointer ctx, gchar *string)
+    {
+        // Append the string output.
+        gchar *combined = g_strconcat(output ? output : "", string, NULL);
+
+        // Clean up.
+        g_free(output);
+
+        output = combined;
+
+        return STATUS_OK;
+    }
+
+    // Initialise clearsilver.
+    hdf_init(&hdf);
+
+    // Generate a report in HDF format.
+    create_fuzzer_report(hdf);
+
+    // Parse the template file.
+    cs_init(&parse, hdf);
+    cs_parse_file(parse, "/tmp/main.cs");
+    cs_render(parse, NULL, get_clearsilver_output);
+
+    // Create the response data using clearsilver.
+    response =  MHD_create_response_from_data(strlen(output),
+                                              output,
+                                              MHD_NO,
+                                              MHD_NO);
+
+    MHD_queue_response(connection,
+                       MHD_HTTP_OK,
+                       response);
+
+    MHD_destroy_response(response);
+
+    cs_destroy(&parse);
+    hdf_destroy(&hdf);
+    return MHD_YES;
+}
+
+// TODO: Add some command line options to limit who is permitted to connect.
+static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, socklen_t addrlen)
+{
+    return MHD_YES;
 }

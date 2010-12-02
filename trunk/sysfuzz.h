@@ -80,7 +80,16 @@ typedef struct {
     errno                                           /* Return error code */ \
 )
 
-#define MAX_SYSCALL_NUM 338
+// Record the highest syscall number for this architecture.
+#if defined(__i386__)
+# define MAX_SYSCALL_NUM 338
+#elif defined(__x86_64__)
+# define MAX_SYSCALL_NUM 300
+#else
+# warning please define a real MAX_SYSCALL_NUMBER for this architecure
+# define MAX_SYSCALL_NUM 300
+#endif
+
 #define MAX_PROCESS_NUM 32
 
 extern syscall_fuzzer_t system_call_fuzzers[MAX_SYSCALL_NUM];
