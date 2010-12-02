@@ -30,7 +30,7 @@
 <h1>iknowthis Statistics Generated on <?cs var:Page.date ?></h1>
 <div id="global">
     <div id="errordist">
-        <img src="http://chart.apis.google.com/chart?cht=p&chs=1000x400&chl=<?cs each:i = Global.errors ?><?cs var:i.description ?>|<?cs /each ?>&chd=t:<?cs each:i = Global.errors ?><?cs var:i.count ?>,<?cs /each ?>0">
+        <img src="http://chart.apis.google.com/chart?cht=p&chs=800x300&chl=<?cs each:i = Global.errors ?><?cs var:i.description ?>|<?cs /each ?>&chd=t:<?cs each:i = Global.errors ?><?cs var:i.count ?>,<?cs /each ?>0">
     </div>
     <div id="statistics">
         <table id="globalstats">

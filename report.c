@@ -176,24 +176,8 @@ void pretty_print_fuzzer(HDF *hdf, syscall_fuzzer_t *fuzzer)
     return;
 }
 
-void create_fuzzer_report(void)
+void create_fuzzer_report(HDF *hdf)
 {
-    GTimeVal currenttime;
-    gchar   *time;
-    HDF     *hdf;
-
-    if (hdf_init(&hdf) != STATUS_OK) {
-        g_error("failed to initialise HDF library, cannot generate report");
-        return;
-    }
-
-    // Record the creation time.
-    g_get_current_time(&currenttime);
-
-    hdf_set_value(hdf, "Page.date", time = g_time_val_to_iso8601(&currenttime));
-
-    g_free(time);
-
     // First create the global error statistics.
     generate_global_statistics(hdf);
 
@@ -282,8 +266,5 @@ void create_fuzzer_report(void)
         }
     }
 
-    hdf_write_file(hdf, "output.hdf");
-    hdf_destroy(&hdf);
     return;
-
 }
