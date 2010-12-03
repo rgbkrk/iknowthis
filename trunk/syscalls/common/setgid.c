@@ -14,9 +14,10 @@
 #include "iknowthis.h"
 
 // Set group identity.
+// int setgid(gid_t gid);
 SYSFUZZ(setgid, __NR_setgid, SYS_SAFE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_setgid,       // int
-	                         typelib_get_integer());        // gid_t gid
+    return spawn_syscall_lwp(this, NULL, __NR_setgid,                                   // int
+                             typelib_get_integer_selection(2, getgid(), getegid()));    // gid_t gid
 }
 

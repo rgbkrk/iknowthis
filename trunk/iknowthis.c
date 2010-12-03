@@ -1,3 +1,6 @@
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 #include <asm/unistd.h>
 #include <errno.h>
 #include <glib.h>
@@ -13,22 +16,29 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/select.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
 #include <microhttpd.h>
 #include <ClearSilver.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
 
-syscall_fuzzer_t   system_call_fuzzers[MAX_SYSCALL_NUM]; // Fuzzer definitions for each system call.
+syscall_fuzzer_t  *system_call_fuzzers;                  // Fuzzer definitions for each system call.
 guint              total_registered_fuzzers;             // Total number of registered fuzzers.
 guint              total_disabled_fuzzers;               // Number of fuzzers that have been disabled.
 guint              process_nesting_depth;                // Nested process depth.
 guint              skip_danger_warning;                  // Dont print the warning message on startup.
+gint               semid;                                // Semaphore set for syscall fuzzers.
 
+static void create_watchdog_process(void);
 static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, socklen_t addrlen);
 static gint httpd_access_handler(gpointer cls,
                                  struct MHD_Connection *connection,
@@ -38,6 +48,27 @@ static gint httpd_access_handler(gpointer cls,
                                  const gchar *upload_data,
                                  gsize *upload_data_size,
                                  gpointer *con_cls);
+
+static struct sembuf takelock[] = {
+    {
+        .sem_num    = 0,
+        .sem_op     = 0,    // Wait for zero
+        .sem_flg    = 0,
+    },
+    {
+        .sem_num    = 0,
+        .sem_op     = 1,    // Increment
+        .sem_flg    = SEM_UNDO,
+    },
+};
+
+static struct sembuf releaselock[] = {
+    {
+        .sem_num    = 0,
+        .sem_op     = -1,   // Decrement
+        .sem_flg    = SEM_UNDO,
+    },
+};
 
 
 void create_fuzzer_report(HDF *hdf);
@@ -57,28 +88,10 @@ static GOptionEntry parameters[] = {
 
 int main(int argc, char **argv)
 {
-    GTimer         *timer       = NULL;
-    GOptionContext *context     = NULL;
-    glong           returncode  = 0;
-    guint           total       = 0;
-    struct MHD_Daemon * d;
-
-    d = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
-                         8080,
-                         httpd_connect_policy,
-                         NULL,
-                         httpd_access_handler,
-                         NULL,
-                         MHD_OPTION_END);
-
-    // Print some stats
-    g_message("welcome to iknowthis, a linux system call fuzzer, pid %5u", getpid());
-    g_message("--------------------------------- http://goo.gl/is02 ------");
-    g_message("%u known system calls, %u fuzzers registered, of which %u are disabled",
-              MAX_SYSCALL_NUM,
-              total_registered_fuzzers,
-              total_disabled_fuzzers);
-
+    GTimer            *timer       = NULL;
+    GOptionContext    *context     = NULL;
+    glong              returncode  = 0;
+    struct passwd     *user        = getpwnam("nobody");
 
     // Parse commandline.
     context = g_option_context_new("");
@@ -91,6 +104,53 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // Set userids to zero, and create a new process group.
+    setresuid(0, 0, 0);
+    setpgrp();
+
+    // Start the http daemon listening for status output.
+    // TODO: Choose a random port and print a URL.
+    MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
+                     8080,
+                     httpd_connect_policy,
+                     NULL,
+                     httpd_access_handler,
+                     NULL,
+                     MHD_OPTION_END);
+
+    g_message("Open http://localhost:8080/status for status information");
+
+    while (true) {
+        if (get_process_count() <= 4 && fork() == 0) {
+            g_message("master process forking off a new one");
+            break;
+        } else {
+            kill(-getpid(), SIGCONT);
+        }
+        sleep(1);
+    }
+
+    // At this point, shared memory segments have been attached and the web
+    // server is listening. We can drop privileges and become an unprivileged
+    // user.
+
+    // Drop all supplementary groups.
+    if (setgroups(0, NULL) != 0) {
+        g_error("unable to drop supplementary groups, %m");
+        abort();
+    }
+
+    // Change to an unprivileged user and group.
+    if (setresgid(user->pw_gid, user->pw_gid, user->pw_gid) != 0) {
+        g_error("unable change group id, %m");
+        abort();
+    }
+
+    if (setresuid(user->pw_uid, user->pw_uid, user->pw_uid) != 0) {
+        g_error("unable to change user id, %m");
+        abort();
+    }
+
     // Warn user this might be dangerous.
     if (skip_danger_warning == false) {
         print_danger_warning();
@@ -98,13 +158,6 @@ int main(int argc, char **argv)
 
     // Used for timing fuzzers.
     timer = g_timer_new();
-
-    // Spam pages with a secret value to look for leaks.
-    //create_dirty_pages();
-
-    // Setup some default signals.
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGXFSZ, SIG_IGN);
 
     while (true) {
         // Select a random fuzzer.
@@ -116,9 +169,6 @@ int main(int argc, char **argv)
         if (fuzzer->callback == NULL || fuzzer->flags & SYS_DISABLED) {
             continue;
         }
-
-        // Count how many fuzzers executed.
-        total++;
 
         //g_message("fuzzer %s selected, %u total executions", fuzzer->name, fuzzer->total);
 
@@ -458,9 +508,9 @@ static gint httpd_access_handler(gpointer cls,
     create_fuzzer_report(hdf);
 
     // Parse the template file.
-    cs_init(&parse, hdf);
-    cs_parse_file(parse, "/tmp/main.cs");
-    cs_render(parse, NULL, get_clearsilver_output);
+    g_assert(cs_init(&parse, hdf) == STATUS_OK);
+    g_assert(cs_parse_file(parse, "report/main.cs") == STATUS_OK);
+    g_assert(cs_render(parse, NULL, get_clearsilver_output) == STATUS_OK);
 
     // Create the response data using clearsilver.
     response =  MHD_create_response_from_data(strlen(output),
@@ -483,4 +533,68 @@ static gint httpd_access_handler(gpointer cls,
 static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, socklen_t addrlen)
 {
     return MHD_YES;
+}
+
+// We use a sysv semaphore to protect access to shared structures. These are
+// kernel backed, so we get things like killed processes holding locks taken
+// care of for free using SEM_UNDO. But happens when a process takes the lock,
+// and then takes a SIGSTOP?
+//
+// We need a watchdog process that verified the lock is available every few
+// seconds, if it isn't, we just take down whoever held it and let the kernel
+// clean up.
+static void create_watchdog_process(void)
+{
+    // Let parent continue, watchdog child takes over.
+    if (fork() != 0) {
+        return;
+    }
+
+    setpgrp();
+
+    g_message("watchdog process %lu started, attach count is %u", syscall(__NR_getpid), get_process_count());
+
+    // Try to take the lock continually.
+    while (get_process_count() > 1) {
+        struct timespec timeout = {
+            .tv_sec     = 0,
+            .tv_nsec    = 500000000UL,
+        };
+
+        if (semtimedop(semid, takelock, G_N_ELEMENTS(takelock), &timeout) != 0) {
+            switch (errno) {
+                case EAGAIN: {
+                    // Timeout, find out who has the lock.
+                    gint lockholder = semctl(semid, 0, GETPID);
+
+                    g_message("watchdog detected deadlock, lock holder is process %u", lockholder);
+
+                    // See if we can coax him into letting go.
+                    kill(lockholder, SIGKILL);
+
+                    // Release the lock, even if he's in D, when he wakes up he will just die.
+                    break;
+                }
+                // EINTR is harmless, just try again.
+                case EINTR:
+                    g_message("watchdog was interrupted");
+                    continue;
+
+                default:
+                    g_error("watchdog encountered unexpected error from semop, %m");
+                    abort();
+            }
+        }
+
+        g_message("watchdog process took the lock %u, releasing it...", get_process_count());
+
+        if (semop(semid, releaselock, G_N_ELEMENTS(releaselock)) != 0) {
+            g_error("watchdog process failed to release the lock, %m");
+            abort();
+        }
+
+        sleep(1);
+    }
+
+    g_error("watchdog process giving up, parent process appears to have died");
 }

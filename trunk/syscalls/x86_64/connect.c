@@ -26,8 +26,8 @@ SYSFUZZ(connect, __NR_connect, SYS_NONE, CLONE_DEFAULT, 1000)
 
     retcode = syscall_fast(__NR_connect,                                                // int
                            typelib_get_resource(this, NULL, RES_FILE, RF_NONE),         // int sockfd
-                           typelib_get_integer_range(0, 64),                            // const struct sockaddr *addr
-                           typelib_get_buffer(&addr, PAGE_SIZE));                       // socklen_t addrlen
+                           typelib_get_buffer(&addr, sizeof(struct sockaddr)),          // const struct sockaddr *addr
+                           typelib_get_integer_selection(1, sizeof(struct sockaddr)));  // socklen_t addrlen
 
     typelib_clear_buffer(addr);
     return retcode;

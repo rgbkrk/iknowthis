@@ -21,7 +21,7 @@ SYSFUZZ(sendfile, __NR_sendfile, SYS_NONE, CLONE_DEFAULT, 1000)
     retcode = spawn_syscall_lwp(this, NULL, __NR_sendfile,                              // ssize_t
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int out_fd
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),    // int int_fd
-                                typelib_get_buffer(&offset, PAGE_SIZE),                 // off_t *offset
+                                typelib_get_buffer(&offset, sizeof(off_t)),             // off_t *offset
                                 typelib_get_integer());                                 // size_t count
 
     typelib_clear_buffer(offset);

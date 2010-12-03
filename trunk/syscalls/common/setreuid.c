@@ -14,10 +14,10 @@
 #include "iknowthis.h"
 
 // Set real and/or effective user or group ID.
-SYSFUZZ(setreuid, __NR_setreuid, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(setreuid, __NR_setreuid, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_setreuid,             // int
-	                         typelib_get_integer(),                 // uid_t ruid
-	                         typelib_get_integer());                // uid_t euid
+    return spawn_syscall_lwp(this, NULL, __NR_setreuid,                                             // int
+                             typelib_get_integer_selection(2, getuid(), typelib_get_integer()),     // uid_t ruid
+                             typelib_get_integer_selection(2, getuid(), typelib_get_integer()));    // uid_t euid
 }
 

@@ -30,12 +30,14 @@ SYSFUZZ(accept, __NR_accept, SYS_NONE, CLONE_DEFAULT, 1000)
     glong       retcode;
     glong       fd;
     gpointer    addr;
-    gpointer    addrlen;
+    socklen_t   addrlen;
+
+    addrlen = typelib_get_integer_selection(1, sizeof(struct sockaddr));
 
     retcode = spawn_syscall_lwp(this, &fd, __NR_accept,
                                       typelib_get_resource(this, NULL, RES_FILE, RF_NONE),  // int sockfd
-                                      typelib_get_buffer(&addr, PAGE_SIZE),                 // struct sockaddr *addr
-                                      typelib_get_buffer(&addrlen, PAGE_SIZE));             // socklen_t *addrlen;
+                                      typelib_get_buffer(&addr, sizeof(struct sockaddr)),   // struct sockaddr *addr
+                                      &addrlen);                                            // socklen_t *addrlen;
 
 
     // Check for new socket.
@@ -47,7 +49,6 @@ SYSFUZZ(accept, __NR_accept, SYS_NONE, CLONE_DEFAULT, 1000)
     }
 
     typelib_clear_buffer(addr);
-    typelib_clear_buffer(addrlen);
 
     return retcode;
 }

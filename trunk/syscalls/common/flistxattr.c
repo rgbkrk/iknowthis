@@ -13,7 +13,7 @@
 
 // List extended attributes.
 // int flistxattr(int fd, const char *list, size_t size);
-SYSFUZZ(flistxattr, __NR_flistxattr, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(flistxattr, __NR_flistxattr, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     glong       retcode;
     gpointer    list;

@@ -27,28 +27,32 @@
 // We need a kernel supported listener count, that we can check. I considered
 // sockets, files, semaphores, but I think the most reliable is shmid attach
 // counts.
-// 
+//
 // Note that zombies do _not_ count against this limit. Zombies are cleaned up
 // by the resource management code when they are evicted from the list.
 
 // The shmid for this process.
-static gint shmid;
+static gint     shmid;
 
-static void __constructor create_process_shmid(void)
+void __constructor create_process_shmid(void)
 {
     struct shmid_ds shmds;
+
+    // I should only be called once.
+    g_assert_cmpint(shmid, ==, 0);
+    g_assert(system_call_fuzzers == NULL);
 
     // Create a shmid, used to track process creations.
     // ftok() does a stat(), and uses the inode number combined with the
     // proj_id, so I'll use the process id.
-    if ((shmid = shmget(ftok("/proc/self/exe", getpid()), PAGE_SIZE, IPC_CREAT | S_IRUSR)) == -1) {
+    if ((shmid = shmget(ftok("/proc/self/exe", getpid()), PAGE_SIZE, IPC_CREAT | 0666)) == -1) {
         // I cannot safely continue, or I might take the system down.
         g_critical("unable to create a shared segment id to track processes, %s", g_strerror(errno));
         abort();
     }
 
     // Attach to this segment.
-    if (shmat(shmid, NULL, SHM_RDONLY) == MAP_FAILED) {
+    if (shmat(shmid, NULL, 0) == MAP_FAILED) {
         // This is probably not good.
         g_critical("there was an error attaching to shmid %#x, %s.", shmid, g_strerror(errno));
         abort();
@@ -68,13 +72,20 @@ static void __constructor create_process_shmid(void)
 // current number of processes.
 guint increment_process_count(void)
 {
-    struct shmid_ds shmds;
-
     // Attach to the process shm segment to increment the attach count.
     if (shmat(shmid, NULL, SHM_RDONLY) == MAP_FAILED) {
         g_critical("there was an error attaching to shmid %#x, %s.", shmid, g_strerror(errno));
         abort();
     }
+
+    // Return to caller so that they can verify this is within bounds.
+    return get_process_count();
+}
+
+// Get the current number of processes, but don't increment it.
+guint get_process_count(void)
+{
+    struct shmid_ds shmds;
 
     // Stat the id to find the current count.
     if (shmctl(shmid, IPC_STAT, &shmds) == -1) {

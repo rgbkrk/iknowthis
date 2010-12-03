@@ -20,10 +20,11 @@ SYSFUZZ(chown, __NR_chown, SYS_NONE, CLONE_DEFAULT, 0)
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_chown,                                 // int
                                 typelib_get_pathname(&path),                            // const char *path
-                                typelib_get_integer(),                                  // uid_t owner
-                                typelib_get_integer());                                 // gid_t group
+                                typelib_get_integer_selection(1, -1),                   // uid_t owner
+                                typelib_get_integer_selection(1, -1));                  // gid_t group
 
     g_free(path);
+
     return retcode;
 }
 

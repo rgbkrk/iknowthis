@@ -55,37 +55,35 @@ static void __constructor init_thread_stacks(void)
     return;
 }
 
+struct watchdog {
+    syscall_fuzzer_t    *fuzzer;
+    pid_t                pid;
+};
+
 // Thread used to monitor for fuzzer for timeout.
-static gint watchdog_thread_func(gpointer this)
+static gint watchdog_thread_func(gpointer parameters)
 {
-    syscall_fuzzer_t *fuzzer = this;
-    struct timespec request = {
-        .tv_sec     = fuzzer->timeout ? 0 : 32,                   // Default timeout
-        .tv_nsec    = fuzzer->timeout * 1000,                     // Microseconds.
+    struct watchdog *params  = parameters;
+    struct timespec  request = {
+        .tv_sec     = params->fuzzer->timeout ? 0 : 1,                    // Default timeout
+        .tv_nsec    = params->fuzzer->timeout * 1000,                     // Microseconds.
     };
 
     // Convert timeout to nanoseconds, and use nanosleep to delay.
-    if (nanosleep(&request, NULL) != 0) {
-        g_warning("watchdog thread failed to sleep for the requested interval, %s", g_strerror(errno));
-        return 1;
-    }
+    nanosleep(&request, NULL);
 
-    //g_message("watchdog thread terminating %d after %u useconds timeout",
-    //          watchdog->pid,
-    //          watchdog->timeout);
-
-    if (fuzzer->timeout == 0) {
-        // g_message("fuzzer %s reached the default cap on execution time", fuzzer->name);
+    if (params->fuzzer->timeout == 0) {
+        g_message("fuzzer %s reached the default cap on execution time", params->fuzzer->name);
     }
 
     // I'm still here, so kill the thread.
-    if (kill(fuzzer->pid, SIGKILL) != 0) {
+    if (kill(params->pid, SIGKILL) != 0) {
         // This is normal, just a small race condition.
         g_assert_cmpint(errno, ==, ESRCH);
 
-        //g_message("watchdog thread failed to terminate hung process %d, %s",
-        //          fuzzer->pid,
-        //          g_strerror(errno));
+        g_message("watchdog thread failed to terminate hung process %d, %s",
+                  params->pid,
+                  g_strerror(errno));
     }
 
     return 0;
@@ -120,6 +118,9 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
     glong           retcode;
     va_list         ap;
 
+    struct watchdog watchdog = {
+        .fuzzer     = this,
+    };
     struct context  context = {
         .status     = status ? status : &retcode,
         .sysno      = sysno,
@@ -153,20 +154,20 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
     }
 
     // Spawn the fuzzer.
-    if ((this->pid = clone(lwp_systemcall_routine, fuzzerstack, this->shared, &context)) == -1) {
+    if ((watchdog.pid = clone(lwp_systemcall_routine, fuzzerstack, this->shared, &context)) == -1) {
         g_critical("failed to spawn lwp for fuzzer %s, %s", this->name, g_strerror(errno));
     }
 
     // Spawn watchdog.
-    if ((watchdogpid = clone(watchdog_thread_func, watchdogstack, CLONE_DEFAULT, this)) == -1) {
+    if ((watchdogpid = clone(watchdog_thread_func, watchdogstack, CLONE_DEFAULT, &watchdog)) == -1) {
         g_critical("failed to spawn watchdog thread for %s, %s", this->name, g_strerror(errno));
 
         // Kill it to prevent hangs.
-        kill(this->pid, SIGKILL);
+        kill(watchdog.pid, SIGKILL);
     }
 
     // And now we play the waiting game.
-    childpid = waitpid(this->pid, &childstatus, __WALL);
+    childpid = waitpid(watchdog.pid, &childstatus, __WALL);
 
     // Child has returned, (possibly) kill watchdog. Note that it might already
     // be dead, if the child timedout.
@@ -182,8 +183,12 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
             g_critical("failed to wait for one of my lwps for %s, %s", this->name, g_strerror(errno));
         }
 
-        g_assert_cmpint(childpid, ==, this->pid);
-        g_assert_cmpint(watchdogret, ==, watchdogpid);
+        if (childpid != -1 ) {
+            g_assert_cmpint(childpid, ==, watchdog.pid);
+        }
+        if (watchdogpid != -1) {
+            g_assert_cmpint(watchdogret, ==, watchdogpid);
+        }
     }
 
     // Child completed before timeout.

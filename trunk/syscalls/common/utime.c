@@ -14,10 +14,11 @@
 #include "iknowthis.h"
 
 // Change file last access and modification times.
+// int utime(const char *filename, const struct utimbuf *times);
 SYSFUZZ(utime, __NR_utime, SYS_SAFE, CLONE_DEFAULT, 1000)
 {
-	gchar       *filename;
-	gpointer     times;
+    gchar       *filename;
+    gpointer     times;
     glong        retcode;
 
     retcode     = spawn_syscall_lwp(this, NULL, __NR_utime,                                        // int

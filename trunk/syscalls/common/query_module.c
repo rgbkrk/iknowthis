@@ -14,12 +14,15 @@
 
 // Query the kernel for various bits pertaining to modules.
 // int query_module(const char *name, int which, void *buf, size_t bufsize, size_t *ret);
-SYSFUZZ(query_module, __NR_query_module, SYS_NONE, CLONE_DEFAULT, 0)
+//
+// This system call is expected to fail on any kernel after Linux 2.6.
+// 
+SYSFUZZ(query_module, __NR_query_module, SYS_FAIL, CLONE_DEFAULT, 0)
 {
-	gpointer    name;
-	gpointer    buf;
-	gpointer    ret;
-	glong       retcode;
+    gpointer    name;
+    gpointer    buf;
+    gpointer    ret;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_query_module,                              // int
                                 typelib_get_buffer(&name, g_random_int_range(0, 0x1000)),   // const char *name

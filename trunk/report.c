@@ -155,13 +155,14 @@ void pretty_print_fuzzer(HDF *hdf, syscall_fuzzer_t *fuzzer)
     hdf_set_value(info, "Name", fuzzer->name);
     hdf_set_int_value(info, "Total", fuzzer->total);
     hdf_set_int_value(info, "Failures", fuzzer->failures);
+    hdf_set_int_value(info, "NumErrors", fuzzer->numerrors);
     hdf_set_value(info, "Errors", NULL);
 
     // Now switch to error tree.
     info = hdf_get_obj(info, "Errors");
 
     // Enumerate all the errors this fuzzer has seen.
-    for (gint i; i < fuzzer->numerrors; i++) {
+    for (gint i = 0; i < fuzzer->numerrors; i++) {
         gchar *error = g_strdup_printf("%u.error", i);
         gchar *count = g_strdup_printf("%u.count", i);
 
@@ -248,7 +249,7 @@ void create_fuzzer_report(HDF *hdf)
         }
 
         // Is it marked SYS_BORING, but returns multiple value?
-        if ((system_call_fuzzers[i].flags & SYS_BORING) && (system_call_fuzzers[i].failures == 0 || system_call_fuzzers[i].numerrors == 1)) {
+        if ((system_call_fuzzers[i].flags & SYS_BORING) && !(system_call_fuzzers[i].numerrors <= 1)) {
             gchar *node = g_strdup_printf("%u.name", i);
             hdf_set_value(hdf_get_obj(hdf, "Global.fuzzer_not_boring"),
                           node,

@@ -14,9 +14,6 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
-// I don't know how to query this at runtime.
-#define SEMMSL 32768
-
 // Callback for typelib_add_resource().
 static gboolean destroy_semaphore(guintptr semid)
 {
@@ -33,7 +30,7 @@ SYSFUZZ(semget, __NR_semget, SYS_NONE, CLONE_DEFAULT, 1000)
     // Execute systemcall.
     retcode = spawn_syscall_lwp(this, &semid, __NR_semget,                                                                   // int
                                       typelib_get_integer_selection(2, IPC_PRIVATE, typelib_get_integer()),                  // key_t key
-                                      typelib_get_integer_range(0, SEMMSL),                                                  // int nsems
+                                      typelib_get_integer_range(0, 256),                                                     // int nsems
                                       typelib_get_integer_mask(IPC_CREAT | IPC_EXCL | 0777));                                // int semflg
 
     // Record the new shmid.

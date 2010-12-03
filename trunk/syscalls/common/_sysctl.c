@@ -16,42 +16,42 @@
 // int _sysctl(struct __sysctl_args *args);
 SYSFUZZ(_sysctl, __NR__sysctl, SYS_NONE, CLONE_DEFAULT, 0)
 {
-    glong                   retcode;
-    struct __sysctl_args    args = {
-    	.oldval     = NULL,
-    	.newval     = NULL,
+    glong                   retcode = -1;
+    gsize                   avail   = PAGE_SIZE;
+    struct __sysctl_args    args    = {
+        .name       = g_new(gint, 2),
+        .nlen       = 2,
+        .oldval     = typelib_get_buffer(NULL, PAGE_SIZE),
+        .oldlenp    = &avail,
+        .newval     = NULL,
+        .newlen     = 0,
     };
 
     // This system call is bizarre.
-    typelib_get_buffer((gpointer) &args.name,      g_random_int_range(0, PAGE_SIZE));
-    typelib_get_buffer((gpointer) &args.oldlenp,   g_random_int_range(0, PAGE_SIZE));
-
-    if (g_random_boolean()) {
-        typelib_get_buffer((gpointer) &args.oldval, g_random_int_range(0, PAGE_SIZE));
-        args.nlen = typelib_get_integer();
-    }
-
-    if (g_random_boolean()) {
-        typelib_get_buffer((gpointer) &args.newval, g_random_int_range(0, PAGE_SIZE));
-        args.newlen = typelib_get_integer();
-    }
-
+    args.name[1]    = typelib_get_integer_range(0, 64);
+    args.name[0]    = typelib_get_integer_selection(15, CTL_KERN,
+                                                        CTL_VM,
+                                                        CTL_NET,
+                                                        CTL_PROC,
+                                                        CTL_FS,
+                                                        CTL_DEBUG,
+                                                        CTL_DEV,
+                                                        CTL_BUS,
+                                                        CTL_ABI,
+                                                        CTL_CPU,
+                                                        CTL_ARLAN,
+                                                        CTL_S390DBF,
+                                                        CTL_SUNRPC,
+                                                        CTL_PM,
+                                                        CTL_FRV);
 
     retcode = spawn_syscall_lwp(this, NULL, __NR__sysctl,   // int
                                 &args);                     // struct __sysctl_args *args
 
-    typelib_clear_buffer(args.name);
-    typelib_clear_buffer(args.oldlenp);
+    // Clean up
+    typelib_clear_buffer(args.oldval);
 
-    if (args.oldval) 
-    	typelib_clear_buffer(args.oldval);
-
-    if (args.newval) {
-    	typelib_clear_buffer(args.newval);
-    	
-    	// I shouldn't be allowed to write a new value.
-    	g_assert_cmpint(retcode, !=, ESUCCESS);
-    }
+    g_free(args.name);
 
     return retcode;
 }
