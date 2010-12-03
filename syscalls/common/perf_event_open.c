@@ -3,10 +3,12 @@
 #endif
 #include <glib.h>
 #include <asm/unistd.h>
-#include <linux/reboot.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sched.h>
+#ifdef __NR_perf_event_open
+# include <linux/perf_event.h>
+#endif
 
 #include "sysfuzz.h"
 #include "typelib.h"

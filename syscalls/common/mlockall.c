@@ -14,9 +14,9 @@
 
 // Lock and unlock memory.
 // int mlockall(int flags);
-SYSFUZZ(mlockall, __NR_mlockall, SYS_NONE, CLONE_FORK, 0)
+SYSFUZZ(mlockall, __NR_mlockall, SYS_NONE, CLONE_FORK, 1000)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_mlockall,                         // int
-	                         typelib_get_integer_mask(3));                      // int flags
+    return spawn_syscall_lwp(this, NULL, __NR_mlockall,                         // int
+                             typelib_get_integer_mask(3));                      // int flags
 }
 

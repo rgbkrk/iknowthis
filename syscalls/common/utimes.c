@@ -16,8 +16,8 @@
 // int utimes(const char *filename, const struct timeval times[2]);
 SYSFUZZ(utimes, __NR_utimes, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gchar       *filename;
-	gpointer     times;
+    gchar       *filename;
+    gpointer     times;
     glong        retcode;
 
     retcode     = spawn_syscall_lwp(this, NULL, __NR_utimes,                                       // int

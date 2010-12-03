@@ -10,6 +10,10 @@
 #include <stdbool.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
 #include <sys/prctl.h>
 #include <sys/mman.h>
 
@@ -21,8 +25,16 @@
 static gboolean destroy_forked_process(guintptr pid)
 {
     g_assert_cmpuint(pid, >, 1);
-    kill(pid, SIGKILL);
-    waitpid(pid, NULL, __WALL);
+
+    // Terminate it.
+    if (kill(pid, SIGKILL) != 0 && errno != ESRCH) {
+        g_message("destroy_forked_process failed to kill forked process %lu, %m", pid);
+    }
+
+    // Wait for it to stop.
+    if (waitpid(pid, NULL, __WALL) != pid && errno != ECHILD) {
+        g_message("destroy_forked_process failed to wait for forked process %lu, %m", pid);
+    }
 
     return true;
 }
@@ -33,6 +45,7 @@ SYSFUZZ(fork, __NR_fork, SYS_NONE, CLONE_DEFAULT, 0)
 {
     glong           retcode;
     pid_t           pid = -1;
+    pid_t           parent = getpid();
 
     // I think the lwp syscall code may not handle this well, luckily fork() is
     // simple enough that I can handle it here.
@@ -40,16 +53,11 @@ SYSFUZZ(fork, __NR_fork, SYS_NONE, CLONE_DEFAULT, 0)
 
     // Determine what happened.
     switch (pid) {
-        case  0: // In the child process, increment nesting depth.
-                 process_nesting_depth++;
-
-                 // Learn about myself.
+        case  0: // In the child process, Learn about myself.
                  typelib_add_resource(this, syscall(__NR_getpid), RES_FORK, RF_NONE, destroy_forked_process);
 
-                 // Possible learn about parent if it's not the master.
-                 if (process_nesting_depth > 1) {
-                    typelib_add_resource(this, syscall(__NR_getppid), RES_FORK, RF_NONE, destroy_forked_process);
-                 }
+                 // Learn about the parent.
+                 typelib_add_resource(this, parent, RES_FORK, RF_NONE, destroy_forked_process);
 
                  // Make sure this wouldnt put us over process quota.
                  if (increment_process_count() > MAX_PROCESS_NUM) {

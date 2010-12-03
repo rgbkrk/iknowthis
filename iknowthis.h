@@ -7,6 +7,7 @@
 void    create_dirty_pages(void);
 gint    spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...);
 guint   increment_process_count(void);
+guint   get_process_count(void);
 
 #else
 # warning iknowthis.h included twice

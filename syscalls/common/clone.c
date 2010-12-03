@@ -24,10 +24,11 @@ static gboolean destroy_forked_process(guintptr pid)
 }
 
 // Create a child process.
-SYSFUZZ(clone, __NR_clone, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(clone, __NR_clone, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
     glong       retcode;
     pid_t       pid = -1;
+    pid_t       parent = getpid();
     gpointer    arg1;
     gpointer    arg2;
     gpointer    arg3;
@@ -52,16 +53,9 @@ SYSFUZZ(clone, __NR_clone, SYS_NONE, CLONE_DEFAULT, 0)
 
     // Determine what happened.
     switch (pid) {
-        case  0: // In the child process, increment nesting depth.
-                 process_nesting_depth++;
-
-                 // Learn about myself.
+        case  0: // Learn about myself and parent.
                  typelib_add_resource(this, syscall(__NR_getpid), RES_FORK, RF_NONE, destroy_forked_process);
-
-                 // Possible learn about parent if it's not the master.
-                 if (process_nesting_depth > 1) {
-                    typelib_add_resource(this, syscall(__NR_getppid), RES_FORK, RF_NONE, destroy_forked_process);
-                 }
+                 typelib_add_resource(this, parent, RES_FORK, RF_NONE, destroy_forked_process);
 
                  // Make sure this wouldnt put us over process quota.
                  if (increment_process_count() > MAX_PROCESS_NUM) {

@@ -17,9 +17,9 @@
 // int setresuid(uid_t ruid, uid_t euid, uid_t suid);
 SYSFUZZ(setresuid, __NR_setresuid, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_setresuid,                                             // int
-	                         typelib_get_integer(),                                                  // uid_t ruid
-	                         typelib_get_integer(),                                                  // uid_t euid
-	                         typelib_get_integer());                                                 // uid_t suid
+    return spawn_syscall_lwp(this, NULL, __NR_setresuid,                // int
+                             typelib_get_integer_selection(1, -1),      // uid_t ruid
+                             typelib_get_integer_selection(1, -1),      // uid_t euid
+                             typelib_get_integer_selection(1, -1));     // uid_t suid
 }
 

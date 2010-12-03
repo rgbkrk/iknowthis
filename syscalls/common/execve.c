@@ -13,7 +13,7 @@
 
 // Execute program.
 // int execve(const char *filename, char *const argv[], char *const envp[]);
-SYSFUZZ(execve, __NR_execve, SYS_NONE, CLONE_DEFAULT, 1000)
+SYSFUZZ(execve, __NR_execve, SYS_FAIL, CLONE_DEFAULT, 1000)
 {
     glong       retcode;
     guint       nargs;

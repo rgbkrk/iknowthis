@@ -2,6 +2,7 @@
 #define __SYSFUZZ_H
 #pragma once
 
+#include <sys/mman.h>
 #include <sched.h>
 
 #ifndef PAGE_SIZE
@@ -60,7 +61,6 @@ typedef struct {
     guint           timeout;                        // Microseconds allowed to execute for.
     gdouble         average;                        // Average time fuzzer takes to execute.
     gsize           numerrors;                      // Unique error codes recorded.
-    pid_t           pid;                            // Process Id of last fuzzer.
     error_record_t  errors[MAX_ERROR_CODES];        // error statistics.
 } syscall_fuzzer_t;
 
@@ -76,7 +76,7 @@ typedef struct {
 #define syscall_fast_ret(_dest, _number...)                                 \
 (                                                                           \
     errno = 0,                                      /* Reset errno */       \
-    *((int *)(_dest)) = syscall(_number),           /* Execute syscall */   \
+    *((glong *)(_dest)) = syscall(_number),         /* Execute syscall */   \
     errno                                           /* Return error code */ \
 )
 
@@ -92,22 +92,32 @@ typedef struct {
 
 #define MAX_PROCESS_NUM 32
 
-extern syscall_fuzzer_t system_call_fuzzers[MAX_SYSCALL_NUM];
-extern guint            total_registered_fuzzers;
-extern guint            total_disabled_fuzzers;
-extern guint            process_nesting_depth;
+extern syscall_fuzzer_t *system_call_fuzzers;
+extern gint              semid;                 // Semaphore set for syscall fuzzers.
+
+// Alocate space for the system_call_fuzzer table in shared memory.
+static inline void allocate_sycall_fuzzer_table(void)
+{
+    g_assert(system_call_fuzzers == NULL);
+
+    system_call_fuzzers = mmap(NULL, sizeof(syscall_fuzzer_t) * MAX_SYSCALL_NUM,
+                                     PROT_READ | PROT_WRITE,
+                                     MAP_SHARED | MAP_ANONYMOUS,
+                                     -1,
+                                     0);
+}
 
 #define SYSFUZZ(_name, _syscall, _flags, _cloneflags, _timeout)             \
     static glong __fuzz__ ## _name (gpointer ignored);                      \
     static void __constructor __const__ ## _name (void)                     \
     {                                                                       \
+        /* Verify the system call table is ready */                         \
+        if (system_call_fuzzers == NULL)                                    \
+            allocate_sycall_fuzzer_table();                                 \
+                                                                            \
         /* Verify this slot is empty */                                     \
         g_assert_cmpstr(system_call_fuzzers[_syscall].name, ==, NULL);      \
-        if ((_flags) & SYS_DISABLED) {                                      \
-            total_disabled_fuzzers++;                                       \
-        } else {                                                            \
-            total_registered_fuzzers++;                                     \
-        }                                                                   \
+                                                                            \
         system_call_fuzzers[_syscall].callback = __fuzz__ ## _name;         \
         system_call_fuzzers[_syscall].name     = # _name;                   \
         system_call_fuzzers[_syscall].flags    = _flags;                    \

@@ -14,9 +14,8 @@
 #include "iknowthis.h"
 
 // Terminate the calling process.
-SYSFUZZ(exit, __NR_exit, SYS_VOID, CLONE_DEFAULT, 0)
+SYSFUZZ(exit, __NR_exit, SYS_VOID | SYS_BORING, CLONE_DEFAULT, 0)
 {
     return spawn_syscall_lwp(this, NULL, __NR_exit,             // void
-                      typelib_get_integer());                   // int status
-    
+                             typelib_get_integer());            // int status
 }

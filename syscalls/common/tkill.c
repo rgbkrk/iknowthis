@@ -12,7 +12,7 @@
 #include "iknowthis.h"
 
 // Send a signal to a single process.
-SYSFUZZ(tkill, __NR_tkill, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(tkill, __NR_tkill, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     glong   retcode;
 
