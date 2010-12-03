@@ -16,7 +16,7 @@
 
 // Retrieve exported kernel and module symbols.
 // int get_kernel_syms(struct kernel_sym *table);
-SYSFUZZ(get_kernel_syms, __NR_get_kernel_syms, SYS_FAIL, CLONE_DEFAULT, 0)
+SYSFUZZ(get_kernel_syms, __NR_get_kernel_syms, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 0)
 {
     gpointer    table;
     glong       retcode;
