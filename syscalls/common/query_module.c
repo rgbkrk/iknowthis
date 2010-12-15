@@ -17,7 +17,7 @@
 //
 // This system call is expected to fail on any kernel after Linux 2.6.
 // 
-SYSFUZZ(query_module, __NR_query_module, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 1000)
+SYSFUZZ(query_module, __NR_query_module, SYS_FAIL | SYS_BORING | SYS_SAFE, CLONE_DEFAULT, 1000)
 {
     gpointer    name;
     gpointer    buf;
