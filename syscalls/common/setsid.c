@@ -14,8 +14,9 @@
 #include "iknowthis.h"
 
 // Creates a session and sets the process group ID.
+// pid_t setsid(void);
 SYSFUZZ(setsid, __NR_setsid, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_setsid);               // pid_t
+    return spawn_syscall_lwp(this, NULL, __NR_setsid);               // pid_t
 }
 

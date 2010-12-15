@@ -14,8 +14,8 @@
 #include "iknowthis.h"
 
 // Unimplemented system calls.
-SYSFUZZ(afs_syscall, __NR_afs_syscall, SYS_FAIL | SYS_SAFE, CLONE_DEFAULT, 0)
+SYSFUZZ(afs_syscall, __NR_afs_syscall, SYS_FAIL | SYS_SAFE | SYS_BORING, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_afs_syscall);
+    return spawn_syscall_lwp(this, NULL, __NR_afs_syscall);
 }
 

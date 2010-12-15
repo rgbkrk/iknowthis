@@ -20,7 +20,7 @@ SYSFUZZ(fstat, __NR_fstat, SYS_NONE, CLONE_DEFAULT, 0)
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_fstat,                                      // int
                                 typelib_get_resource(this, NULL, RES_FILE, RF_NONE),         // int fd
-                                typelib_get_buffer(&buf, PAGE_SIZE));                        // struct stat *buf
+                                typelib_get_buffer(&buf, sizeof(struct stat)));              // struct stat *buf
 
     typelib_clear_buffer(buf);
 

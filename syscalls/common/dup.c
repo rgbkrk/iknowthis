@@ -19,7 +19,7 @@ static gboolean destroy_open_file(guintptr fd)
 
 // Duplicate a file descriptor.
 // int dup(int oldfd);
-SYSFUZZ(dup, __NR_dup, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(dup, __NR_dup, SYS_SAFE, CLONE_DEFAULT, 0)
 {
     glong   fd;
     glong   retcode;
@@ -29,8 +29,8 @@ SYSFUZZ(dup, __NR_dup, SYS_NONE, CLONE_DEFAULT, 0)
 
     if (retcode == ESUCCESS) {
         // NOTE: Because basically nothing can go wrong with dup,
-        //       it will saturate all the available space in my fd list very
-        //       quickly. Therefore, only allow it occassionally.
+        //       it will saturate all the available space in my fd list.
+        //       Therefore, only allow it occassionally.
         if (g_random_int_range(0, 1024)) {
             // Throw it away.
             close(fd);

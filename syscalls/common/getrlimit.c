@@ -19,12 +19,12 @@
 // int getrlimit(int resource, struct rlimit *rlim);
 SYSFUZZ(getrlimit, __NR_getrlimit, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gpointer    rlim;
-	glong       retcode;
+    gpointer    rlim;
+    glong       retcode;
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_getrlimit,                                 // int
-	                            typelib_get_integer_range(0, __RLIMIT_NLIMITS),             // int resource
-	                            typelib_get_buffer(&rlim, PAGE_SIZE));                      // struct rlimit *rlim
+    retcode = spawn_syscall_lwp(this, NULL, __NR_getrlimit,                                 // int
+                                typelib_get_integer_range(0, __RLIMIT_NLIMITS),             // int resource
+                                typelib_get_buffer(&rlim, sizeof(struct rlimit)));          // struct rlimit *rlim
 
     typelib_clear_buffer(rlim);
     return retcode;

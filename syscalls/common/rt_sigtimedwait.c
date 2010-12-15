@@ -16,18 +16,19 @@
 // long sys_rt_sigtimedwait (const sigset_t *uthese, siginfo_t *uinfo,
 //                           const struct struct timespec *uts,
 //                           size_t sigsetsize);
+// long long struct struct... :-)
 SYSFUZZ(rt_sigtimedwait, __NR_rt_sigtimedwait, SYS_NONE, CLONE_DEFAULT, 1000)
 {
-	gpointer    uthese;
-	gpointer    uinfo;
-	gpointer    uts;
-	glong       retcode;
+    gpointer    uthese;
+    gpointer    uinfo;
+    gpointer    uts;
+    glong       retcode;
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_rt_sigtimedwait,                       // int
-	                            typelib_get_buffer(&uthese, g_random_int_range(0, 32)), // sigset_t *uthese
-	                            typelib_get_buffer(&uinfo, g_random_int_range(0, 32)),  // sigset_t *uinfo
-                                typelib_get_buffer(&uts, g_random_int_range(0, 32)),    // const struct struct timespec *uts
-                                typelib_get_integer_selection(1, sizeof(sigset_t)));    // size_t sigsetsize
+    retcode = spawn_syscall_lwp(this, NULL, __NR_rt_sigtimedwait,                       // int
+                                typelib_get_buffer(&uthese, sizeof(sigset_t)),          // sigset_t *uthese
+                                typelib_get_buffer(&uinfo, sizeof(sigset_t)),           // sigset_t *uinfo
+                                typelib_get_buffer(&uts, sizeof(struct timespec)),      // const struct struct timespec *uts
+                                typelib_get_integer_selection(1, sizeof(guint64)));     // size_t sigsetsize
 
     typelib_clear_buffer(uthese);
     typelib_clear_buffer(uinfo);

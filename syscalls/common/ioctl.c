@@ -18,51 +18,32 @@ SYSFUZZ(ioctl, __NR_ioctl, SYS_NONE, CLONE_DEFAULT, 0)
     guint        req;
     guint        arg;
     gint         fd;
+    gpointer     buffer;
     glong        retcode;
-    static gint  r_mask;
 
     // Choose a random ioctl request and argument.
-    req = typelib_get_integer_mask(r_mask) | (1 << g_random_int_range(0, 32));
+    req = typelib_get_integer();
     arg = typelib_get_integer();
 
     // Choose the device.
     fd  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);
 
-    // Execute a probe ioctl.
-    retcode = spawn_syscall_lwp(this, NULL, __NR_ioctl,                                         // int
-                                fd,                                                             // int fd
-                                req,                                                            // int request
-                                ~0);                                                            // ...
-
-    // Remember that this mask is valid.
-    if (retcode != EINVAL)
-        r_mask |= req;
-
-    // If that succeeded, it must ignore the arg parameter, or all flags are
-    // valid (seems unlikely).
-    if (retcode == ESUCCESS) {
-        // Re-run with random combination of flags.
-        return spawn_syscall_lwp(this, NULL, __NR_ioctl,                                        // int
-                                 fd,                                                            // int fd
-                                 req,                                                           // int request
-                                 arg);                                                          // ...
-    }
-
-    // Call expected an address, so give it one
-    if (retcode == EFAULT) {
-        gpointer buffer;
-
-        retcode = spawn_syscall_lwp(this, NULL, __NR_ioctl,                                     // int
-                                    fd,                                                         // int fd
-                                    req,                                                        // int request
-                                    typelib_get_buffer(&buffer, g_random_int_range(0, 8192)));  // ...
-
-        typelib_clear_buffer(buffer);
-        return retcode;
-    }
+    // Execute a probe ioctl to see if the final parameter is an address.
+    retcode = syscall_fast(__NR_ioctl, fd, req, ~0);
 
     // The probe failed, see if I can determine why from errno.
     switch (retcode) {
+        case EFAULT:     // Bad address
+            // It was expecting an address, let's give him one.
+            retcode = syscall_fast(__NR_ioctl, fd, req, typelib_get_buffer(&buffer, PAGE_SIZE));
+
+            // Clean up
+            typelib_clear_buffer(buffer);
+            break;
+        default:
+            g_debug("unexpected errno set by ioctl, %ld (%s)", retcode, custom_strerror_wrapper(retcode));
+            // Fallthrough
+        case ESUCCESS:   // Success
         case ENOTTY:     // Inappropriate ioctl for device
         case EINVAL:     // Invalid argument
         case EPERM:      // Permission denied
@@ -74,9 +55,9 @@ SYSFUZZ(ioctl, __NR_ioctl, SYS_NONE, CLONE_DEFAULT, 0)
         case EBADF:      // Bad file descriptor
         case EBADFD:     // File descriptor in bad state
         case ENOTCONN:   // Transport endpoint is not connected
-            break;
-        default:
-            g_debug("unexpecter errno set by ioctl, %ld (%s)", retcode, g_strerror(retcode));
+        case ETIMEOUT:
+            // Doesn't look like an address was expected, just rerun with a random parameter.
+            retcode = syscall_fast(__NR_ioctl, fd, req, arg);
             break;
     }
 

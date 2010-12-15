@@ -21,16 +21,24 @@ SYSFUZZ(mremap, __NR_mremap, SYS_NONE, CLONE_DEFAULT, 0)
     gintptr     newaddr;
     gsize       oldsize;
     gsize       newsize;
+    gint        flags;
 
     typelib_get_vma(this, &address, &oldsize);
 
-    newsize = g_random_int_range(0, 0x10000);
+    newsize = g_random_boolean()
+                ? (PAGE_SIZE * 1)
+                : (PAGE_SIZE * 2);
 
-    retcode = spawn_syscall_lwp(this, &newaddr, __NR_mremap,                                // void *
+    flags   = typelib_get_integer_mask(MREMAP_FIXED | MREMAP_MAYMOVE);
+
+    // I don't currently handle MREMAP_FIXED.
+    flags  &= ~MREMAP_FIXED;
+
+    retcode = syscall_fast_ret(&newaddr, __NR_mremap,                                       // void *
                                 address,                                                    // void *old_address
                                 oldsize,                                                    // size_t old_size
                                 newsize,                                                    // size_t new_size
-                                typelib_get_integer_mask(MREMAP_FIXED | MREMAP_MAYMOVE),    // int flags
+                                flags,                                                      // int flags
                                 typelib_get_integer());                                     // unsigned long new_addr
 
     if (retcode == ESUCCESS) {

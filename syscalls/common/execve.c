@@ -5,30 +5,30 @@
 #include <asm/unistd.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sched.h>
+#include <string.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
 
+static gpointer argv[8];
+static gpointer envp[8];
+
 // Execute program.
 // int execve(const char *filename, char *const argv[], char *const envp[]);
-SYSFUZZ(execve, __NR_execve, SYS_FAIL, CLONE_DEFAULT, 1000)
+SYSFUZZ(execve, __NR_execve, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     glong       retcode;
     guint       nargs;
     guint       nenv;
-    gpointer   *argv;
-    gpointer   *envp;
     gchar      *path;
 
-    // Choose how many parameters to generate.
-    nargs   = g_random_int_range(0, 128);
-    nenv    = g_random_int_range(0, 128);
+    memset(argv, 0, sizeof(argv));
+    memset(envp, 0, sizeof(envp));
 
-    // Allocate space for pointers.
-    argv    = g_malloc0_n(nargs + 1, sizeof(gpointer));
-    envp    = g_malloc0_n(nenv  + 1, sizeof(gpointer));
+    // Choose how many parameters to generate.
+    nargs   = g_random_int_range(0, G_N_ELEMENTS(argv));
+    nenv    = g_random_int_range(0, G_N_ELEMENTS(envp));
 
     // Allocate data.
     while (nenv)  typelib_get_buffer(&envp[--nenv], PAGE_SIZE);
@@ -46,9 +46,6 @@ SYSFUZZ(execve, __NR_execve, SYS_FAIL, CLONE_DEFAULT, 1000)
     // Clear each arg.
     while (argv[nargs]) typelib_clear_buffer(argv[nargs++]);
     while (envp[nenv]) typelib_clear_buffer(envp[nenv++]);
-
-    g_free(argv);
-    g_free(envp);
 
     return retcode;
 }

@@ -8,10 +8,29 @@
 #include <fcntl.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/types.h>
+#include <pwd.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
+
+void __constructor cleanup_sysv_objects(void)
+{
+    struct shmid_ds buf;
+    struct passwd  *pw  = getpwnam("nobody");
+
+    // Try to remove stale shared memory segments.
+    for (gint i = 0; i < 1024; i++) {
+        gint  key = shmctl(i, SHM_STAT, &buf);
+
+        // Did this index exist and owned by my uid?
+        if (key != -1 && buf.shm_perm.uid == pw->pw_uid) {
+            // Looks good, kill it.
+            shmctl(key, IPC_RMID, NULL);
+        }
+    }
+}
 
 // Shared memory control.
 // int shmctl(int shmid, int cmd, struct shmid_ds *buf);

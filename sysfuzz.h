@@ -22,6 +22,20 @@ enum {
     EKILLED         = -3,               // Fuzzer was killed.
 };
 
+// Quick strerror wrapper to add support for my custom errno values.
+static inline const gchar * custom_strerror_wrapper(gint errnum)
+{
+    switch (errnum) {
+        case ESUCCESS: return "Operation successful";
+        case ETIMEOUT: return "Operation timed out";
+        case EEXITED:  return "Caller exited";
+        case EKILLED:  return "Caller was killed";
+        default:       return g_strerror(errnum);
+    }
+
+    g_assert_not_reached();
+}
+
 // Flags that modify the behaviour of a fuzzer.
 // If you modify this list, remember to update any pretty printers that dump
 // these flags, like list_fuzzer_names().
@@ -37,7 +51,9 @@ enum {
 
 // Some convenience clone combinations.
 enum {
-    CLONE_FORK      = 0,
+    // Of course this is not really a fork, but how else can i get the 64bit return code back on x64?
+    // FIXME: ptrace?
+    CLONE_FORK      = CLONE_VM,
     CLONE_DEFAULT   = CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_SYSVSEM | CLONE_IO,
     CLONE_SAFER     = CLONE_FS | CLONE_FILES | CLONE_IO,
 };

@@ -47,14 +47,14 @@ void __constructor create_process_shmid(void)
     // proj_id, so I'll use the process id.
     if ((shmid = shmget(ftok("/proc/self/exe", getpid()), PAGE_SIZE, IPC_CREAT | 0666)) == -1) {
         // I cannot safely continue, or I might take the system down.
-        g_critical("unable to create a shared segment id to track processes, %s", g_strerror(errno));
+        g_critical("unable to create a shared segment id to track processes, %s", custom_strerror_wrapper(errno));
         abort();
     }
 
     // Attach to this segment.
     if (shmat(shmid, NULL, 0) == MAP_FAILED) {
         // This is probably not good.
-        g_critical("there was an error attaching to shmid %#x, %s.", shmid, g_strerror(errno));
+        g_critical("there was an error attaching to shmid %#x, %s.", shmid, custom_strerror_wrapper(errno));
         abort();
     }
 
@@ -74,7 +74,7 @@ guint increment_process_count(void)
 {
     // Attach to the process shm segment to increment the attach count.
     if (shmat(shmid, NULL, SHM_RDONLY) == MAP_FAILED) {
-        g_critical("there was an error attaching to shmid %#x, %s.", shmid, g_strerror(errno));
+        g_critical("there was an error attaching to shmid %#x, %s.", shmid, custom_strerror_wrapper(errno));
         abort();
     }
 
@@ -89,7 +89,7 @@ guint get_process_count(void)
 
     // Stat the id to find the current count.
     if (shmctl(shmid, IPC_STAT, &shmds) == -1) {
-        g_critical("there was an error stating the process counting shmid, %s", g_strerror(errno));
+        g_critical("there was an error stating the process counting shmid, %s", custom_strerror_wrapper(errno));
         abort();
     }
 

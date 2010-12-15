@@ -41,7 +41,7 @@ static gboolean destroy_forked_process(guintptr pid)
 
 // Create a child process.
 // pid_t fork(void);
-SYSFUZZ(fork, __NR_fork, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(fork, __NR_fork, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
     glong           retcode;
     pid_t           pid = -1;

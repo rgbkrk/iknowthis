@@ -17,7 +17,6 @@
 // int personality(unsigned long persona);
 SYSFUZZ(personality, __NR_personality, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_personality,                                              // int
-	                         typelib_get_integer());                                                    // unsigned long persona
+    return spawn_syscall_lwp(this, NULL, __NR_personality, typelib_get_integer());
 }
 

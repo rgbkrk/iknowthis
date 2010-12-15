@@ -16,16 +16,16 @@
 // int mprotect(const void *addr, size_t len, int prot);
 SYSFUZZ(mprotect, __NR_mprotect, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	glong       retcode;
-	guintptr    address;
-	gsize       size;
+    glong       retcode;
+    guintptr    address;
+    gsize       size;
 
-	typelib_get_vma(this, &address, &size);
+    typelib_get_vma(this, &address, &size);
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_mprotect,                      // int
-	                            address,                                        // void *addr
-	                            size,                                           // size_t len
-	                            typelib_get_integer_mask(PROT_READ
+    retcode = spawn_syscall_lwp(this, NULL, __NR_mprotect,                      // int
+                                address,                                        // void *addr
+                                size,                                           // size_t len
+                                typelib_get_integer_mask(PROT_READ
                                                        | PROT_WRITE
                                                        | PROT_EXEC
                                                        | PROT_GROWSDOWN

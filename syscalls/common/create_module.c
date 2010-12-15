@@ -14,7 +14,7 @@
 
 // Create a loadable module entry.
 // caddr_t create_module(const char *name, size_t size);
-SYSFUZZ(create_module, __NR_create_module, SYS_FAIL, CLONE_DEFAULT, 0)
+SYSFUZZ(create_module, __NR_create_module, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 0)
 {
     gpointer    name;
     glong       retcode;

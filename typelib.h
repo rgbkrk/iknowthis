@@ -37,11 +37,11 @@
 gpointer        typelib_random_buffer(gpointer buffer, gsize size);
 gpointer        typelib_get_buffer(gpointer *buffer, gsize size);
 gchar *         typelib_get_pathname(gchar **pathname);
-guint           typelib_get_integer(void);
-guint           typelib_get_integer_range(guint start, guint end);
+gulong          typelib_get_integer(void);
+gulong          typelib_get_integer_range(guint32 start, guint32 end);
 void            typelib_clear_buffer(gpointer buffer);
-guint           typelib_get_integer_selection(guint count, ...);
-guint           typelib_get_integer_mask(guint mask);
+gulong          typelib_get_integer_selection(guint count, ...);
+gulong          typelib_get_integer_mask(gulong mask);
 
 enum {
     IOV_NONE           = 0,

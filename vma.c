@@ -231,7 +231,7 @@ static void typelib_vma_destroy(struct vma *vma, gboolean unmapvma)
             }
         } else {
             // Dump some debugging information.
-            g_warning("failed unmap vma %#" G_GINTPTR_MODIFIER "x, %s", vma->address.i, g_strerror(errno));
+            g_warning("failed unmap vma %#" G_GINTPTR_MODIFIER "x, %s", vma->address.i, custom_strerror_wrapper(errno));
             typelib_vma_prettyprint(vma);
             abort();
         }

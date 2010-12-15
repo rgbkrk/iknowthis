@@ -83,7 +83,7 @@ static gint watchdog_thread_func(gpointer parameters)
 
         g_message("watchdog thread failed to terminate hung process %d, %s",
                   params->pid,
-                  g_strerror(errno));
+                  custom_strerror_wrapper(errno));
     }
 
     return 0;
@@ -93,20 +93,26 @@ static gint watchdog_thread_func(gpointer parameters)
 // structure.
 gint lwp_systemcall_routine(gpointer param)
 {
+    glong           retcode = 0;
     struct context *context = param;
 
     // Initialise, in case I'm killed.
     *(context->status) = -ESUCCESS;
+    errno              =  ESUCCESS;
 
     // Execute system call.
-    *(context->status) = syscall(context->sysno,
-                                 context->arg0,
-                                 context->arg1,
-                                 context->arg2,
-                                 context->arg3,
-                                 context->arg4,
-                                 context->arg5,
-                                 context->arg6);
+    retcode = syscall(context->sysno,
+                      context->arg0,
+                      context->arg1,
+                      context->arg2,
+                      context->arg3,
+                      context->arg4,
+                      context->arg5,
+                      context->arg6);
+
+    // Find the status code.
+    *(context->status) = retcode == -1 ? -errno : retcode;
+
     return 0;
 }
 
@@ -148,19 +154,19 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
         }
 
         // Calculate return code.
-        return (gulong)(*(context.status)) >= (gulong)(-4095)
-                ? - *(context.status)
-                : 0;
+        return (gulong)(*(context.status)) > (gulong)(-4095)
+                            ? -*(context.status)
+                            : 0;
     }
 
     // Spawn the fuzzer.
     if ((watchdog.pid = clone(lwp_systemcall_routine, fuzzerstack, this->shared, &context)) == -1) {
-        g_critical("failed to spawn lwp for fuzzer %s, %s", this->name, g_strerror(errno));
+        g_critical("failed to spawn lwp for fuzzer %s, %s", this->name, custom_strerror_wrapper(errno));
     }
 
     // Spawn watchdog.
     if ((watchdogpid = clone(watchdog_thread_func, watchdogstack, CLONE_DEFAULT, &watchdog)) == -1) {
-        g_critical("failed to spawn watchdog thread for %s, %s", this->name, g_strerror(errno));
+        g_critical("failed to spawn watchdog thread for %s, %s", this->name, custom_strerror_wrapper(errno));
 
         // Kill it to prevent hangs.
         kill(watchdog.pid, SIGKILL);
@@ -180,7 +186,7 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
     if (sysno != __NR_execve) {
         // Check that worked.
         if (childpid == -1 || watchdogret == -1) {
-            g_critical("failed to wait for one of my lwps for %s, %s", this->name, g_strerror(errno));
+            g_critical("failed to wait for one of my lwps for %s, %s", this->name, custom_strerror_wrapper(errno));
         }
 
         if (childpid != -1 ) {
@@ -193,9 +199,9 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
 
     // Child completed before timeout.
     if (WIFEXITED(childstatus)) {
-        return (gulong)(*(context.status)) >= (gulong)(-4095)
-                ? - *(context.status)
-                : 0;
+        return (gulong)(*(context.status)) > (gulong)(-4095)
+                            ? -*(context.status)
+                            : 0;
     }
 
     // Child crashed.

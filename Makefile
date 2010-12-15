@@ -16,7 +16,7 @@ SYSCALLS    = $(patsubst %.c,%.o,$(wildcard syscalls/$(ARCH)/*.c))
 all:        iknowthis
 
 iknowthis:  $(SYSCALLS) iknowthis.o base.o buffer.o typelib/pathname.o \
-            typelib/resource.o lwp.o vma.o maps.o proc.o report.o
+            typelib/resource.o lwp.o vma.o maps.o proc.o report.o uid.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 clean:

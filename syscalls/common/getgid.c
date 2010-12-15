@@ -14,8 +14,9 @@
 #include "iknowthis.h"
 
 // Get group identity.
-SYSFUZZ(getgid, __NR_getgid, SYS_SAFE, CLONE_DEFAULT, 0)
+// gid_t getgid(void);
+SYSFUZZ(getgid, __NR_getgid, SYS_SAFE | SYS_BORING, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_getgid);      // gid_t
+    return spawn_syscall_lwp(this, NULL, __NR_getgid);      // gid_t
 }
 

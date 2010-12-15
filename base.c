@@ -4,40 +4,56 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 
-
-// 
 // typelib routines for primitive types.
-//
-
-guint typelib_get_integer(void)
+gulong typelib_get_integer(void)
 {
-	switch (g_random_int_range(0, 3)) {
-		case 0: return g_random_int() & g_random_int();
-		case 1: return g_random_int() | g_random_int();
-		case 2: return g_random_int();
+    gulong result = 0;
+
+    switch (g_random_int_range(0, 3)) {
+        case 0: result   = g_random_int() & g_random_int();     // Low density
+#if __WORDSIZE == 64
+                result <<= 32;
+                result  |= g_random_int() & g_random_int();
+#endif
+                break;
+        case 1: result   = g_random_int() | g_random_int();     // High density
+#if __WORDSIZE == 64
+                result <<= 32;
+                result  |= g_random_int() | g_random_int();
+#endif
+                break;
+        case 2: result   = g_random_int();                      // Even density
+#if __WORDSIZE == 64
+                result <<= 32;
+                result  |= g_random_int();
+#endif
+                break;
+        default: g_assert_not_reached();
     }
-
-    g_assert_not_reached();
+    return result;
 }
- 
+
 // Note that it might return out of range occasionally.
-guint typelib_get_integer_range(guint start, guint end)
+gulong typelib_get_integer_range(guint32 start, guint32 end)
 {
-	g_assert_cmpuint(start, <, end);
-	
-	if (g_random_int_range(0, 1024)) {
-		return g_random_int_range(start, end + 1);
+    g_assert_cmpuint(start, <, end);
+
+    if (g_random_int_range(0, 1024)) {
+        return g_random_int_range(start, end + 1);
     }
 
     return typelib_get_integer();
 }
 
-guint typelib_get_integer_selection(guint count, ...)
+gulong typelib_get_integer_selection(guint count, ...)
 {
     va_list     ap;
     guint       i;
     guint       current;
     guint       selected;
+
+    // Verify I'm not called with insane parameters.
+    g_assert_cmpuint(count, >, 0);
 
     // Possibly break the rules.
     if (g_random_int_range(0, 1024) == 0) {
@@ -50,14 +66,14 @@ guint typelib_get_integer_selection(guint count, ...)
 
     va_start(ap, count); {
         do {
-           current = va_arg(ap, guint);
-        } while (++i < selected);
+           current = va_arg(ap, gulong);
+        } while (i++ < selected);
     } va_end(ap);
 
     return current;
 }
 
-guint typelib_get_integer_mask(guint mask)
+gulong typelib_get_integer_mask(gulong mask)
 {
     return typelib_get_integer() & mask;
 }

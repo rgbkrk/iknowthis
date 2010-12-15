@@ -26,7 +26,7 @@ SYSFUZZ(mincore, __NR_mincore, SYS_NONE, CLONE_DEFAULT, 0)
     retcode = spawn_syscall_lwp(this, NULL, __NR_mincore,                       // int
                                 address,                                        // void *start
                                 size,                                           // size_t length
-                                typelib_get_buffer(&vec, g_random_int_range(0, 8192))); // unsigned char *vec
+                                typelib_get_buffer(&vec, PAGE_SIZE));           // unsigned char *vec
 
     typelib_clear_buffer(vec);
     return retcode;

@@ -15,8 +15,8 @@
 
 // Yield the processor.
 // int sched_yield(void);
-SYSFUZZ(sched_yield, __NR_sched_yield, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(sched_yield, __NR_sched_yield, SYS_BORING, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_sched_yield);                                             // int
+    return spawn_syscall_lwp(this, NULL, __NR_sched_yield);                                             // int
 }
 

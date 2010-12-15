@@ -15,8 +15,8 @@
 
 // Get group identity.
 // gid_t getegid(void);
-SYSFUZZ(getegid, __NR_getegid, SYS_SAFE, CLONE_DEFAULT, 0)
+SYSFUZZ(getegid, __NR_getegid, SYS_SAFE | SYS_BORING, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_getegid);     // void
+    return spawn_syscall_lwp(this, NULL, __NR_getegid);     // void
 }
 
