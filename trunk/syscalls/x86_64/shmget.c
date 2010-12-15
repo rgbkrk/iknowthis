@@ -27,9 +27,9 @@ SYSFUZZ(shmget, __NR_shmget, SYS_NONE, CLONE_DEFAULT, 1000)
     glong  shmid = -1;
 
     // Execute systemcall.
-    retcode = spawn_syscall_lwp(this, &shmid, __NR_shmget,                                                                  // int
-                                      typelib_get_integer_selection(2, IPC_PRIVATE, typelib_get_integer()),                 // key_t key
-                                      typelib_get_integer(),                                                                // size_t size
+    retcode = spawn_syscall_lwp(this, &shmid, __NR_shmget,                                                                   // int
+                                      typelib_get_integer_selection(2, IPC_PRIVATE, typelib_get_integer()),                  // key_t key
+                                      typelib_get_integer_range(0, PAGE_SIZE),                                               // size_t size
                                       typelib_get_integer_mask(IPC_CREAT | IPC_EXCL | SHM_HUGETLB | SHM_NORESERVE | 0777));  // int shmflg
 
     // Record the new shmid.

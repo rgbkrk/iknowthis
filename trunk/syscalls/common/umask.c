@@ -14,9 +14,8 @@
 #include "iknowthis.h"
 
 // Set file mode creation mask.
-SYSFUZZ(umask, __NR_umask, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(umask, __NR_umask, SYS_BORING, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_umask,                // mode_t
-	                         typelib_get_integer());                // mode_t mask
+    return spawn_syscall_lwp(this, NULL, __NR_umask, typelib_get_integer());
 }
 

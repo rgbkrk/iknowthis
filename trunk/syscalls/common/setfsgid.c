@@ -15,9 +15,10 @@
 
 // Set group identity used for file system checks.
 // int setfsgid(uid_t fsgid);
-SYSFUZZ(setfsgid, __NR_setfsgid, SYS_NONE, CLONE_DEFAULT, 0)
+// XXX: Bizarrely, setfsgid never returns any error.
+SYSFUZZ(setfsgid, __NR_setfsgid, SYS_VOID, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_setfsgid,                                                 // int
-	                         typelib_get_integer());                                                    // uid_t fsgid
+    return spawn_syscall_lwp(this, NULL, __NR_setfsgid,                                                 // int
+                             typelib_get_integer());                                                    // uid_t fsgid
 }
 

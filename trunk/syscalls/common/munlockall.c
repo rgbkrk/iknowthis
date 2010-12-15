@@ -16,6 +16,6 @@
 // int munlockall(void);
 SYSFUZZ(munlockall, __NR_munlockall, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_munlockall);                      // int
+    return spawn_syscall_lwp(this, NULL, __NR_munlockall);                      // int
 }
 

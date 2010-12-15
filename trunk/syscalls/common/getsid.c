@@ -15,7 +15,7 @@
 
 // Get session ID.
 // pid_t getsid(pid_t pid);
-SYSFUZZ(getsid, __NR_getsid, SYS_NONE, CLONE_DEFAULT, 0)
+SYSFUZZ(getsid, __NR_getsid, SYS_SAFE, CLONE_DEFAULT, 0)
 {
     return spawn_syscall_lwp(this, NULL, __NR_getsid, typelib_get_resource(this, NULL, RES_FORK, RF_NONE)); // pid_t pid
 }

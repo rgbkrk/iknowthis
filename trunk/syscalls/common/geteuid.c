@@ -14,8 +14,9 @@
 #include "iknowthis.h"
 
 // Get user identity.
-SYSFUZZ(geteuid, __NR_geteuid, SYS_NONE, CLONE_DEFAULT, 0)
+// uid_t geteuid(void);
+SYSFUZZ(geteuid, __NR_geteuid, SYS_SAFE | SYS_BORING, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_geteuid);     // void
+    return spawn_syscall_lwp(this, NULL, __NR_geteuid);     // void
 }
 

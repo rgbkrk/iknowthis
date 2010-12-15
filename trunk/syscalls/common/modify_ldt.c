@@ -16,13 +16,13 @@
 // int mprotect(const void *addr, size_t len, int prot);
 SYSFUZZ(modify_ldt, __NR_modify_ldt, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	gpointer    ptr;
-	glong       retcode;
+    gpointer    ptr;
+    glong       retcode;
 
-	retcode = syscall_fast(__NR_modify_ldt,                                                 // int
+    retcode = syscall_fast(__NR_modify_ldt,                                                 // int
                            typelib_get_integer_range(0, 1),                                 // int func
-	                       typelib_get_buffer(&ptr, g_random_int_range(0, PAGE_SIZE)),      // void *ptr
-	                       typelib_get_integer());                                          // unsigned long bytecount
+                           typelib_get_buffer(&ptr, g_random_int_range(0, PAGE_SIZE)),      // void *ptr
+                           typelib_get_integer());                                          // unsigned long bytecount
 
     typelib_clear_buffer(ptr);
 

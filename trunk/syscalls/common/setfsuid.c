@@ -15,9 +15,11 @@
 
 // Set user identity used for file system checks.
 // int setfsuid(uid_t fsuid);
-SYSFUZZ(setfsuid, __NR_setfsuid, SYS_NONE, CLONE_DEFAULT, 0)
+
+// XXX: Bizarrely, setfsuid() never returns error, even if it failed.
+SYSFUZZ(setfsuid, __NR_setfsuid, SYS_VOID, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_setfsuid,                                                 // int
-	                         typelib_get_integer());                                                    // uid_t fsuid
+    return spawn_syscall_lwp(this, NULL, __NR_setfsuid,                                                 // int
+                             typelib_get_integer());                                                    // uid_t fsuid
 }
 

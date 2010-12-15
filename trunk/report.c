@@ -86,7 +86,7 @@ static void generate_global_statistics(HDF *hdf)
             gchar *nodedesc  = g_strdup_printf("%u.description", code);
             gchar *nodecount = g_strdup_printf("%u.count", code);
 
-            hdf_set_value(errors, nodedesc, g_strerror(code));
+            hdf_set_value(errors, nodedesc, custom_strerror_wrapper(code));
             hdf_set_int_value(errors, nodecount, count);
 
             // Clean up.
@@ -128,8 +128,11 @@ static void generate_fuzzer_statistics(HDF *hdf)
             slowest = fuzzer;
     }
 
-    g_assert(fastest);
-    g_assert(slowest);
+    // Check we have a result
+    if (fastest == NULL || slowest == NULL) {
+        g_warning("statistics generation may fail, there do not appear to be any fuzzers enabled");
+        return;
+    }
 
     hdf_set_value(hdf, "Global.fastest_fuzzer.name", fastest->name);
     hdf_set_int_value(hdf, "Global.fastest_fuzzer.speed", fastest->average * 1000000);
@@ -166,7 +169,7 @@ void pretty_print_fuzzer(HDF *hdf, syscall_fuzzer_t *fuzzer)
         gchar *error = g_strdup_printf("%u.error", i);
         gchar *count = g_strdup_printf("%u.count", i);
 
-        hdf_set_value(info, error, g_strerror(fuzzer->errors[i].error));
+        hdf_set_value(info, error, custom_strerror_wrapper(fuzzer->errors[i].error));
         hdf_set_int_value(info, count, fuzzer->errors[i].count);
 
         g_free(error);

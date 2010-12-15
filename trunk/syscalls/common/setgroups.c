@@ -14,14 +14,15 @@
 #include "iknowthis.h"
 
 // Get/set list of supplementary group IDs.
-SYSFUZZ(setgroups, __NR_setgroups, SYS_NONE, CLONE_DEFAULT, 0)
+// int setgroups(size_t size, const gid_t *list);
+SYSFUZZ(setgroups, __NR_setgroups, SYS_FAIL, CLONE_DEFAULT, 0)
 {
-	gpointer    list;
-	glong       retcode;
+    gpointer    list;
+    glong       retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_setgroups,                                 // int
                                 typelib_get_integer(),                                      // int size
-                                typelib_get_buffer(&list, g_random_int_range(0, 8192)));    // gid_t list[]
+                                typelib_get_buffer(&list, PAGE_SIZE));                      // gid_t list[]
 
     typelib_clear_buffer(list);
 

@@ -31,14 +31,14 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
+#define STATUS_HTTP_PORT 'IK'
+
 syscall_fuzzer_t  *system_call_fuzzers;                  // Fuzzer definitions for each system call.
 guint              total_registered_fuzzers;             // Total number of registered fuzzers.
 guint              total_disabled_fuzzers;               // Number of fuzzers that have been disabled.
 guint              process_nesting_depth;                // Nested process depth.
 guint              skip_danger_warning;                  // Dont print the warning message on startup.
-gint               semid;                                // Semaphore set for syscall fuzzers.
 
-static void create_watchdog_process(void);
 static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, socklen_t addrlen);
 static gint httpd_access_handler(gpointer cls,
                                  struct MHD_Connection *connection,
@@ -48,28 +48,6 @@ static gint httpd_access_handler(gpointer cls,
                                  const gchar *upload_data,
                                  gsize *upload_data_size,
                                  gpointer *con_cls);
-
-static struct sembuf takelock[] = {
-    {
-        .sem_num    = 0,
-        .sem_op     = 0,    // Wait for zero
-        .sem_flg    = 0,
-    },
-    {
-        .sem_num    = 0,
-        .sem_op     = 1,    // Increment
-        .sem_flg    = SEM_UNDO,
-    },
-};
-
-static struct sembuf releaselock[] = {
-    {
-        .sem_num    = 0,
-        .sem_op     = -1,   // Decrement
-        .sem_flg    = SEM_UNDO,
-    },
-};
-
 
 void create_fuzzer_report(HDF *hdf);
 static void print_danger_warning(void);
@@ -93,46 +71,49 @@ int main(int argc, char **argv)
     glong              returncode  = 0;
     struct passwd     *user        = getpwnam("nobody");
 
-    // Parse commandline.
+    // Setup commandline parser.
     context = g_option_context_new("");
 
     // Install parameters.
     g_option_context_add_main_entries(context, parameters, NULL);
 
+    // Parse commandline.
     if (g_option_context_parse(context, &argc, &argv, NULL) == false) {
         g_warning("Failed to parse command line arguments.");
         return 1;
     }
 
-    // Set userids to zero, and create a new process group.
+    // Set all userids to zero, so that the fuzzer process cannot terminate us
+    // with kill(). Note that the permission check for kill() checks the ruid,
+    // not the euid, which is why we need to use setresuid() in case we were
+    // started via sudo or suid which only sets the euid.
     setresuid(0, 0, 0);
-    setpgrp();
 
-    // Start the http daemon listening for status output.
-    // TODO: Choose a random port and print a URL.
-    MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
-                     8080,
-                     httpd_connect_policy,
-                     NULL,
-                     httpd_access_handler,
-                     NULL,
-                     MHD_OPTION_END);
-
-    g_message("Open http://localhost:8080/status for status information");
-
-    while (true) {
-        if (get_process_count() <= 4 && fork() == 0) {
-            g_message("master process forking off a new one");
-            break;
-        } else {
-            kill(-getpid(), SIGCONT);
+    // Create a child process that runs as original uid to serve status info.
+    // Obviously we cannot run this in the same process as the fuzzer (because
+    // it might kill us, or change our directory, or whatever else).
+    if (fork() == 0) {
+        // Start the http daemon listening for status output.
+        // TODO: Choose a random port and print a URL.
+        if (MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
+                             STATUS_HTTP_PORT,
+                             httpd_connect_policy,
+                             NULL,
+                             httpd_access_handler,
+                             NULL,
+                             MHD_OPTION_END) == NULL) {
+            g_error("failed to start the status daemon, statistics will be unavailble");
         }
-        sleep(1);
+
+        // Wait forever.
+        while (true) pause();
     }
 
-    // At this point, shared memory segments have been attached and the web
-    // server is listening. We can drop privileges and become an unprivileged
-    // user.
+    g_message("Open http://localhost:%u/status for status information", STATUS_HTTP_PORT);
+
+    // At this point the http server is is listening. We can drop privileges
+    // and become an unprivileged user.
+    // TODO: choose an unused uid?
 
     // Drop all supplementary groups.
     if (setgroups(0, NULL) != 0) {
@@ -140,12 +121,13 @@ int main(int argc, char **argv)
         abort();
     }
 
-    // Change to an unprivileged user and group.
+    // Change to an unprivileged group before we lose permission to do this.
     if (setresgid(user->pw_gid, user->pw_gid, user->pw_gid) != 0) {
         g_error("unable change group id, %m");
         abort();
     }
 
+    // And finally drop our uid.
     if (setresuid(user->pw_uid, user->pw_uid, user->pw_uid) != 0) {
         g_error("unable to change user id, %m");
         abort();
@@ -182,8 +164,7 @@ int main(int argc, char **argv)
         g_timer_stop(timer);
 
         // Keep a running average of speed for this fuzzer.
-        fuzzer->average = ((fuzzer->average * fuzzer->total) + g_timer_elapsed(timer, NULL))
-                            / (fuzzer->total + 1);
+        fuzzer->average = ((fuzzer->average * fuzzer->total) + g_timer_elapsed(timer, NULL)) / (fuzzer->total + 1);
 
         // And keep track of executions.
         fuzzer->total++;
@@ -192,7 +173,7 @@ int main(int argc, char **argv)
         //          fuzzer->name,
         //          g_timer_elapsed(timer, NULL),
         //          returncode,
-        //          g_strerror(returncode));
+        //          custom_strerror_wrapper(returncode));
 
         // Should I ignore this?
         if (fuzzer->flags & SYS_VOID) {
@@ -237,17 +218,19 @@ int main(int argc, char **argv)
             if (error->count++ == 0) {
                 g_message("fuzzer %s returned a new error, %s (%u executions, %u failures).",
                           fuzzer->name,
-                          g_strerror(error->error),
+                          custom_strerror_wrapper(error->error),
                           fuzzer->total,
                           fuzzer->failures);
             }
 
-            //if (fuzzer->total > 1024) {
-            //  if (fuzzer->failures == fuzzer->total && fuzzer->numerrors == 1) {
-            //      g_message("disabled boring fuzzer %s", fuzzer->name);
-            //      fuzzer->flags |= SYS_DISABLED;
-            //    }
-            //}
+            // Stop wasting time on confirmed boring fuzzers.
+            if (fuzzer->total > 1024 && fuzzer->flags & SYS_BORING) {
+                g_message("disabled boring fuzzer %s after %u tests", fuzzer->name, fuzzer->total);
+                fuzzer->flags |= SYS_DISABLED;
+            } else if (fuzzer->total > 1024 && fuzzer->flags & SYS_FAIL) {
+                g_message("disabled failing fuzzer %s after %u tests", fuzzer->name, fuzzer->total);
+                fuzzer->flags |= SYS_DISABLED;
+            }
         }
     }
 
@@ -332,13 +315,14 @@ static gboolean disable_enable_fuzzer_range(const gchar *option_name, const gcha
                         endptr++;
 
                         // Parse out the next number.
-                        max = g_ascii_strtoll(endptr, &endptr, 10);
+                        max = MIN(g_ascii_strtoll(endptr, &endptr, 10), MAX_SYSCALL_NUM);
 
                         // FIXME: make these real checks.
                         g_assert_cmpint(sysno, <=, max);
                         g_assert_cmpint(max, >=, 0);
-                        g_assert_cmpint(max, <, MAX_SYSCALL_NUM);
                         g_assert_cmpint(*endptr, ==, 0);
+
+                        g_assert_cmpint(max, <=, MAX_SYSCALL_NUM);
 
                         // Now disable every fuzzer in the range.
                         for (sysno = sysno; sysno <= max; sysno++) {
@@ -482,6 +466,7 @@ static gint httpd_access_handler(gpointer cls,
                                  gsize *upload_data_size,
                                  gpointer *con_cls)
 {
+    NEOERR              *err        = NULL;
     CSPARSE             *parse      = NULL;
     HDF                 *hdf        = NULL;
     gchar               *output     = NULL;
@@ -502,14 +487,23 @@ static gint httpd_access_handler(gpointer cls,
     }
 
     // Initialise clearsilver.
-    hdf_init(&hdf);
+    err = hdf_init(&hdf);
 
     // Generate a report in HDF format.
     create_fuzzer_report(hdf);
 
-    // Parse the template file.
+    // FIXME: Do this properly.
     g_assert(cs_init(&parse, hdf) == STATUS_OK);
-    g_assert(cs_parse_file(parse, "report/main.cs") == STATUS_OK);
+
+    // Parse the template file.
+    if ((err = cs_parse_file(parse, "report/main.cs")) != STATUS_OK) {
+        // I don't know what kind of errors we will see here, experiment with
+        // it and add better error handling in future.
+        nerr_log_error(err);
+
+        g_assert_not_reached();
+    }
+
     g_assert(cs_render(parse, NULL, get_clearsilver_output) == STATUS_OK);
 
     // Create the response data using clearsilver.
@@ -535,66 +529,3 @@ static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, sock
     return MHD_YES;
 }
 
-// We use a sysv semaphore to protect access to shared structures. These are
-// kernel backed, so we get things like killed processes holding locks taken
-// care of for free using SEM_UNDO. But happens when a process takes the lock,
-// and then takes a SIGSTOP?
-//
-// We need a watchdog process that verified the lock is available every few
-// seconds, if it isn't, we just take down whoever held it and let the kernel
-// clean up.
-static void create_watchdog_process(void)
-{
-    // Let parent continue, watchdog child takes over.
-    if (fork() != 0) {
-        return;
-    }
-
-    setpgrp();
-
-    g_message("watchdog process %lu started, attach count is %u", syscall(__NR_getpid), get_process_count());
-
-    // Try to take the lock continually.
-    while (get_process_count() > 1) {
-        struct timespec timeout = {
-            .tv_sec     = 0,
-            .tv_nsec    = 500000000UL,
-        };
-
-        if (semtimedop(semid, takelock, G_N_ELEMENTS(takelock), &timeout) != 0) {
-            switch (errno) {
-                case EAGAIN: {
-                    // Timeout, find out who has the lock.
-                    gint lockholder = semctl(semid, 0, GETPID);
-
-                    g_message("watchdog detected deadlock, lock holder is process %u", lockholder);
-
-                    // See if we can coax him into letting go.
-                    kill(lockholder, SIGKILL);
-
-                    // Release the lock, even if he's in D, when he wakes up he will just die.
-                    break;
-                }
-                // EINTR is harmless, just try again.
-                case EINTR:
-                    g_message("watchdog was interrupted");
-                    continue;
-
-                default:
-                    g_error("watchdog encountered unexpected error from semop, %m");
-                    abort();
-            }
-        }
-
-        g_message("watchdog process took the lock %u, releasing it...", get_process_count());
-
-        if (semop(semid, releaselock, G_N_ELEMENTS(releaselock)) != 0) {
-            g_error("watchdog process failed to release the lock, %m");
-            abort();
-        }
-
-        sleep(1);
-    }
-
-    g_error("watchdog process giving up, parent process appears to have died");
-}
