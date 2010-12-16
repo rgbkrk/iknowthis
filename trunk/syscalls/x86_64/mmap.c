@@ -53,7 +53,7 @@ SYSFUZZ(mmap, __NR_mmap, SYS_NONE, CLONE_DEFAULT, 0)
                                     | MAP_STACK
                                     | MAP_HUGETLB);
     fd     = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);
-    offset = typelib_get_integer();
+    offset = typelib_get_integer_selection(1, 0);
 
     // Filter out flags I don't currently support.
     flags &= ~MAP_FIXED;        // Will unmap existing region, need to take care.
