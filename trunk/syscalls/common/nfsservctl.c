@@ -11,6 +11,7 @@
 #define NFSCLNT_KEYMAX 32
 #define NFSCLNT_ADDRMAX 16
 
+#include <linux/nfsd/nfsfh.h>
 #include <linux/nfsd/export.h>
 #include <linux/nfsd/syscall.h>
 #include <errno.h>
