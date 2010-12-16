@@ -105,6 +105,7 @@ SYSFUZZ(fcntl, __NR_fcntl, SYS_NONE, CLONE_DEFAULT, 0)
         case F_SETLKW64:
 #endif
 
+#if F_GETOWN_EX != F_DUPFD
         case F_GETOWN_EX:
         case F_SETOWN_EX:
             retcode = spawn_syscall_lwp(this, &result, __NR_fcntl,                          // int
@@ -116,6 +117,7 @@ SYSFUZZ(fcntl, __NR_fcntl, SYS_NONE, CLONE_DEFAULT, 0)
             typelib_clear_buffer(GUINT_TO_POINTER(arg));
 
             return retcode;
+#endif
         case F_SETSIG:
             // I don't want no crazy signal.
             retcode = spawn_syscall_lwp(this, &result, __NR_fcntl,                          // int

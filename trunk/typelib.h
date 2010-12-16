@@ -14,8 +14,11 @@
 # define g_strcmp0 strcmp
 # define O_CLOEXEC 04
 #endif
-#ifndef g_assert_cmpuint
+#ifndef g_assert_cmpint
 # define g_assert_cmpint(x, y, z)
+#endif
+#ifndef g_assert_cmpuint
+# define g_assert_cmpuint(x, y, z)
 #endif
 #if !GLIB_CHECK_VERSION(2, 18, 0)
     // Debian Armel has a crazy old glib. 
