@@ -14,7 +14,7 @@
 
 // Change data segment size.
 // XXX: May be broken.
-SYSFUZZ(brk, __NR_brk, SYS_NONE, CLONE_FORK, 0)
+SYSFUZZ(brk, __NR_brk, SYS_DISABLED, CLONE_FORK, 0)
 {
     return spawn_syscall_lwp(this, NULL, __NR_brk, typelib_get_integer());
 }
