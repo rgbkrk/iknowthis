@@ -34,13 +34,13 @@ struct context {
 static void __constructor init_thread_stacks(void)
 {
     fuzzerstack   = mmap(NULL,
-                         getpagesize() * 32,
+                         PAGE_SIZE * 32,
                          PROT_READ | PROT_WRITE,
                          MAP_ANONYMOUS | MAP_PRIVATE | MAP_GROWSDOWN,
                          -1,
                          0);
     watchdogstack = mmap(NULL,
-                         getpagesize() * 32,
+                         PAGE_SIZE * 32,
                          PROT_READ | PROT_WRITE,
                          MAP_ANONYMOUS | MAP_PRIVATE | MAP_GROWSDOWN,
                          -1,
@@ -49,8 +49,8 @@ static void __constructor init_thread_stacks(void)
     g_assert(fuzzerstack != MAP_FAILED);
     g_assert(watchdogstack != MAP_FAILED);
 
-    fuzzerstack     += getpagesize() * 16;
-    watchdogstack   += getpagesize() * 16;
+    fuzzerstack     += PAGE_SIZE * 16;
+    watchdogstack   += PAGE_SIZE * 16;
 
     return;
 }

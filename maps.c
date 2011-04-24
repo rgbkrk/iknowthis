@@ -106,8 +106,8 @@ gboolean maps_sanity_check(GSList *maps)
         struct map *map = node->data;
 
         // Page aligned.
-        g_assert_cmpint(map->start & (getpagesize() - 1), ==, 0);
-        g_assert_cmpint(map->end & (getpagesize() - 1), ==, 0);
+        g_assert_cmpint(map->start & (PAGE_SIZE - 1), ==, 0);
+        g_assert_cmpint(map->end & (PAGE_SIZE - 1), ==, 0);
 
         // In userspace.
         g_assert_cmpint(map->start, <=, 0xC0000000);

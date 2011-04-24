@@ -56,10 +56,10 @@ gpointer typelib_get_buffer(gpointer *buffer, gsize size)
     metadata_t  *metadata;
 
     // Round up size to the next PAGE_SIZE
-    totalsize = (size + (getpagesize() - 1)) & ~(getpagesize() - 1);
+    totalsize = (size + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1);
 
     // Add one page to be a guard page
-    totalsize = totalsize + getpagesize();
+    totalsize = totalsize + PAGE_SIZE;
 
     // Allocate
     guardbuf = mmap(NULL,
@@ -75,11 +75,11 @@ gpointer typelib_get_buffer(gpointer *buffer, gsize size)
     }
 
     // mprotect the last page
-    mprotect(guardbuf + totalsize - getpagesize(), getpagesize(), PROT_NONE);
+    mprotect(guardbuf + totalsize - PAGE_SIZE, PAGE_SIZE, PROT_NONE);
 
     // Return pointer to the Size requested before the guardpage.
     if (buffer) {
-        *buffer = guardbuf + totalsize - getpagesize() - size;
+        *buffer = guardbuf + totalsize - PAGE_SIZE - size;
     }
 
     // Record this allocation.
@@ -92,7 +92,7 @@ gpointer typelib_get_buffer(gpointer *buffer, gsize size)
     // g_debug("guarded %u byte buffer mapped at @%p", size, *buffer);
 
     // Fill buffer with random junk.
-    return typelib_random_buffer(guardbuf + totalsize - getpagesize() - size, size);
+    return typelib_random_buffer(guardbuf + totalsize - PAGE_SIZE - size, size);
 }
 
 // Clean up an allocated buffer.
