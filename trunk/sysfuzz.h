@@ -3,10 +3,11 @@
 #pragma once
 
 #include <sys/mman.h>
+#include <unistd.h>
 #include <sched.h>
 
 #ifndef PAGE_SIZE
-# define PAGE_SIZE 0x1000
+# define PAGE_SIZE getpagesize()
 #endif
 
 #ifndef CLONE_IO
