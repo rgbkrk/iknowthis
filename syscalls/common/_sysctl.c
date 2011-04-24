@@ -11,6 +11,7 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
+#include "compat.h"
 
 // Read/write system parameters.
 // int _sysctl(struct __sysctl_args *args);

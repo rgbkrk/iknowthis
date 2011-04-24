@@ -20,6 +20,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/socket.h>
+#include <sys/prctl.h>
 #include <unistd.h>
 #include <string.h>
 #include <microhttpd.h>
@@ -32,10 +33,12 @@
 #include "iknowthis.h"
 
 #define STATUS_HTTP_PORT 'IK'
+#define DEFAULT_USER "nobody"
 
 syscall_fuzzer_t  *system_call_fuzzers;                  // Fuzzer definitions for each system call.
 guint              total_registered_fuzzers;             // Total number of registered fuzzers.
 guint              total_disabled_fuzzers;               // Number of fuzzers that have been disabled.
+gchar             *unprivileged_user;                    // Run all syscalls with this user uid/gid
 guint              process_nesting_depth;                // Nested process depth.
 guint              skip_danger_warning;                  // Dont print the warning message on startup.
 
@@ -61,6 +64,7 @@ static GOptionEntry parameters[] = {
     { "enable",            0, 0,                    G_OPTION_ARG_CALLBACK, disable_enable_fuzzer_range, "Enable fuzzers specified in range", "1,2,mincore,..." },
 //  { "exit-condition",  'e', 0,                    G_OPTION_ARG_FILENAME, xxx,                         "Program that indicates stop condition", NULL },
     { "list",              0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, list_fuzzer_names,           "List all registered fuzzers", NULL },
+    { "run-as",            0, 0,                    G_OPTION_ARG_STRING,   &unprivileged_user,          "Run all syscalls with this user uid/gid", "nobody" },
     { NULL },
 };
 
@@ -69,7 +73,7 @@ int main(int argc, char **argv)
     GTimer            *timer       = NULL;
     GOptionContext    *context     = NULL;
     glong              returncode  = 0;
-    struct passwd     *user        = getpwnam("nobody");
+    struct passwd     *user        = NULL;
 
     // Setup commandline parser.
     context = g_option_context_new("");
@@ -93,6 +97,9 @@ int main(int argc, char **argv)
     // Obviously we cannot run this in the same process as the fuzzer (because
     // it might kill us, or change our directory, or whatever else).
     if (fork() == 0) {
+        // Make sure I terminate if something went wrong
+        prctl(PR_SET_PDEATHSIG, SIGKILL);
+
         // Start the http daemon listening for status output.
         // TODO: Choose a random port and print a URL.
         if (MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
@@ -105,6 +112,9 @@ int main(int argc, char **argv)
             g_error("failed to start the status daemon, statistics will be unavailble");
         }
 
+        // Make sure I terminate if something went wrong
+        prctl(PR_SET_PDEATHSIG, SIGKILL);
+
         // Wait forever.
         while (true) pause();
     }
@@ -113,25 +123,41 @@ int main(int argc, char **argv)
 
     // At this point the http server is is listening. We can drop privileges
     // and become an unprivileged user.
-    // TODO: choose an unused uid?
+    if (unprivileged_user == NULL) {
+        unprivileged_user = DEFAULT_USER;
+    }
+
+    // Query user name.
+    if ((user = getpwnam(unprivileged_user)) == NULL) {
+        g_critical("unable to find username: %s: %m", unprivileged_user);
+        return 1;
+    }
+
+    // Clean up any shared memory left over.
+    clear_shared_segments(user->pw_uid);
+
+    // Setup a new one for resource tracking
+    create_process_shmid();
 
     // Drop all supplementary groups.
     if (setgroups(0, NULL) != 0) {
         g_error("unable to drop supplementary groups, %m");
-        abort();
+        return 1;
     }
 
     // Change to an unprivileged group before we lose permission to do this.
     if (setresgid(user->pw_gid, user->pw_gid, user->pw_gid) != 0) {
         g_error("unable change group id, %m");
-        abort();
+        return 1;
     }
 
     // And finally drop our uid.
     if (setresuid(user->pw_uid, user->pw_uid, user->pw_uid) != 0) {
         g_error("unable to change user id, %m");
-        abort();
+        return 1;
     }
+
+    g_message("now running under user: %s", unprivileged_user);
 
     // Warn user this might be dangerous.
     if (skip_danger_warning == false) {

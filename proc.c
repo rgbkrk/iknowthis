@@ -34,13 +34,36 @@
 // The shmid for this process.
 static gint     shmid;
 
-void __constructor create_process_shmid(void)
+// Remove any old shared memory segments left over from previous runs.
+void clear_shared_segments(uid_t owner)
+{
+    struct shminfo  shminfo;
+    struct shmid_ds shmds;
+    gint            numshm = shmctl(0, SHM_INFO, &shminfo);
+
+    // I don't think these can fail.
+    g_assert_cmpint(numshm, >=, 0);
+
+    // Remove all existing ipc stuff that may have been left behind from previous runs.
+    while (numshm--) {
+        gint shmid = shmctl(numshm, IPC_STAT, &shmds);
+
+        if (shmds.shm_perm.uid == owner) {
+            shmctl(shmid, IPC_RMID, NULL);
+        }
+    }
+
+    // TODO: msgctl, etc
+
+    return;
+}
+
+void create_process_shmid(void)
 {
     struct shmid_ds shmds;
 
     // I should only be called once.
     g_assert_cmpint(shmid, ==, 0);
-    g_assert(system_call_fuzzers == NULL);
 
     // Create a shmid, used to track process creations.
     // ftok() does a stat(), and uses the inode number combined with the

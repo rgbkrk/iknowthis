@@ -14,9 +14,9 @@
 
 // Wait for signal.
 // int pause(void);
-SYSFUZZ(pause, __NR_pause, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 100)
+SYSFUZZ(pause, __NR_pause, SYS_FAIL | SYS_BORING | SYS_DISABLED, CLONE_DEFAULT, 100)
 {
-	gint retcode = spawn_syscall_lwp(this, NULL, __NR_pause);
+    gint retcode = spawn_syscall_lwp(this, NULL, __NR_pause);
 
     g_assert_cmpint(retcode, ==, ETIMEOUT);
 

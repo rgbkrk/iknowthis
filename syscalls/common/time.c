@@ -14,7 +14,7 @@
 // Get time in seconds.
 SYSFUZZ(time, __NR_time, SYS_SAFE, CLONE_DEFAULT, 0)
 {
-	gpointer   t;
+    gpointer   t;
     glong      retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_time,                                 // time_t
