@@ -12,6 +12,7 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
+#include "compat.h"
 
 // Shared memory operations.
 // void *shmat(int shmid, const void *shmaddr, int shmflg);

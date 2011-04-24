@@ -11,6 +11,10 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
+#ifndef __NR_recvmmsg
+# define __NR_recvmmsg 337
+#endif
+
 // Recieve multiple messages.
 // ssize_t recvmmsg(int socket, struct mmsghdr *mmsg, int vlen, int flags);
 SYSFUZZ(recvmmsg, __NR_recvmmsg, SYS_NONE, CLONE_DEFAULT, 1000)

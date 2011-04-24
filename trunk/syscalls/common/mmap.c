@@ -11,6 +11,7 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
+#include "compat.h"
 
 #ifndef MAP_HUGETLB
 # define MAP_HUGETLB 0x40000
