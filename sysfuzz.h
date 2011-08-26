@@ -99,7 +99,7 @@ typedef struct {
 
 // Record the highest syscall number for this architecture.
 #if defined(__i386__)
-# define MAX_SYSCALL_NUM 338
+#  define MAX_SYSCALL_NUM 346
 #elif defined(__x86_64__)
 # define MAX_SYSCALL_NUM 300
 #else
