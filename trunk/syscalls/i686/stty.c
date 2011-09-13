@@ -15,6 +15,6 @@
 // Unimplemented system call.
 SYSFUZZ(stty, __NR_stty, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_stty);
+    return spawn_syscall_lwp(this, NULL, __NR_stty);
 }
 

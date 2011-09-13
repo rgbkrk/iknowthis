@@ -16,6 +16,6 @@
 // XXX FIXME
 SYSFUZZ(_newselect, __NR__newselect, SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-	return 0;
+    return 0;
 }
 

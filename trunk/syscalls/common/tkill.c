@@ -11,8 +11,11 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
-// Send a signal to a single process.
-SYSFUZZ(tkill, __NR_tkill, SYS_NONE, CLONE_DEFAULT, 1000)
+// Disabled until I can whitelist the process group leader.
+
+// Send a signal to a thread.
+// int tkill(int tid, int sig);
+SYSFUZZ(tkill, __NR_tkill, SYS_NONE | SYS_DISABLED, CLONE_DEFAULT, 1000)
 {
     glong   retcode;
 

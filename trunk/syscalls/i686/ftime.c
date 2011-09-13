@@ -15,11 +15,11 @@
 // int ftime(struct timeb *tp);
 SYSFUZZ(ftime, __NR_ftime, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 0)
 {
-	gpointer   tp;
-	gint       retcode;
+    gpointer   tp;
+    gint       retcode;
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_ftime,                                 // int
-	                            typelib_get_buffer(&tp, g_random_int_range(0, 32)));    // struct timeb *tp
+    retcode = spawn_syscall_lwp(this, NULL, __NR_ftime,                                 // int
+                                typelib_get_buffer(&tp, g_random_int_range(0, 32)));    // struct timeb *tp
 
     typelib_clear_buffer(tp);
 

@@ -41,7 +41,7 @@ static gboolean destroy_forked_process(guintptr pid)
 
 // Create a child process.
 // pid_t fork(void);
-SYSFUZZ(fork, __NR_fork, SYS_DISABLED, CLONE_DEFAULT, 0)
+SYSFUZZ(fork, __NR_fork, SYS_NONE, CLONE_DEFAULT, 0)
 {
     glong           retcode;
     pid_t           pid = -1;
@@ -53,13 +53,7 @@ SYSFUZZ(fork, __NR_fork, SYS_DISABLED, CLONE_DEFAULT, 0)
 
     // Determine what happened.
     switch (pid) {
-        case  0: // In the child process, Learn about myself.
-                 typelib_add_resource(this, syscall(__NR_getpid), RES_FORK, RF_NONE, destroy_forked_process);
-
-                 // Learn about the parent.
-                 typelib_add_resource(this, parent, RES_FORK, RF_NONE, destroy_forked_process);
-
-                 // Make sure this wouldnt put us over process quota.
+        case  0: // Make sure this wouldnt put us over process quota.
                  if (increment_process_count() > MAX_PROCESS_NUM) {
                     // Terminate self.
                     syscall(__NR_exit, 0);

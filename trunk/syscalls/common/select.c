@@ -12,7 +12,7 @@
 #include "iknowthis.h"
 
 // Synchronous I/O multiplexing.
-SYSFUZZ(select, __NR_select, SYS_DISABLED, CLONE_DEFAULT, 1000)
+SYSFUZZ(select, __NR_select, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     gpointer    readfds;
     gpointer    writefds;

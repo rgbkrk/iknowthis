@@ -16,15 +16,15 @@
 // int munlock(const void *addr, size_t len);
 SYSFUZZ(munlock, __NR_munlock, SYS_NONE, CLONE_DEFAULT, 0)
 {
-	glong       retcode;
-	guintptr    address;
-	gsize       size;
+    glong       retcode;
+    guintptr    address;
+    gsize       size;
 
-	typelib_get_vma(this, &address, &size);
+    typelib_get_vma(this, &address, &size);
 
-	retcode = spawn_syscall_lwp(this, NULL, __NR_munlock,                       // int
-	                            address,                                        // void *addr
-	                            size);                                          // size_t len
+    retcode = spawn_syscall_lwp(this, NULL, __NR_munlock,                       // int
+                                address,                                        // void *addr
+                                size);                                          // size_t len
 
     return retcode;
 }

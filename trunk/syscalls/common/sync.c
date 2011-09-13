@@ -15,6 +15,6 @@
 // void sync(void);
 SYSFUZZ(sync, __NR_sync, SYS_VOID | SYS_SAFE | SYS_DISABLED, CLONE_DEFAULT, 0)
 {
-	// Disabled as it's slow and trivial.
-	return spawn_syscall_lwp(this, NULL, __NR_sync);                                                // void
+    // Disabled as it's slow and trivial.
+    return spawn_syscall_lwp(this, NULL, __NR_sync);                                                // void
 }
