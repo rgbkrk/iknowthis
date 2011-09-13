@@ -13,7 +13,8 @@
 #include "iknowthis.h"
 
 // Enter virtual 8086 mode.
-SYSFUZZ(vm86, __NR_vm86, SYS_DISABLED, CLONE_FORK, 1000)
+// int vm86(unsigned long fn, struct vm86plus_struct *v86);
+SYSFUZZ(vm86, __NR_vm86, SYS_NONE, CLONE_FORK, 1000)
 {
     gpointer    v86;
     gint        retcode;

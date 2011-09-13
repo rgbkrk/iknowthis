@@ -15,11 +15,11 @@
 // Return from signal handler and cleanup stack frame.
 SYSFUZZ(sigreturn, __NR_sigreturn, SYS_DISABLED, CLONE_FORK, 0)
 {
-	gint retcode;
+    gint retcode;
 
     retcode = spawn_syscall_lwp(this, NULL, __NR_sigreturn,                                 // int
                                 typelib_get_integer());                                     // unsigned long __unused
-    
+
     return retcode;
 }
 

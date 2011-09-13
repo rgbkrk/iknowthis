@@ -13,8 +13,8 @@
 #include "iknowthis.h"
 
 // Change data segment size.
-// XXX: May be broken.
-SYSFUZZ(brk, __NR_brk, SYS_DISABLED, CLONE_FORK, 0)
+// int brk(void *addr);
+SYSFUZZ(brk, __NR_brk, SYS_NONE, CLONE_FORK, 0)
 {
     return spawn_syscall_lwp(this, NULL, __NR_brk, typelib_get_integer());
 }

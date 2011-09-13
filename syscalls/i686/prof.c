@@ -15,6 +15,6 @@
 // Unimplemented system call.
 SYSFUZZ(prof, __NR_prof, SYS_FAIL | SYS_BORING | SYS_SAFE, CLONE_DEFAULT, 0)
 {
-	return spawn_syscall_lwp(this, NULL, __NR_prof);
+    return spawn_syscall_lwp(this, NULL, __NR_prof);
 }
 

@@ -14,10 +14,10 @@
 // Unimplemented system call.
 SYSFUZZ(break, __NR_break, SYS_FAIL | SYS_BORING | SYS_SAFE, CLONE_DEFAULT, 0)
 {
-	gint   retcode;
+    gint   retcode;
 
-	// Execute systemcall.
-	retcode = spawn_syscall_lwp(this, NULL,__NR_break);
+    // Execute systemcall.
+    retcode = spawn_syscall_lwp(this, NULL,__NR_break);
 
     // These system calls always return -1 and set errno to ENOSYS.
     g_assert_cmpuint(retcode, ==, ENOSYS);

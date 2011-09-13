@@ -12,6 +12,9 @@
 #include "iknowthis.h"
 
 // Mount file system.
+// int mount(const char *source, const char *target,
+//           const char *filesystemtype, unsigned long mountflags,
+//           const void *data);
 SYSFUZZ(mount, __NR_mount, SYS_FAIL, CLONE_DEFAULT, 0)
 {
     gchar   *source;

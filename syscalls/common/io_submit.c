@@ -11,6 +11,8 @@
 #include "typelib.h"
 #include "iknowthis.h"
 
+// XXX: This is ugly.
+
 struct io_iocb_common {
     void                *buf;
     unsigned int         __pad1;
@@ -49,7 +51,7 @@ gboolean destroy_iocb_callback(guintptr callback)
 
 // Submit asynchronous I/O blocks for processing
 // long io_submit (aio_context_t ctx_id, long nr, struct iocb **iocbpp);
-SYSFUZZ(io_submit, __NR_io_submit, SYS_DISABLED, CLONE_DEFAULT, 1000)
+SYSFUZZ(io_submit, __NR_io_submit, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     glong           retcode;
     struct iocb    *iocb;

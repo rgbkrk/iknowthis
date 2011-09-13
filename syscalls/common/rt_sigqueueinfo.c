@@ -14,7 +14,7 @@
 
 // Send signal information to a signal. (wut?)
 // long sys_rt_sigqueueinfo (int pid, int sig, siginfo_t *uinfo);
-SYSFUZZ(rt_sigqueueinfo , __NR_rt_sigqueueinfo, SYS_DISABLED, CLONE_DEFAULT, 0)
+SYSFUZZ(rt_sigqueueinfo , __NR_rt_sigqueueinfo, SYS_NONE, CLONE_DEFAULT, 0)
 {
     gpointer    uinfo;
     glong       retcode;
