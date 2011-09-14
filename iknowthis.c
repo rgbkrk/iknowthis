@@ -250,7 +250,7 @@ int main(int argc, char **argv)
             }
 
             // Stop wasting time on confirmed boring fuzzers.
-            if (fuzzer->total > 1024 && fuzzer->flags & SYS_BORING) {
+            if (fuzzer->total > 128 && fuzzer->flags & SYS_BORING) {
                 g_message("disabled boring fuzzer %s after %u tests", fuzzer->name, fuzzer->total);
                 fuzzer->flags |= SYS_DISABLED;
             } else if (fuzzer->total > 1024 && fuzzer->flags & SYS_FAIL) {
