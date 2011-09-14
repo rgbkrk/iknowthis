@@ -45,7 +45,6 @@ SYSFUZZ(fork, __NR_fork, SYS_NONE, CLONE_DEFAULT, 0)
 {
     glong           retcode;
     pid_t           pid = -1;
-    pid_t           parent = getpid();
 
     // I think the lwp syscall code may not handle this well, luckily fork() is
     // simple enough that I can handle it here.
