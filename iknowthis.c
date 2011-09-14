@@ -41,6 +41,7 @@ guint              total_disabled_fuzzers;               // Number of fuzzers th
 gchar             *unprivileged_user;                    // Run all syscalls with this user uid/gid
 guint              process_nesting_depth;                // Nested process depth.
 guint              skip_danger_warning;                  // Dont print the warning message on startup.
+guint              disable_statistics;                   // Dont start the statistics webserver.
 
 static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, socklen_t addrlen);
 static gint httpd_access_handler(gpointer cls,
@@ -60,6 +61,7 @@ static gboolean list_fuzzer_names(const gchar *option_name, const gchar *value, 
 // Command line options.
 static GOptionEntry parameters[] = {
     { "dangerous",         0, 0,                    G_OPTION_ARG_NONE,     &skip_danger_warning,        "Do not display warning about system damage", NULL },
+    { "no-statistics",     0, 0,                    G_OPTION_ARG_NONE,     &disable_statistics,         "Disable the statistics webserver", NULL },
     { "disable",           0, 0,                    G_OPTION_ARG_CALLBACK, disable_enable_fuzzer_range, "Disable fuzzers specified in range", "1,2,mincore,43-63,mq_*,..." },
     { "enable",            0, 0,                    G_OPTION_ARG_CALLBACK, disable_enable_fuzzer_range, "Enable fuzzers specified in range", "1,2,mincore,..." },
 //  { "exit-condition",  'e', 0,                    G_OPTION_ARG_FILENAME, xxx,                         "Program that indicates stop condition", NULL },
@@ -96,7 +98,7 @@ int main(int argc, char **argv)
     // Create a child process that runs as original uid to serve status info.
     // Obviously we cannot run this in the same process as the fuzzer (because
     // it might kill us, or change our directory, or whatever else).
-    if (fork() == 0) {
+    if (!disable_statistics && fork() == 0) {
         // Make sure I terminate if something went wrong
         prctl(PR_SET_PDEATHSIG, SIGKILL);
 
@@ -115,11 +117,11 @@ int main(int argc, char **argv)
         // Make sure I terminate if something went wrong
         prctl(PR_SET_PDEATHSIG, SIGKILL);
 
+        g_message("Open http://localhost:%u/status for status information", STATUS_HTTP_PORT);
+
         // Wait forever.
         while (true) pause();
     }
-
-    g_message("Open http://localhost:%u/status for status information", STATUS_HTTP_PORT);
 
     // At this point the http server is is listening. We can drop privileges
     // and become an unprivileged user.
