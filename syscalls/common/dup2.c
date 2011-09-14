@@ -13,7 +13,7 @@
 
 // Duplicate a file descriptor.
 // int dup2(int oldfd, int newfd);
-SYSFUZZ(dup2, __NR_dup2, SYS_DISABLED, CLONE_DEFAULT, 0)
+SYSFUZZ(dup2, __NR_dup2, SYS_NONE, CLONE_FORK, 0)
 {
     glong   retcode;
     glong   result;

@@ -15,7 +15,7 @@
 
 // Set and get a process’s CPU affinity mask.
 // int sched_setaffinity(pid_t pid, unsigned int cpusetsize, cpu_set_t *mask);
-SYSFUZZ(sched_setaffinity, __NR_sched_setaffinity, SYS_NONE, CLONE_FORK, 0)
+SYSFUZZ(sched_setaffinity, __NR_sched_setaffinity, SYS_NONE, CLONE_FORK, 100)
 {
     gpointer    mask;
     glong       retcode;
