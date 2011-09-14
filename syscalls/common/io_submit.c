@@ -51,7 +51,11 @@ gboolean destroy_iocb_callback(guintptr callback)
 
 // Submit asynchronous I/O blocks for processing
 // long io_submit (aio_context_t ctx_id, long nr, struct iocb **iocbpp);
+#if defined(__x86_64__)
+SYSFUZZ(io_submit, __NR_io_submit, SYS_DISABLED, CLONE_DEFAULT, 1000)
+#else
 SYSFUZZ(io_submit, __NR_io_submit, SYS_NONE, CLONE_DEFAULT, 1000)
+#endif
 {
     glong           retcode;
     struct iocb    *iocb;
