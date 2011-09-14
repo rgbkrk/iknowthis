@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include <linux/sched.h>
 #include <sched.h>
 
 #include "sysfuzz.h"

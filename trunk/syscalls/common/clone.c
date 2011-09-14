@@ -17,18 +17,19 @@
 static gboolean destroy_forked_process(guintptr pid)
 {
     g_assert_cmpuint(pid, >, 1);
+
     kill(pid, SIGKILL);
+
     waitpid(pid, NULL, __WALL);
 
     return true;
 }
 
 // Create a child process.
-SYSFUZZ(clone, __NR_clone, SYS_DISABLED, CLONE_DEFAULT, 0)
+SYSFUZZ(clone, __NR_clone, SYS_NONE, CLONE_DEFAULT, 0)
 {
     glong       retcode;
     pid_t       pid = -1;
-    pid_t       parent = getpid();
     gpointer    arg1;
     gpointer    arg2;
     gpointer    arg3;
@@ -41,29 +42,23 @@ SYSFUZZ(clone, __NR_clone, SYS_DISABLED, CLONE_DEFAULT, 0)
 
     // I think the lwp syscall code may not handle this well.
     retcode = syscall_fast_ret(&pid, __NR_clone,
-                               (typelib_get_integer() & ~(CLONE_VFORK 
-                                                        | CLONE_PARENT
-                                                        | CLONE_THREAD
-                                                        | CLONE_VM
-                                                        | 0xff)),
-                               /* g_random_boolean() ? arg1 : */ NULL,
-                               /* g_random_boolean() ? arg2 : */ NULL,
-                               /* g_random_boolean() ? arg3 : */ NULL,
-                               /* g_random_boolean() ? arg4 : */ NULL);
+                                (typelib_get_integer() & ~0xff),    // Mask to prevent requesting SIGKILL or similar.
+                                g_random_boolean() ? arg1 : NULL,
+                                g_random_boolean() ? arg2 : NULL,
+                                g_random_boolean() ? arg3 : NULL,
+                                g_random_boolean() ? arg4 : NULL);
 
     // Determine what happened.
     switch (pid) {
-        case  0: // Learn about myself and parent.
-                 typelib_add_resource(this, syscall(__NR_getpid), RES_FORK, RF_NONE, destroy_forked_process);
-                 typelib_add_resource(this, parent, RES_FORK, RF_NONE, destroy_forked_process);
-
-                 // Make sure this wouldnt put us over process quota.
+        case  0: // Make sure this wouldnt put us over process quota.
                  if (increment_process_count() > MAX_PROCESS_NUM) {
-                     // Nested too deeply, terminate self.
-                     syscall(__NR_exit, 0);
 
-                     // Shouldn't continue.
-                     g_assert_not_reached();
+                    // Nested too deeply, terminate self.
+                    while (true) {
+                        syscall(__NR_exit, 0);
+                        // Note: This can really fail. Spin here until I'm reaped.
+                        pause();
+                    }
                  }
 
                  // Mangle prng state.
