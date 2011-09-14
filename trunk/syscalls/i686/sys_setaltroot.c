@@ -13,7 +13,7 @@
 #include "iknowthis.h"
 
 // Unimplemented System Call.
-SYSFUZZ(sys_setaltroot, 285, SYS_FAIL, CLONE_DEFAULT, 0)
+SYSFUZZ(sys_setaltroot, 285, SYS_FAIL | SYS_BORING, CLONE_DEFAULT, 0)
 {
     return syscall_fast(285);
 }

@@ -1,5 +1,6 @@
 #include <sys/uio.h>
 #include <glib.h>
+#include <linux/sched.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
