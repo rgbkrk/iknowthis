@@ -4,6 +4,7 @@
 
 #include <sys/mman.h>
 #include <unistd.h>
+#include <linux/sched.h>
 #include <sched.h>
 
 #ifndef PAGE_SIZE
