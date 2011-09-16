@@ -16,23 +16,42 @@
 SYSFUZZ(execve, __NR_execve, SYS_NONE, CLONE_DEFAULT, 1000)
 {
     glong       retcode;
-    gpointer    argv[2];
-    gpointer    envp[2];
-    gchar      *path    = g_strdup_printf("/proc/self/%d", (gint) typelib_get_resource(this, NULL, RES_FILE, RF_NONE));
+    gchar      *pathname;
+    guint       acnt    = g_random_int_range(1, 32);
+    guint       ecnt    = g_random_int_range(1, 32);
+    gpointer  *argv     = g_malloc(acnt * sizeof(gpointer));
+    gpointer  *envp     = g_malloc(ecnt * sizeof(gpointer));
 
-    memset(argv, 0, sizeof(argv));
-    memset(envp, 0, sizeof(envp));
+    for (guint i = 0; i < acnt - 1; i++) {
+        typelib_get_buffer(&argv[i], g_random_int_range(0, PAGE_SIZE));
+    }
 
-    typelib_get_buffer(&argv[0], PAGE_SIZE);
-    typelib_get_buffer(&envp[0], PAGE_SIZE);
+    for (guint i = 0; i < ecnt - 1; i++) {
+        typelib_get_buffer(&envp[i], g_random_int_range(0, PAGE_SIZE));
+    }
+
+    argv[acnt - 1] = envp[ecnt - 1] = NULL;
 
     // Execute system call.
-    retcode = spawn_syscall_lwp(this, NULL, __NR_execve, path, &argv, &envp);
+    if (g_random_boolean()) {
+        retcode = spawn_syscall_lwp(this, NULL, __NR_execve, typelib_get_pathname(&pathname), argv, envp);
+    } else {
+        retcode = spawn_syscall_lwp(this, NULL, __NR_execve, typelib_get_pathname(&pathname), *argv, *envp);
+    }
 
     // Clean up
-    g_free(path);
-    typelib_clear_buffer(argv[0]);
-    typelib_clear_buffer(envp[0]);
+    g_free(pathname);
+
+    for (guint i = 0; i < acnt - 1; i++) {
+        typelib_clear_buffer(argv[i]);
+    }
+
+    for (guint i = 0; i < ecnt - 1; i++) {
+        typelib_clear_buffer(envp[i]);
+    }
+
+    g_free(argv);
+    g_free(envp);
 
     return retcode;
 }
