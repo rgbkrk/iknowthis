@@ -79,7 +79,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             socketcall_args[2]  = typelib_get_integer_selection(1, 0);  // int protocol
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,                            // int
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall,                     // int
                                        SYS_SOCKET,                                      // int call
                                        socketcall_args);                                // unsigned long *args
 
@@ -98,7 +98,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             typelib_get_buffer((void **) &socketcall_args[1], PAGE_SIZE);                // const struct sockaddr *addr
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,                             // int
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall,                      // int
                                        SYS_BIND,                                         // int call
                                        socketcall_args);                                 // unsigned long *args
 
@@ -114,7 +114,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             typelib_get_buffer((void **) &socketcall_args[1], PAGE_SIZE);                // const struct sockaddr *addr
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,                             // int
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall,                      // int
                                        SYS_CONNECT,                                      // int call
                                        socketcall_args);                                 // unsigned long *args
 
@@ -131,7 +131,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             socketcall_args[2]  = g_random_int_range(0, 1024);                           // socklen_t addrlen
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,                             // int
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall,                      // int
                                        SYS_LISTEN,                                       // int call
                                        socketcall_args);                                 // unsigned long *args
 
@@ -203,9 +203,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             socketcall_args[1] |= (g_random_int() & g_random_int() & g_random_int());
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,     // int
-                                       SYS_SOCKETPAIR,           // int call
-                                       socketcall_args);         // unsigned long *args
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall,     // int
+                                       SYS_SOCKETPAIR,                  // int call
+                                       socketcall_args);                // unsigned long *args
 
             // Check for new socket.
             if (retcode == ESUCCESS) {
@@ -236,9 +236,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             typelib_get_buffer((void **) &socketcall_args[1], PAGE_SIZE);
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
-                                       SYS_SEND,                    // int call
-                                       socketcall_args);            // unsigned long *args
+            retcode = spawn_syscall_lwp(this, NULL, __NR_socketcall, // int
+                                       SYS_SEND,                     // int call
+                                       socketcall_args);             // unsigned long *args
 
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
@@ -281,9 +281,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                                g_random_int_range(0, 8192));
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
-                                       SYS_SENDTO,                  // int call
-                                       socketcall_args);            // unsigned long *args
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall, // int
+                                        SYS_SENDTO,                 // int call
+                                        socketcall_args);           // unsigned long *args
 
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
@@ -304,7 +304,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                                g_random_int_range(0, 8192));
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall, // int
                                        SYS_SENDTO,                  // int call
                                        socketcall_args);            // unsigned long *args
 
@@ -320,9 +320,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             socketcall_args[2]  = g_random_int_range(0, 32);        // int how
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
-                                       SYS_SHUTDOWN,                // int call
-                                       socketcall_args);            // unsigned long *args
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall, // int
+                                        SYS_SHUTDOWN,               // int call
+                                        socketcall_args);           // unsigned long *args
 
             return retcode;
 
@@ -331,14 +331,14 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             socketcall_args[0]  = typelib_get_resource(this, NULL, RES_FILE, RF_NONE);             // int sockfd
             socketcall_args[1]  = typelib_get_integer_range(0, 256);// int level
             socketcall_args[2]  = typelib_get_integer_range(0, 128);// int optname
-            socketcall_args[4]  = typelib_get_integer_range(0, 64);// socklen_t optlen
+            socketcall_args[4]  = typelib_get_integer_range(0, 64); // socklen_t optlen
 
             typelib_get_buffer((void **) &socketcall_args[3], PAGE_SIZE);
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
-                                       SYS_SETSOCKOPT,              // int call
-                                       socketcall_args);            // unsigned long
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall, // int
+                                        SYS_SETSOCKOPT,             // int call
+                                        socketcall_args);           // unsigned long
 
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[3]));
@@ -357,9 +357,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                                g_random_int_range(0, 32));
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
-                                       SYS_GETSOCKOPT,              // int call
-                                       socketcall_args);            // unsigned long
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall, // int
+                                        SYS_GETSOCKOPT,             // int call
+                                        socketcall_args);           // unsigned long
 
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[3]));
@@ -375,9 +375,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                                g_random_int_range(0, 8192));
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,
-                                       SYS_SENDMSG,
-                                       socketcall_args);
+            retcode = spawn_syscall_lwp(this,  &fd, __NR_socketcall,
+                                        SYS_SENDMSG,
+                                        socketcall_args);
             typelib_clear_buffer(socketcall_args[1]);
             return retcode;
         case SYS_RECVMSG:       // Receive a message from a socket.
@@ -389,9 +389,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                                g_random_int_range(0, 8192));
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,
-                                       SYS_RECVMSG,
-                                       socketcall_args);
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall,
+                                        SYS_RECVMSG,
+                                        socketcall_args);
             typelib_clear_buffer(socketcall_args[1]);
             return retcode;
         case SYS_ACCEPT4:       // Accept a connection on a socket.
@@ -407,9 +407,9 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                                g_random_int_range(0, 32));
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,        // int
-                                       SYS_ACCEPT4,                 // int call
-                                       socketcall_args);            // unsigned long
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall,  // int
+                                        SYS_ACCEPT4,                 // int call
+                                        socketcall_args);            // unsigned long
 
             // Clean up.
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
@@ -428,13 +428,13 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                                g_random_int_range(0, 8192));
 
             // Make call.
-            retcode = syscall_fast_ret(&fd, __NR_socketcall,
-                                       SYS_RECVMMSG,
-                                       socketcall_args);
+            retcode = spawn_syscall_lwp(this, &fd, __NR_socketcall,
+                                        SYS_RECVMMSG,
+                                        socketcall_args);
 
-            typelib_clear_buffer(socketcall_args[1]);
+            typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
             return retcode;
-        default: 
+        default:
             // Random number and args.
             for (i = 0; i < 8; i++) {
                 socketcall_args[i] = typelib_get_integer();
