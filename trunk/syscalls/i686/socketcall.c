@@ -26,6 +26,10 @@
 # define SYS_ACCEPT4 18
 #endif
 
+#ifndef SYS_SENDMMSG
+# define SYS_SENDMMSG 20
+#endif
+
 #ifndef SOCK_CLOEXEC
 # define SOCK_CLOEXEC 010000000
 #endif
@@ -71,7 +75,8 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
                                               SYS_SENDMSG,
                                               SYS_RECVMSG,
                                               SYS_ACCEPT4,
-                                              SYS_RECVMMSG)) {
+                                              SYS_RECVMMSG,
+                                              SYS_SENDMMSG)) {
         case SYS_SOCKET:    // Create an endpoint for communication.
             // Install arguments.
             socketcall_args[0]  = typelib_get_integer_range(0, 32);     // int domain
@@ -416,7 +421,7 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[2]));
 
             return retcode;
-        case SYS_RECVMMSG:      // New
+        case SYS_RECVMMSG:
             // ssize_t recvmmsg(int socket, struct mmsghdr *mmsg, int vlen, int flags);
             // XXX: FIXME
             // Install arguments.
@@ -434,6 +439,10 @@ SYSFUZZ(socketcall, __NR_socketcall, SYS_NONE, CLONE_DEFAULT, 1000)
 
             typelib_clear_buffer(GUINT_TO_POINTER(socketcall_args[1]));
             return retcode;
+        case SYS_SENDMMSG:
+            // We don't need this because the kernel developers finally
+            // realised that socketcall is super ugly, and senddmsg is
+            // available directly.
         default:
             // Random number and args.
             for (i = 0; i < 8; i++) {

@@ -24,9 +24,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <microhttpd.h>
-#include <ClearSilver.h>
 #include <pwd.h>
 #include <grp.h>
+#include <ClearSilver.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"

@@ -14,8 +14,8 @@
 #ifndef __NR_syncfs
 # if defined(__i386__)
 #  define __NR_syncfs 344
-# elif defined(__x86_64)
-#  define __NR_syncfs 307
+# elif defined(__x86_64__)
+#  define __NR_syncfs 306
 # else
 #  error please define __NR_syncfs for your architecture
 # endif
