@@ -8,9 +8,10 @@ CFLAGS      =-Wall -Wno-multichar -pipe -O0 -ggdb3 -fno-strict-aliasing `pkg-con
 LDFLAGS     =$(CFLAGS) `pkg-config --libs libmicrohttpd,glib-2.0` -lneo_cs -lneo_cgi -lneo_utl -lz
 CPPFLAGS    =-I. -Itypelib -I/usr/include/ClearSilver
 ARCH       ?=$(shell uname -m)
+OS         ?=$(shell uname -s)
 
 # This glob matches all source files in the syscalls subdirectory.
-SYSCALLS    = $(patsubst %.c,%.o,$(wildcard syscalls/$(ARCH)/*.c))
+SYSCALLS    = $(patsubst %.c,%.o,$(wildcard syscalls/$(OS)/$(ARCH)/*.c))
 
 # Default rule.
 all:        iknowthis
@@ -20,4 +21,4 @@ iknowthis:  $(SYSCALLS) iknowthis.o base.o buffer.o typelib/pathname.o \
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 clean:
-	rm -f *.o syscalls/*/*.o iknowthis core.* core typelib/*.o
+	rm -f *.o syscalls/*/*/*.o iknowthis core.* core typelib/*.o
