@@ -2,10 +2,13 @@
 #define __SYSFUZZ_H
 #pragma once
 
-#include <sys/mman.h>
 #include <unistd.h>
-#include <linux/sched.h>
 #include <sched.h>
+#include <sys/mman.h>
+
+#ifdef __linux__
+# include <linux/sched.h>
+#endif
 
 #ifndef PAGE_SIZE
 # define PAGE_SIZE getpagesize()
@@ -54,10 +57,17 @@ enum {
 // Some convenience clone combinations.
 enum {
     // Of course this is not really a fork, but how else can i get the 64bit return code back on x64?
-    // FIXME: ptrace?
+#if __linux__
     CLONE_FORK      = CLONE_VM,
     CLONE_DEFAULT   = CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_SYSVSEM | CLONE_IO,
     CLONE_SAFER     = CLONE_FS | CLONE_FILES | CLONE_IO,
+#elif __FreeBSD__
+    CLONE_FORK      = RFMEM | RFPROC | RFFDG,
+    CLONE_DEFAULT   = RFMEM | RFPROC,
+    CLONE_SAFER     = RFPROC,
+#else
+# error please define some clone combinations for your operating system
+#endif
 };
 
 // No way any syscall can return more than this number of errors.
@@ -99,13 +109,19 @@ typedef struct {
 )
 
 // Record the highest syscall number for this architecture.
-#if defined(__i386__)
-#  define MAX_SYSCALL_NUM 347
-#elif defined(__x86_64__)
-# define MAX_SYSCALL_NUM 309
+#if defined(__linux__)
+# if defined(__i386__)
+#   define MAX_SYSCALL_NUM 347
+# elif defined(__x86_64__)
+#  define MAX_SYSCALL_NUM 309
+# else
+#  warning please define a real MAX_SYSCALL_NUMBER for this architecure
+#  define MAX_SYSCALL_NUM 300
+# endif
+#elif defined(__FreeBSD__)
+# define MAX_SYSCALL_NUM 523
 #else
-# warning please define a real MAX_SYSCALL_NUMBER for this architecure
-# define MAX_SYSCALL_NUM 300
+# error please define a MAX_SYSCALL_NUMBER for this architecture
 #endif
 
 #define MAX_PROCESS_NUM 32
@@ -120,7 +136,7 @@ static inline void allocate_sycall_fuzzer_table(void)
 
     system_call_fuzzers = mmap(NULL, sizeof(syscall_fuzzer_t) * MAX_SYSCALL_NUM,
                                      PROT_READ | PROT_WRITE,
-                                     MAP_SHARED | MAP_ANONYMOUS,
+                                     MAP_SHARED | MAP_ANON,
                                      -1,
                                      0);
 }

@@ -192,7 +192,13 @@ static struct trace *typelib_vma_trace(syscall_fuzzer_t *this, guintptr address)
     // Take a snapshot of the state of this resource.
     trace->caller       = this;
     trace->timestamp    = time(0);
+#if 0
+    // FIXME: Originally I had planned to save large amounts of debugging data
+    // so that we can find where something first  happened and track it down,
+    // but this is hard to make portable. I disabled this code while porting to
+    // FreeBSD, but would like to enable it again.
     trace->map          = maps_get_entry(address);
+#endif
 
     return trace;
 }

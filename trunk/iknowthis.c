@@ -1,7 +1,6 @@
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
-#include <asm/unistd.h>
 #include <errno.h>
 #include <glib.h>
 #include <sched.h>
@@ -20,7 +19,6 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/socket.h>
-#include <sys/prctl.h>
 #include <unistd.h>
 #include <string.h>
 #include <microhttpd.h>
@@ -99,9 +97,6 @@ int main(int argc, char **argv)
     // Obviously we cannot run this in the same process as the fuzzer (because
     // it might kill us, or change our directory, or whatever else).
     if (!disable_statistics && fork() == 0) {
-        // Make sure I terminate if something went wrong
-        prctl(PR_SET_PDEATHSIG, SIGKILL);
-
         // Start the http daemon listening for status output.
         // TODO: Choose a random port and print a URL.
         if (MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
@@ -111,15 +106,14 @@ int main(int argc, char **argv)
                              httpd_access_handler,
                              NULL,
                              MHD_OPTION_END) == NULL) {
-            g_error("failed to start the status daemon, statistics will be unavailble");
+            g_warning("failed to start the status daemon, statistics will be unavailble");
+            return 1;
         }
-
-        // Make sure I terminate if something went wrong
-        prctl(PR_SET_PDEATHSIG, SIGKILL);
 
         g_message("Open http://localhost:%u/status for status information", STATUS_HTTP_PORT);
 
         // Wait forever.
+        // FIXME: waitpid here.
         while (true) pause();
     }
 
@@ -138,12 +132,9 @@ int main(int argc, char **argv)
     // Clean up any shared memory left over.
     clear_shared_segments(user->pw_uid);
 
-    // Setup a new one for resource tracking
-    create_process_shmid();
-
     // Drop all supplementary groups.
     if (setgroups(0, NULL) != 0) {
-        g_error("unable to drop supplementary groups, %m");
+        g_error("unable to drop supplementary groups, %s", g_strerror(errno));
         return 1;
     }
 

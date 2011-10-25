@@ -1,7 +1,6 @@
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
-#include <asm/unistd.h>
 #include <errno.h>
 #include <glib.h>
 #include <sched.h>

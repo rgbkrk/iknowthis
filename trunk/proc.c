@@ -1,11 +1,9 @@
 #include <stdbool.h>
 #include <search.h>
-#include <sys/prctl.h>
 #include <unistd.h>
 #include <glib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <asm/unistd.h>
 #include <sched.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -18,6 +16,18 @@
 #include "sysfuzz.h"
 #include "typelib.h"
 #include "iknowthis.h"
+
+// FIXME: Why is this protected by #ifdef _KERNEL in freebsd? How do userspace
+// programs do it?
+#ifdef __FreeBSD__
+struct shminfo {
+    u_long shmmax; /* max shared memory segment size (bytes) */
+    u_long shmmin; /* max shared memory segment size (bytes) */
+    u_long shmmni; /* max number of shared memory identifiers */
+    u_long shmseg; /* max shared memory segments per process */
+    u_long shmall; /* max amount of shared memory (pages) */
+};
+#endif
 
 // We need to cap the number of processes created to avoid fork bombing the
 // system. The obvious solution is setrlimit(RLIM_NPROC), but this is uid wide
@@ -41,6 +51,11 @@ void clear_shared_segments(uid_t owner)
     struct shmid_ds shmds;
     gint            numshm = shmctl(0, SHM_INFO, &shminfo);
 
+#ifdef __FreeBSD__
+# warning FIXME
+    return;
+#endif
+
     // I don't think these can fail.
     g_assert_cmpint(numshm, >=, 0);
 
@@ -58,12 +73,17 @@ void clear_shared_segments(uid_t owner)
     return;
 }
 
-void create_process_shmid(void)
+void __constructor create_process_shmid(void)
 {
     struct shmid_ds shmds;
 
     // I should only be called once.
     g_assert_cmpint(shmid, ==, 0);
+
+#ifdef __FreeBSD__
+# warning FIXME
+    return;
+#endif
 
     // Create a shmid, used to track process creations.
     // ftok() does a stat(), and uses the inode number combined with the
