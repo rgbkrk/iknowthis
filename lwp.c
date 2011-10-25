@@ -2,7 +2,6 @@
 # define _GNU_SOURCE
 #endif
 #include <glib.h>
-#include <asm/unistd.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sched.h>
@@ -30,19 +29,24 @@ struct context {
     gulong   arg6;
 };
 
+#ifdef __FreeBSD__
+# define MAP_GROWSDOWN 0
+# define __WALL 0
+#endif
+
 // Allocate space for lwp stacks.
 static void __constructor init_thread_stacks(void)
 {
     fuzzerstack   = mmap(NULL,
                          PAGE_SIZE * 32,
                          PROT_READ | PROT_WRITE,
-                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_GROWSDOWN,
+                         MAP_ANON  | MAP_PRIVATE | MAP_GROWSDOWN,
                          -1,
                          0);
     watchdogstack = mmap(NULL,
                          PAGE_SIZE * 32,
                          PROT_READ | PROT_WRITE,
-                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_GROWSDOWN,
+                         MAP_ANON  | MAP_PRIVATE | MAP_GROWSDOWN,
                          -1,
                          0);
 
@@ -159,6 +163,7 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
                             : 0;
     }
 
+#if defined(__linux__)
     // Spawn the fuzzer.
     if ((watchdog.pid = clone(lwp_systemcall_routine, fuzzerstack, this->shared, &context)) == -1) {
         g_critical("failed to spawn lwp for fuzzer %s, %s", this->name, custom_strerror_wrapper(errno));
@@ -171,6 +176,22 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
         // Kill it to prevent hangs.
         kill(watchdog.pid, SIGKILL);
     }
+#elif defined(__FreeBSD__)
+    // Spawn the fuzzer.
+    if ((watchdog.pid = rfork_thread(this->shared, fuzzerstack, lwp_systemcall_routine, &context)) == -1) {
+        g_critical("failed to spawn lwp for fuzzer %s, %s", this->name, custom_strerror_wrapper(errno));
+    }
+
+    // Spawn watchdog.
+    if ((watchdogpid = rfork_thread(CLONE_DEFAULT, watchdogstack, watchdog_thread_func, &watchdog)) == -1) {
+        g_critical("failed to spawn watchdog thread for %s, %s", this->name, custom_strerror_wrapper(errno));
+
+        // Kill it to prevent hangs.
+        kill(watchdog.pid, SIGKILL);
+    }
+#else
+# error need to know how to isolate threads on your architecture.
+#endif
 
     // And now we play the waiting game.
     childpid = waitpid(watchdog.pid, &childstatus, __WALL);
@@ -182,19 +203,16 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
     // Wait for the watchdog to return.
     watchdogret = waitpid(watchdogpid, &watchdogstatus, __WALL);
 
-    // Special case execve which is weird.
-    if (sysno != __NR_execve) {
-        // Check that worked.
-        if (childpid == -1 || watchdogret == -1) {
-            g_critical("failed to wait for one of my lwps for %s, %s", this->name, custom_strerror_wrapper(errno));
-        }
+    // Check that worked.
+    if (childpid == -1 || watchdogret == -1) {
+        g_critical("failed to wait for one of my lwps for %s, %s", this->name, custom_strerror_wrapper(errno));
+    }
 
-        if (childpid != -1 ) {
-            g_assert_cmpint(childpid, ==, watchdog.pid);
-        }
-        if (watchdogpid != -1) {
-            g_assert_cmpint(watchdogret, ==, watchdogpid);
-        }
+    if (childpid != -1 ) {
+        g_assert_cmpint(childpid, ==, watchdog.pid);
+    }
+    if (watchdogpid != -1) {
+        g_assert_cmpint(watchdogret, ==, watchdogpid);
     }
 
     // Child completed before timeout.

@@ -1,18 +1,30 @@
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
-#ifndef _XOPEN_SOURCE
-# define _XOPEN_SOURCE 500
+#ifndef __FreeBSD__
+# ifndef _XOPEN_SOURCE
+#  define _XOPEN_SOURCE 500
+# endif
 #endif
 
+#include <glib.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <glib.h>
 #include <string.h>
 #include <ftw.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
+
+#ifdef __FreeBSD__
+// FreeBSD has a slightly less configurable ftw implementation than Linux, but
+// it's mostly compatible if we make the extra flags no-ops.
+# define FTW_CONTINUE       0
+# define FTW_SKIP_SUBTREE   0
+# define FTW_SKIP_SIBLINGS  0
+# define FTW_STOP           1
+# define FTW_ACTIONRETVAL   0
+#endif
 
 // Many system calls expect a pathname as a parameter, and many pathnames
 // expose new and interesting complexity that we should test. Device nodes,
@@ -41,11 +53,24 @@ static void __constructor typelib_find_mount_points(void)
         g_ptr_array_free(fs_mount_points, true);
     }
 
+#if defined(__linux__)
     // Read the mounted filesystems.
     if (g_file_get_contents("/proc/mounts", &mounts, &length, NULL) == false) {
         g_error("unable to read mounted filesystems");
-        return;
+        g_abort();
     }
+#elif defined(__FreeBSD__)
+    // FreeBSD has not mtab, use mount.
+    if (g_spawn_command_line_sync("mount -p", &mounts, NULL, NULL, NULL) == false) {
+        g_error("unable to read mounted filesystems");
+        g_abort();
+    } else {
+        length = strlen(mounts);
+    }
+#else
+# error need to determine what filesystems are mounted at runtime.
+#endif
+
 
     split           = g_strsplit(mounts, "\n", -1);
     fs_mount_points = g_ptr_array_new();
@@ -54,6 +79,8 @@ static void __constructor typelib_find_mount_points(void)
 
     for (i = 0; i < g_strv_length(split); i++) {
         if (sscanf(split[i], "%*s %s %s %*s %*u %*u", mountpoint, filesystem) >= 1) {
+            // g_message("found %s on %s", filesystem, mountpoint);
+
             // Duplicate this string and add to array.
             g_ptr_array_add(fs_mount_points, g_strdup(mountpoint));
         }

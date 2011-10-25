@@ -65,7 +65,7 @@ gpointer typelib_get_buffer(gpointer *buffer, gsize size)
     guardbuf = mmap(NULL,
                     totalsize,
                     PROT_READ | PROT_WRITE | PROT_EXEC,
-                    MAP_ANONYMOUS | MAP_PRIVATE,
+                    MAP_ANON | MAP_PRIVATE,
                     -1,
                     0);
 

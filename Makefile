@@ -5,8 +5,8 @@
 ##
 
 CFLAGS      =-Wall -Wno-multichar -pipe -O0 -ggdb3 -fno-strict-aliasing `pkg-config --cflags libmicrohttpd,glib-2.0` -std=gnu99
-LDFLAGS     =$(CFLAGS) `pkg-config --libs libmicrohttpd,glib-2.0` -lneo_cs -lneo_cgi -lneo_utl -lz
-CPPFLAGS    =-I. -Itypelib -I/usr/include/ClearSilver
+LDFLAGS     =$(CFLAGS) `pkg-config --libs libmicrohttpd,glib-2.0` -lneo_cs -lneo_cgi -lneo_utl -lz -Wl,-z,now
+CPPFLAGS    =-I. -Itypelib -I/usr/include/ClearSilver -I/usr/local/include/ClearSilver
 ARCH       ?=$(shell uname -m)
 OS         ?=$(shell uname -s)
 
@@ -17,8 +17,8 @@ SYSCALLS    = $(patsubst %.c,%.o,$(wildcard syscalls/$(OS)/$(ARCH)/*.c))
 all:        iknowthis
 
 iknowthis:  $(SYSCALLS) iknowthis.o base.o buffer.o typelib/pathname.o \
-            typelib/resource.o lwp.o vma.o maps.o proc.o report.o uid.o
+            typelib/resource.o vma.o proc.o report.o uid.o lwp.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 clean:
-	rm -f *.o syscalls/*/*/*.o iknowthis core.* core typelib/*.o
+	rm -f *.o syscalls/*/*/*.o iknowthis core.* *.core core typelib/*.o
