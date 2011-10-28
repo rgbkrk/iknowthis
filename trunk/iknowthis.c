@@ -334,7 +334,10 @@ static gboolean disable_enable_fuzzer_range(const gchar *option_name, const gcha
                         endptr++;
 
                         // Parse out the next number.
-                        max = MIN(g_ascii_strtoll(endptr, &endptr, 10), MAX_SYSCALL_NUM);
+                        max = g_ascii_strtoll(endptr, &endptr, 10);
+
+                        // Check it's within range.
+                        max = MIN(max, MAX_SYSCALL_NUM);
 
                         // FIXME: make these real checks.
                         g_assert_cmpint(sysno, <=, max);
