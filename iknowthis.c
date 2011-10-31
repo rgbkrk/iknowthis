@@ -21,10 +21,13 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
-#include <microhttpd.h>
 #include <pwd.h>
 #include <grp.h>
-#include <ClearSilver.h>
+
+#ifndef DISABLE_HTTP_DASHBOARD
+# include <microhttpd.h>
+# include <ClearSilver.h>
+#endif
 
 #include "sysfuzz.h"
 #include "typelib.h"
@@ -41,6 +44,7 @@ guint              process_nesting_depth;                // Nested process depth
 guint              skip_danger_warning;                  // Dont print the warning message on startup.
 guint              disable_statistics;                   // Dont start the statistics webserver.
 
+#ifndef DISABLE_HTTP_DASHBOARD
 static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, socklen_t addrlen);
 static gint httpd_access_handler(gpointer cls,
                                  struct MHD_Connection *connection,
@@ -52,6 +56,8 @@ static gint httpd_access_handler(gpointer cls,
                                  gpointer *con_cls);
 
 void create_fuzzer_report(HDF *hdf);
+#endif
+
 static void print_danger_warning(void);
 static gboolean disable_enable_fuzzer_range(const gchar *option_name, const gchar *value, gpointer data, GError **error);
 static gboolean list_fuzzer_names(const gchar *option_name, const gchar *value, gpointer data, GError **error);
@@ -93,6 +99,7 @@ int main(int argc, char **argv)
     // started via sudo or suid which only sets the euid.
     setresuid(0, 0, 0);
 
+#ifndef DISABLE_HTTP_DASHBOARD
     // Create a child process that runs as original uid to serve status info.
     // Obviously we cannot run this in the same process as the fuzzer (because
     // it might kill us, or change our directory, or whatever else).
@@ -116,6 +123,7 @@ int main(int argc, char **argv)
         // FIXME: waitpid here.
         while (true) pause();
     }
+#endif
 
     // At this point the http server is is listening. We can drop privileges
     // and become an unprivileged user.
@@ -478,6 +486,8 @@ static void print_danger_warning(void)
     return;
 }
 
+#ifndef DISABLE_HTTP_DASHBOARD
+
 // Callback from HTTP server, send it report data.
 static gint httpd_access_handler(gpointer cls,
                                  struct MHD_Connection *connection,
@@ -551,3 +561,4 @@ static gint httpd_connect_policy(gpointer cls, const struct sockaddr *addr, sock
     return MHD_YES;
 }
 
+#endif
