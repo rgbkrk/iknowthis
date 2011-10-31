@@ -57,11 +57,11 @@ enum {
 // Some convenience clone combinations.
 enum {
     // Of course this is not really a fork, but how else can i get the 64bit return code back on x64?
-#if __linux__
+#if defined(__linux__)
     CLONE_FORK      = CLONE_VM,
     CLONE_DEFAULT   = CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_SYSVSEM | CLONE_IO,
     CLONE_SAFER     = CLONE_FS | CLONE_FILES | CLONE_IO,
-#elif __FreeBSD__
+#elif defined(__FreeBSD__) || defined(__OpenBSD__)
     CLONE_FORK      = RFMEM | RFPROC | RFFDG,
     CLONE_DEFAULT   = RFMEM | RFPROC,
     CLONE_SAFER     = RFPROC,
@@ -118,8 +118,8 @@ typedef struct {
 #  warning please define a real MAX_SYSCALL_NUMBER for this architecure
 #  define MAX_SYSCALL_NUM 300
 # endif
-#elif defined(__FreeBSD__)
-# define MAX_SYSCALL_NUM 523
+#elif defined(SYS_MAXSYSCALL)
+#  define MAX_SYSCALL_NUM SYS_MAXSYSCALL
 #else
 # error please define a MAX_SYSCALL_NUMBER for this architecture
 #endif

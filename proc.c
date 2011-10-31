@@ -2,16 +2,16 @@
 #include <search.h>
 #include <unistd.h>
 #include <glib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <sched.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/syscall.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
@@ -19,7 +19,7 @@
 
 // FIXME: Why is this protected by #ifdef _KERNEL in freebsd? How do userspace
 // programs do it?
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__)
 struct shminfo {
     u_long shmmax; /* max shared memory segment size (bytes) */
     u_long shmmin; /* max shared memory segment size (bytes) */
@@ -49,12 +49,11 @@ void clear_shared_segments(uid_t owner)
 {
     struct shminfo  shminfo;
     struct shmid_ds shmds;
-    gint            numshm = shmctl(0, SHM_INFO, &shminfo);
-
-#ifdef __FreeBSD__
-# warning FIXME
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
+# warning FIXME how do you do this on BSD?
     return;
-#endif
+#else
+    gint            numshm = shmctl(0, SHM_INFO, &shminfo);
 
     // I don't think these can fail.
     g_assert_cmpint(numshm, >=, 0);
@@ -71,6 +70,7 @@ void clear_shared_segments(uid_t owner)
     // TODO: msgctl, etc
 
     return;
+#endif
 }
 
 void __constructor create_process_shmid(void)
@@ -80,7 +80,7 @@ void __constructor create_process_shmid(void)
     // I should only be called once.
     g_assert_cmpint(shmid, ==, 0);
 
-#ifdef __FreeBSD__
+#ifndef __linux__
 # warning FIXME
     return;
 #endif

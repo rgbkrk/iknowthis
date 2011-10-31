@@ -2,11 +2,12 @@
 #include <search.h>
 #include <unistd.h>
 #include <glib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <sched.h>
 #include <stdio.h>
 #include <ClearSilver.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/syscall.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
