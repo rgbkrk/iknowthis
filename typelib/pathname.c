@@ -100,7 +100,7 @@ static void __constructor typelib_find_mount_points(void)
     // There must be at least one filesystem.
     g_assert_cmpuint(fs_mount_points->len, >, 0);
 
-    g_debug("discovered %u mountpoints", fs_mount_points->len);
+    // g_debug("discovered %u mountpoints", fs_mount_points->len);
 
     return;
 }

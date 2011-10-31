@@ -16,7 +16,7 @@
 # if defined(__i386__)
 #  define __NR_fanotify_init 338
 # elif defined(__x86_64__)
-#  define __NR_fanotify_init 301
+#  define __NR_fanotify_init 300
 # else
 #  error please define __NR_fanotify_init for your architecture
 # endif

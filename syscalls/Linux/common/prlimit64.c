@@ -16,9 +16,7 @@
 #include "iknowthis.h"
 
 #ifndef __NR_prlimit64
-# if defined(__i386__)
-#  define __NR_prlimit64 340
-# elif defined(__x86_64)
+# if defined(__x86_64__)
 #  define __NR_prlimit64 302
 # else
 #  error please define __NR_prlimit64 for your architecture

@@ -16,7 +16,7 @@
 # if defined(__i386__)
 #  define __NR_fanotify_mark 339
 # elif defined(__x86_64__)
-#  define __NR_fanotify_mark 302
+#  define __NR_fanotify_mark 301
 # else
 #  error please define __NR_fanotify_mark for your architecture
 # endif
