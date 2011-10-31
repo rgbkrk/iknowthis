@@ -19,6 +19,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/socket.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 #include <string.h>
 #include <pwd.h>

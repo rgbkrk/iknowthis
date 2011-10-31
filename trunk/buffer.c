@@ -1,9 +1,10 @@
+#include <glib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <sys/mman.h>
-#include <glib.h>
+#include <sys/syscall.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"

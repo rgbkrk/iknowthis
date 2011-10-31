@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
+#include <sys/syscall.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
@@ -29,7 +30,7 @@ struct context {
     gulong   arg6;
 };
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 # define MAP_GROWSDOWN 0
 # define __WALL 0
 #endif
@@ -176,7 +177,7 @@ gint spawn_syscall_lwp(syscall_fuzzer_t *this, glong *status, glong sysno, ...)
         // Kill it to prevent hangs.
         kill(watchdog.pid, SIGKILL);
     }
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__)
     // Spawn the fuzzer.
     if ((watchdog.pid = rfork_thread(this->shared, fuzzerstack, lwp_systemcall_routine, &context)) == -1) {
         g_critical("failed to spawn lwp for fuzzer %s, %s", this->name, custom_strerror_wrapper(errno));

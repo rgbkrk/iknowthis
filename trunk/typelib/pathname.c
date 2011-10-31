@@ -12,11 +12,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <ftw.h>
+#include <sys/syscall.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 // FreeBSD has a slightly less configurable ftw implementation than Linux, but
 // it's mostly compatible if we make the extra flags no-ops.
 # define FTW_CONTINUE       0
@@ -67,6 +68,10 @@ static void __constructor typelib_find_mount_points(void)
     } else {
         length = strlen(mounts);
     }
+#elif defined(__OpenBSD__)
+    // FIXME I don't know how to do this on openbsd, read mount.c source.
+    mounts = g_strdup("/dev/wd0a / ffs");
+    length = strlen(mounts);
 #else
 # error need to determine what filesystems are mounted at runtime.
 #endif
@@ -95,7 +100,7 @@ static void __constructor typelib_find_mount_points(void)
     // There must be at least one filesystem.
     g_assert_cmpuint(fs_mount_points->len, >, 0);
 
-    g_debug("discovered %u mountpoints from /proc/mounts", fs_mount_points->len);
+    g_debug("discovered %u mountpoints", fs_mount_points->len);
 
     return;
 }

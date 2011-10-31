@@ -8,6 +8,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <string.h>
+#include <pwd.h>
+#include <grp.h>
 #include <sys/ipc.h>
 #include <sys/mman.h>
 #include <sys/shm.h>
@@ -18,11 +22,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <string.h>
-#include <pwd.h>
-#include <grp.h>
+#include <sys/syscall.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
