@@ -1,7 +1,7 @@
 #include <glib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sys/unistd.h>
+#include <sys/syscall.h>
 
 #include "sysfuzz.h"
 #include "typelib.h"
