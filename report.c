@@ -1,3 +1,4 @@
+#ifndef DISABLE_HTTP_DASHBOARD
 #include <stdbool.h>
 #include <search.h>
 #include <unistd.h>
@@ -271,3 +272,4 @@ void create_fuzzer_report(HDF *hdf)
 
     return;
 }
+#endif
