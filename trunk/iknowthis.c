@@ -180,7 +180,7 @@ int main(int argc, char **argv)
             continue;
         }
 
-        // g_message("fuzzer %s selected, %u total executions", fuzzer->name, fuzzer->total);
+        g_message("fuzzer %s selected, %u total executions", fuzzer->name, fuzzer->total);
 
         // Execute the fuzzer, timing the operation.
         g_timer_start(timer);
