@@ -13,7 +13,10 @@
 
 #include <linux/nfsd/nfsfh.h>
 #include <linux/nfsd/export.h>
+
+#ifdef NFSCTL_VERSION
 #include <linux/nfsd/syscall.h>
+
 #include <errno.h>
 #include <unistd.h>
 #include <sched.h>
@@ -52,3 +55,4 @@ SYSFUZZ(nfsservctl, __NR_nfsservctl, SYS_NONE, CLONE_DEFAULT, 0)
     return retcode;
 }
 
+#endif
